@@ -1,26 +1,209 @@
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:wght@300;400;500;600&display=swap");
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-newsreader: "Newsreader", serif;
+  --font-playfair: "Playfair Display", serif;
+  --font-libre: "Libre Baskerville", serif;
+  --font-jetbrains: "JetBrains Mono", monospace;
+  --font-source: "Source Sans 3", sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  /* 报纸风格配色 */
+  --color-paper-50: #ffffff;
+  --color-paper-100: #fafafa;
+  --color-paper-200: #f5f5f5;
+  --color-paper-300: #e5e5e5;
+  --color-paper-400: #d4d4d4;
+  --color-paper-500: #a3a3a3;
+  --color-paper-600: #737373;
+  --color-paper-700: #525252;
+  --color-paper-800: #404040;
+  --color-paper-900: #262626;
+  --color-news-bg: #fffefb;
+  --color-news-accent: #f5f0e6;
+  --color-news-border: #c9c2b5;
+  --color-news-text: #2d2a26;
+  --color-news-muted: #6b6560;
+  --color-finance-rise: #c41e3a;
+  --color-finance-fall: #228b22;
+  --color-finance-neutral: #1565c0;
+  --color-finance-warning: #e65100;
+  --color-finance-highlight: #8b0000;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --radius: 0rem;
+  --background: #fffefb;
+  --foreground: #2d2a26;
+  --card: #ffffff;
+  --card-foreground: #2d2a26;
+  --popover: #ffffff;
+  --popover-foreground: #2d2a26;
+  --primary: #2d2a26;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f0e6;
+  --secondary-foreground: #2d2a26;
+  --muted: #f5f5f5;
+  --muted-foreground: #6b6560;
+  --accent: #f5f0e6;
+  --accent-foreground: #2d2a26;
+  --destructive: #c41e3a;
+  --border: #c9c2b5;
+  --input: #c9c2b5;
+  --ring: #2d2a26;
+  --chart-1: #c41e3a;
+  --chart-2: #228b22;
+  --chart-3: #1565c0;
+  --chart-4: #e65100;
+  --chart-5: #8b0000;
+  --sidebar: #f5f0e6;
+  --sidebar-foreground: #2d2a26;
+  --sidebar-primary: #2d2a26;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f5f0e6;
+  --sidebar-accent-foreground: #2d2a26;
+  --sidebar-border: #c9c2b5;
+  --sidebar-ring: #2d2a26;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    @apply bg-background text-foreground;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* 报纸风格自定义样式 */
+.drop-cap::first-letter {
+  font-family: "Playfair Display", serif;
+  font-size: 4em;
+  float: left;
+  line-height: 0.8;
+  margin-right: 0.15em;
+  color: #8b0000;
+  font-weight: 700;
+}
+
+.news-border {
+  border: 3px solid #c9c2b5;
+}
+
+.news-border-thin {
+  border: 1px solid #d4d4d4;
+}
+
+.news-border-bottom {
+  border-bottom: 2px solid #c9c2b5;
+}
+
+.column-divider {
+  border-left: 1px solid #e5e5e5;
+}
+
+.headline-underline {
+  border-bottom: 4px solid #2d2a26;
+  padding-bottom: 8px;
+}
+
+.kicker {
+  font-family: "Source Sans 3", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+@keyframes pulse-subtle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.live-indicator {
+  animation: pulse-subtle 2s infinite;
 }
