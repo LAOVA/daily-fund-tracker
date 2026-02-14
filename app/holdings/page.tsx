@@ -4,8 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useFundsStore, Fund } from "@/stores/fundsStore";
-import { cn, formatPercent, getChangeColor } from "@/lib/utils";
+import { useFundsStore } from "@/stores/fundsStore";
+import { cn, getChangeColor } from "@/lib/utils";
 import { ChevronDown, ChevronUp, RefreshCw, Loader2 } from "lucide-react";
 import { fetchFundHoldingsByJsonp, Holding } from "@/lib/useFundData";
 
@@ -30,11 +30,13 @@ export default function HoldingsPage() {
       const results = [];
       for (const fund of watchlist) {
         const result = await fetchFundHoldingsByJsonp(fund.code);
-        results.push({
-          fundCode: fund.code,
-          fundName: result.fundName || fund.name,
-          holdings: result.holdings,
-        });
+        if (result) {
+          results.push({
+            fundCode: fund.code,
+            fundName: result.fundName || fund.name,
+            holdings: result.holdings,
+          });
+        }
       }
       setFundHoldings(results);
     } catch (error) {
@@ -126,7 +128,7 @@ export default function HoldingsPage() {
             {expandedFunds.has(fund.fundCode) && (
               <CardContent className="p-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5">
-                  {fund.holdings.map((holding, index) => (
+                  {fund.holdings.map((holding) => (
                     <div
                       key={holding.code}
                       className="border border-gray-200 bg-white p-4 hover:shadow-md transition-shadow cursor-pointer"

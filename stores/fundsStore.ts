@@ -37,7 +37,7 @@ interface FundsState {
 
 export const useFundsStore = create<FundsState>()(
   persist(
-    (set, get) => ({
+    (set: (fn: (state: FundsState) => Partial<FundsState> | FundsState) => void, _get: () => FundsState) => ({
       watchlist: [],
       groups: [
         {
@@ -47,18 +47,18 @@ export const useFundsStore = create<FundsState>()(
         },
       ],
 
-      addFund: (fund) =>
-        set((state) => {
-          const exists = state.watchlist.some((f) => f.code === fund.code);
+      addFund: (fund: Fund) =>
+        set((state: FundsState) => {
+          const exists = state.watchlist.some((f: Fund) => f.code === fund.code);
           if (exists) return state;
 
           const newWatchlist = [...state.watchlist, fund];
-          const defaultGroup = state.groups.find((g) => g.id === "default");
+          const defaultGroup = state.groups.find((g: FundGroup) => g.id === "default");
 
           if (defaultGroup) {
             return {
               watchlist: newWatchlist,
-              groups: state.groups.map((g) =>
+              groups: state.groups.map((g: FundGroup) =>
                 g.id === "default"
                   ? { ...g, funds: [...g.funds, fund.code] }
                   : g
@@ -69,24 +69,33 @@ export const useFundsStore = create<FundsState>()(
           return { watchlist: newWatchlist };
         }),
 
-      removeFund: (code) =>
-        set((state) => ({
-          watchlist: state.watchlist.filter((f) => f.code !== code),
-          groups: state.groups.map((g) => ({
+      removeFund: (code: string) =>
+        set((state: FundsState) => ({
+          watchlist: state.watchlist.filter((f: Fund) => f.code !== code),
+          groups: state.groups.map((g: FundGroup) => ({
             ...g,
-            funds: g.funds.filter((c) => c !== code),
+            funds: g.funds.filter((c: string) => c !== code),
           })),
         })),
 
-      updateFund: (code, data) =>
-        set((state) => ({
-          watchlist: state.watchlist.map((f) =>
-            f.code === code ? { ...f, ...data } : f
-          ),
+      updateFund: (code: string, data: Partial<Fund>) =>
+        set((state: FundsState) => ({
+          watchlist: state.watchlist.map((f: Fund) => {
+            if (f.code !== code) return f;
+            // 只更新有定义的值，避免 undefined 覆盖已有数据
+            const updates: Partial<Fund> = {};
+            (Object.keys(data) as Array<keyof Fund>).forEach((key) => {
+              const value = data[key];
+              if (value !== undefined && value !== null) {
+                updates[key] = value as any;
+              }
+            });
+            return { ...f, ...updates };
+          }),
         })),
 
-      addGroup: (name) =>
-        set((state) => ({
+      addGroup: (name: string) =>
+        set((state: FundsState) => ({
           groups: [
             ...state.groups,
             {
@@ -97,25 +106,25 @@ export const useFundsStore = create<FundsState>()(
           ],
         })),
 
-      removeGroup: (id) =>
-        set((state) => ({
-          groups: state.groups.filter((g) => g.id !== id),
+      removeGroup: (id: string) =>
+        set((state: FundsState) => ({
+          groups: state.groups.filter((g: FundGroup) => g.id !== id),
         })),
 
-      addFundToGroup: (fundCode, groupId) =>
-        set((state) => ({
-          groups: state.groups.map((g) =>
+      addFundToGroup: (fundCode: string, groupId: string) =>
+        set((state: FundsState) => ({
+          groups: state.groups.map((g: FundGroup) =>
             g.id === groupId && !g.funds.includes(fundCode)
               ? { ...g, funds: [...g.funds, fundCode] }
               : g
           ),
         })),
 
-      removeFundFromGroup: (fundCode, groupId) =>
-        set((state) => ({
-          groups: state.groups.map((g) =>
+      removeFundFromGroup: (fundCode: string, groupId: string) =>
+        set((state: FundsState) => ({
+          groups: state.groups.map((g: FundGroup) =>
             g.id === groupId
-              ? { ...g, funds: g.funds.filter((c) => c !== fundCode) }
+              ? { ...g, funds: g.funds.filter((c: string) => c !== fundCode) }
               : g
           ),
         })),

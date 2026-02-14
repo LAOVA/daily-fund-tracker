@@ -2,16 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import {
   TrendingUp,
-  LayoutDashboard,
   PieChart,
   Briefcase,
-  Settings,
-  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSettingsStore } from "@/stores/settingsStore";
 
 const navItems = [
   { href: "/", label: "实时估值", icon: TrendingUp },
@@ -21,7 +18,17 @@ const navItems = [
 
 export function Header() {
   const pathname = usePathname();
-  const { autoRefresh, refreshInterval } = useSettingsStore();
+  const [currentTime, setCurrentTime] = useState<string>(() =>
+    new Date().toLocaleTimeString("zh-CN", { hour12: false })
+  );
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString("zh-CN", { hour12: false }));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const today = new Date();
   const dateStr = today
@@ -94,20 +101,12 @@ export function Header() {
           {/* 状态指示 */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              {autoRefresh && (
-                <>
-                  <RefreshCw className="w-3 h-3 text-[#6B6560] animate-spin-slow" />
-                  <span className="text-xs text-[#6B6560] font-['Source_Sans_3']">
-                    {refreshInterval}秒
-                  </span>
-                </>
-              )}
               <span className="w-2 h-2 bg-[#C41E3A] rounded-full live-indicator"></span>
               <span
-                className="font-['JetBrains_Mono'] text-sm text-[#6B6560] font-['Source_Sans_3']"
+                className="font-['JetBrains_Mono'] text-sm text-[#6B6560]"
                 id="currentTime"
               >
-                10:32:45
+                {currentTime}
               </span>
             </div>
           </div>

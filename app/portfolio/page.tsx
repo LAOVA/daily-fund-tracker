@@ -12,10 +12,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useFundsStore, FundGroup } from "@/stores/fundsStore";
+import { useFundsStore } from "@/stores/fundsStore";
 import { formatPercent, getChangeColor } from "@/lib/utils";
 import {
-  Plus,
   Trash2,
   FolderPlus,
   TrendingUp,
@@ -30,8 +29,6 @@ export default function PortfolioPage() {
     addGroup,
     removeGroup,
     removeFund,
-    addFundToGroup,
-    removeFundFromGroup,
   } = useFundsStore();
   const [newGroupName, setNewGroupName] = useState("");
   const [isAddGroupOpen, setIsAddGroupOpen] = useState(false);
