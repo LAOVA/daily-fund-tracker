@@ -3,42 +3,31 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import {
-  TrendingUp,
-  PieChart,
-  Briefcase,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/", label: "实时估值", icon: TrendingUp },
-  { href: "/holdings", label: "重仓追踪", icon: PieChart },
-  { href: "/portfolio", label: "组合管理", icon: Briefcase },
+  { href: "/", label: "首页" },
+  { href: "/holdings", label: "重仓追踪" },
+  { href: "/portfolio", label: "组合管理" },
 ];
 
 export function Header() {
   const pathname = usePathname();
-  const [currentTime, setCurrentTime] = useState<string>(() =>
-    new Date().toLocaleTimeString("zh-CN", { hour12: false })
-  );
+  const [currentTime, setCurrentTime] = useState<string>("");
 
   useEffect(() => {
+    setCurrentTime(new Date().toLocaleTimeString("zh-CN", { hour12: false }));
     const timer = setInterval(() => {
       setCurrentTime(new Date().toLocaleTimeString("zh-CN", { hour12: false }));
     }, 1000);
-
     return () => clearInterval(timer);
   }, []);
 
   const today = new Date();
-  const dateStr = today
-    .toLocaleDateString("zh-CN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    })
-    .replace("/", "年")
-    .replace("/", "月");
+  const dateStr = today.toLocaleDateString("zh-CN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
   const weekDays = [
     "星期日",
     "星期一",
@@ -50,68 +39,83 @@ export function Header() {
   ];
   const weekDay = weekDays[today.getDay()];
 
+  // 计算期号：从2024年1月1日开始计算
+  const startDate = new Date("2024-01-01");
+  const daysDiff = Math.floor(
+    (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const issueNumber = daysDiff + 1;
+
   return (
-    <header className="bg-white border-b-4 border-[#C9C2B5] sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        {/* 刊头 */}
-        <div className="border-b border-[#C9C2B5] mb-3 pb-2">
-          <div className="flex items-center justify-between text-xs text-[#6B6560]">
-            <span>
+    <header className="bg-[#FFFEFB] border-b-2 border-[#C9C2B5]">
+      {/* 顶部信息栏 */}
+      <div className="max-w-7xl mx-auto px-4 pt-4">
+        <div className="flex items-center justify-between text-xs text-[#6B6560] border-b border-[#C9C2B5] pb-2 mb-4">
+          <div className="flex items-center gap-4">
+            <span className="font-['Source_Sans_3']">
               {dateStr} {weekDay}
             </span>
-            <span>第{Math.floor(today.getTime() / 86400000 / 7) + 2000}期</span>
-            <span>北京 3°C ~ 12°C</span>
+            <span className="text-[#C41E3A] font-['JetBrains_Mono'] font-bold">
+              第 {issueNumber} 期
+            </span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="font-['Source_Sans_3']">农历甲辰年</span>
+            <span className="font-['JetBrains_Mono']">{currentTime}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 报头 */}
+      <div className="max-w-7xl mx-auto px-4 pb-4">
+        <div className="text-center border-b-4 border-[#2D2A26] pb-4 mb-4">
+          {/* 报纸装饰线 */}
+          <div className="flex items-center justify-center gap-4 mb-2">
+            <div className="h-[2px] w-32 bg-[#2D2A26]"></div>
+            <div className="h-[1px] w-20 bg-[#C9C2B5]"></div>
+            <div className="h-[2px] w-32 bg-[#2D2A26]"></div>
+          </div>
+
+          {/* 主标题 - 使用 Newsreader 字体 */}
+          <h1 className="font-['Newsreader'] text-6xl md:text-7xl font-bold text-[#2D2A26] tracking-wide mb-2">
+            追基日报
+          </h1>
+
+          {/* 副标题 */}
+          <p className="font-['Source_Sans_3'] text-sm text-[#6B6560] tracking-[0.4em] uppercase">
+            Daily Fund Tracker
+          </p>
+
+          {/* 报纸装饰线 */}
+          <div className="flex items-center justify-center gap-4 mt-2">
+            <div className="h-[2px] w-32 bg-[#2D2A26]"></div>
+            <div className="h-[1px] w-20 bg-[#C9C2B5]"></div>
+            <div className="h-[2px] w-32 bg-[#2D2A26]"></div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-[#2D2A26] flex items-center justify-center">
-              <TrendingUp className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <h1 className="font-['Playfair_Display'] font-bold text-2xl text-[#2D2A26] tracking-wide">
-                基金估值追踪
-              </h1>
-              <p className="text-xs text-[#6B6560] tracking-wider font-['Source_Sans_3']">
-                FINANCE DAILY
-              </p>
-            </div>
-          </div>
-
-          {/* 导航链接 */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "text-sm font-bold uppercase tracking-wide transition-colors cursor-pointer font-['Source_Sans_3']",
+        {/* 导航栏 */}
+        <nav className="flex items-center justify-center gap-8 border-b border-[#2D2A26] pb-3">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`
+                font-['Source_Sans_3'] text-sm font-bold uppercase tracking-[0.2em]
+                transition-all duration-200 hover:scale-105
+                ${
                   pathname === item.href
-                    ? "text-[#8B0000] hover:text-[#8B0000]"
-                    : "text-[#2D2A26] hover:text-[#8B0000]"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          {/* 状态指示 */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-[#C41E3A] rounded-full live-indicator"></span>
-              <span
-                className="font-['JetBrains_Mono'] text-sm text-[#6B6560]"
-                id="currentTime"
-              >
-                {currentTime}
-              </span>
-            </div>
-          </div>
-        </div>
+                    ? "text-[#C41E3A] border-b-2 border-[#C41E3A] pb-1"
+                    : "text-[#2D2A26] hover:text-[#C41E3A]"
+                }
+              `}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
       </div>
     </header>
   );
 }
+
