@@ -1,10 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Search, Loader2, Plus } from "lucide-react";
+import { Search, Loader2, Plus, Folder } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useFundsStore } from "@/stores/fundsStore";
+import { useFundsStore, FundGroup } from "@/stores/fundsStore";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface SearchResult {
   code: string;
@@ -299,8 +306,10 @@ export function FundSearch() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [selectedFund, setSelectedFund] = useState<SearchResult | null>(null);
+  const [showGroupDialog, setShowGroupDialog] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const { watchlist, addFund } = useFundsStore();
+  const { watchlist, addFund, groups } = useFundsStore();
 
   // 点击外部关闭下拉框
   useEffect(() => {
@@ -365,11 +374,20 @@ export function FundSearch() {
   const handleSelectFund = (result: SearchResult) => {
     const exists = watchlist.some((f) => f.code === result.code);
     if (!exists) {
-      addFund({ code: result.code, name: result.name });
+      setSelectedFund(result);
+      setShowGroupDialog(true);
     }
     setKeyword("");
     setResults([]);
     setShowResults(false);
+  };
+
+  const handleAddToGroup = (groupId: string) => {
+    if (selectedFund) {
+      addFund({ code: selectedFund.code, name: selectedFund.name }, groupId);
+      setShowGroupDialog(false);
+      setSelectedFund(null);
+    }
   };
 
   const isInWatchlist = (code: string) => {
@@ -426,6 +444,36 @@ export function FundSearch() {
           ))}
         </div>
       )}
+
+      {/* 分组选择对话框 */}
+      <Dialog open={showGroupDialog} onOpenChange={setShowGroupDialog}>
+        <DialogContent className="sm:max-w-md border-2 border-[#2D2A26]">
+          <DialogHeader>
+            <DialogTitle className="font-['Newsreader'] text-2xl font-bold text-[#2D2A26]">
+              选择分组
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 space-y-2">
+            <p className="text-sm text-[#6B6560] font-['Source_Sans_3'] mb-4">
+              将 <span className="font-bold text-[#2D2A26]">{selectedFund?.name}</span> 添加到：
+            </p>
+            {groups.map((group: FundGroup) => (
+              <Button
+                key={group.id}
+                variant="outline"
+                className="w-full justify-start border-[#C9C2B5] hover:bg-[#F5F0E6] hover:border-[#2D2A26] font-['Source_Sans_3']"
+                onClick={() => handleAddToGroup(group.id)}
+              >
+                <Folder className="w-4 h-4 mr-2 text-[#6B6560]" />
+                {group.name}
+                <span className="ml-auto text-xs text-[#6B6560]">
+                  {group.funds.length}只基金
+                </span>
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

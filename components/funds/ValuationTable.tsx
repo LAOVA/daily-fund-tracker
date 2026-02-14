@@ -1,25 +1,29 @@
 "use client";
 
-import { useEffect, useCallback, useState, useRef, memo } from "react";
-import { useRouter } from "next/navigation";
-import { RefreshCw, Trash2, Loader2, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import React, { useEffect, useCallback, useState, useRef, memo, Fragment } from "react";
+import { RefreshCw, Trash2, Loader2, TrendingUp, TrendingDown, Minus, ChevronRight, ChevronDown, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useFundsStore, Fund } from "@/stores/fundsStore";
+import { useFundsStore, Fund, FundGroup } from "@/stores/fundsStore";
 import { formatNumber, formatPercent, getChangeColor } from "@/lib/utils";
 import { fetchMultipleFundData } from "@/lib/useFundData";
+import { FundDetailPanel } from "./FundDetailPanel";
 
 // 使用 memo 优化表格行
+interface FundTableRowProps {
+  fund: Fund;
+  index: number;
+  isExpanded: boolean;
+  onRemove: (code: string) => void;
+  onToggle: (code: string) => void;
+}
+
 const FundTableRow = memo(function FundTableRow({
   fund,
   index,
+  isExpanded,
   onRemove,
-  onNavigate,
-}: {
-  fund: Fund;
-  index: number;
-  onRemove: (code: string) => void;
-  onNavigate: (code: string) => void;
-}) {
+  onToggle,
+}: FundTableRowProps) {
   const getChangeIcon = (value: number) => {
     if (value > 0) return <TrendingUp className="w-3 h-3 inline" />;
     if (value < 0) return <TrendingDown className="w-3 h-3 inline" />;
@@ -30,15 +34,22 @@ const FundTableRow = memo(function FundTableRow({
     <tr
       className={`border-b border-[#E5E5E5] hover:bg-[#F9F8F6] transition-colors cursor-pointer ${
         index % 2 === 0 ? "bg-white" : "bg-[#FDFCFB]"
-      }`}
-      onClick={() => onNavigate(fund.code)}
+      } ${isExpanded ? "bg-[#F5F0E6]" : ""}`}
+      onClick={() => onToggle(fund.code)}
     >
-      <td className="py-4 px-4" onClick={(e) => e.stopPropagation()}>
-        <div className="font-['Libre_Baskerville'] font-bold text-[#2D2A26]">
-          {fund.name}
-        </div>
-        <div className="text-xs text-[#6B6560] font-['JetBrains_Mono'] mt-1">
-          {fund.code}
+      <td className="py-4 px-4">
+        <div className="flex items-center gap-2">
+          <span className="text-[#6B6560]">
+            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          </span>
+          <div>
+            <div className="font-['Libre_Baskerville'] font-bold text-[#2D2A26]">
+              {fund.name}
+            </div>
+            <div className="text-xs text-[#6B6560] font-['JetBrains_Mono'] mt-1">
+              {fund.code}
+            </div>
+          </div>
         </div>
       </td>
       <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-[#2D2A26]">
@@ -85,10 +96,11 @@ const FundTableRow = memo(function FundTableRow({
 });
 
 export function ValuationTable() {
-  const router = useRouter();
-  const { watchlist, updateFund, removeFund } = useFundsStore();
+  const { watchlist, groups, updateFund, removeFund } = useFundsStore();
   const [loading, setLoading] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<string>("all");
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [expandedFund, setExpandedFund] = useState<string | null>(null);
   const fetchingCodesRef = useRef<Set<string>>(new Set());
 
   const fetchFundData = useCallback(async (force = false) => {
@@ -106,7 +118,7 @@ export function ValuationTable() {
     setLoading(true);
 
     try {
-      const results = await fetchMultipleFundData(codesToFetch, (code: string, data: any) => {
+      await fetchMultipleFundData(codesToFetch, (code: string, data: any) => {
         const fund = watchlist.find((f: Fund) => f.code === code);
         if (fund && data) {
           updateFund(code, {
@@ -146,13 +158,16 @@ export function ValuationTable() {
     }
   }, [watchlist.length]);
 
-  const handleNavigate = useCallback((code: string) => {
-    router.push(`/holdings?fund=${code}`);
-  }, [router]);
+  const handleToggleExpand = useCallback((code: string) => {
+    setExpandedFund((prev) => (prev === code ? null : code));
+  }, []);
 
   const handleRemove = useCallback((code: string) => {
     removeFund(code);
-  }, [removeFund]);
+    if (expandedFund === code) {
+      setExpandedFund(null);
+    }
+  }, [removeFund, expandedFund]);
 
   return (
     <div className="bg-white">
@@ -168,6 +183,37 @@ export function ValuationTable() {
             </h3>
           </div>
           <div className="flex items-center gap-3">
+            {/* 分组筛选按钮 */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant={selectedGroup === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedGroup("all")}
+                className={selectedGroup === "all" 
+                  ? "bg-[#2D2A26] text-white font-['Source_Sans_3'] text-xs" 
+                  : "border-[#C9C2B5] hover:bg-[#F5F0E6] font-['Source_Sans_3'] text-xs"
+                }
+              >
+                <Folder className="w-3 h-3 mr-1" />
+                全部
+              </Button>
+              {groups.map((group: FundGroup) => (
+                <Button
+                  key={group.id}
+                  variant={selectedGroup === group.id ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedGroup(group.id)}
+                  className={selectedGroup === group.id 
+                    ? "bg-[#2D2A26] text-white font-['Source_Sans_3'] text-xs" 
+                    : "border-[#C9C2B5] hover:bg-[#F5F0E6] font-['Source_Sans_3'] text-xs"
+                  }
+                >
+                  <Folder className="w-3 h-3 mr-1" />
+                  {group.name}
+                  <span className="ml-1 text-[10px]">({group.funds.length})</span>
+                </Button>
+              ))}
+            </div>
             {lastUpdate && (
               <span className="text-xs text-[#6B6560] font-['Source_Sans_3']">
                 更新于 {lastUpdate.toLocaleTimeString()}
@@ -185,6 +231,12 @@ export function ValuationTable() {
             </Button>
           </div>
         </div>
+      </div>
+
+      {/* 提示信息 */}
+      <div className="mb-4 text-sm text-[#6B6560] font-['Source_Sans_3'] flex items-center gap-2">
+        <span className="text-[#C41E3A]">💡</span>
+        <span>点击任意基金行可查看历史净值走势和重仓股信息</span>
       </div>
 
       {/* 表格 */}
@@ -222,15 +274,29 @@ export function ValuationTable() {
             </tr>
           </thead>
           <tbody>
-            {watchlist.map((fund: Fund, index: number) => (
-              <FundTableRow
-                key={fund.code}
-                fund={fund}
-                index={index}
-                onRemove={handleRemove}
-                onNavigate={handleNavigate}
-              />
-            ))}
+              {watchlist
+              .filter((fund: Fund) => {
+                if (selectedGroup === "all") return true;
+                const group = groups.find((g: FundGroup) => g.id === selectedGroup);
+                return group?.funds.includes(fund.code);
+              })
+              .map((fund: Fund, index: number) => (
+                <Fragment key={fund.code}>
+                  <FundTableRow
+                    fund={fund}
+                    index={index}
+                    isExpanded={expandedFund === fund.code}
+                    onRemove={handleRemove}
+                    onToggle={handleToggleExpand}
+                  />
+                  {expandedFund === fund.code && (
+                    <FundDetailPanel
+                      fund={fund}
+                      onClose={() => setExpandedFund(null)}
+                    />
+                  )}
+                </Fragment>
+              ))}
           </tbody>
         </table>
       </div>
@@ -243,6 +309,22 @@ export function ValuationTable() {
           </p>
           <p className="text-sm text-[#6B6560] font-['Source_Sans_3']">
             请在上方搜索框添加基金代码
+          </p>
+        </div>
+      )}
+      
+      {/* 分组筛选空状态 */}
+      {watchlist.length > 0 && watchlist.filter((fund: Fund) => {
+        if (selectedGroup === "all") return true;
+        const group = groups.find((g: FundGroup) => g.id === selectedGroup);
+        return group?.funds.includes(fund.code);
+      }).length === 0 && (
+        <div className="py-12 text-center border-t border-[#C9C2B5]">
+          <p className="text-[#6B6560] font-['Libre_Baskerville'] text-lg mb-2">
+            该分组暂无基金
+          </p>
+          <p className="text-sm text-[#6B6560] font-['Source_Sans_3']">
+            请切换到其他分组或添加基金到该分组
           </p>
         </div>
       )}
