@@ -23,6 +23,7 @@ import {
 import { useFundsStore, Fund } from "@/stores/fundsStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { formatNumber, formatPercent, getChangeColor, cn } from "@/lib/utils";
+import { fetchFullFundData } from "@/lib/useFundData";
 
 export function ValuationTable() {
   const router = useRouter();
@@ -32,26 +33,35 @@ export function ValuationTable() {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   const fetchFundData = useCallback(async () => {
+    console.log(
+      "fetchFundData called, watchlist length:",
+      watchlist.length,
+      watchlist
+    );
     if (watchlist.length === 0) return;
 
     setLoading(true);
     try {
-      const codes = watchlist.map((f) => f.code).join(",");
-      const res = await fetch(`/api/funds/valuation?codes=${codes}`);
-      const data = await res.json();
-
-      if (data.success && data.data) {
-        data.data.forEach((fundData: Partial<Fund>) => {
-          // 如果API返回的名称是空的或错误的代码，使用store中已有的名称
-          const existingFund = watchlist.find((f) => f.code === fundData.code);
-          const fundName =
-            fundData.name && fundData.name !== fundData.code
-              ? fundData.name
-              : existingFund?.name || fundData.code;
-          updateFund(fundData.code!, { ...fundData, name: fundName });
+      // 使用客户端直接获取完整数据 - 串行获取避免JSONP回调冲突
+      for (const fund of watchlist) {
+        console.log("开始获取:", fund.code);
+        const data = await fetchFullFundData(fund.code);
+        console.log("获取完成:", fund.code, data);
+        updateFund(fund.code, {
+          code: data.code,
+          name: data.name || fund.name,
+          previousNetAssetValue: data.previousNetAssetValue,
+          estimatedNetValue: data.estimatedNetValue,
+          estimatedGrowthRate: data.estimatedGrowthRate,
+          yesterdayChange: data.yesterdayChange,
+          lastWeekGrowthRate: data.lastWeekChange,
+          lastMonthGrowthRate: data.lastMonthChange,
+          thisYearGrowthRate: data.thisYearChange,
+          updateTime: new Date().toISOString(),
         });
-        setLastUpdate(new Date());
+        console.log("更新完成:", fund.code);
       }
+      setLastUpdate(new Date());
     } catch (error) {
       console.error("Fetch error:", error);
     } finally {
@@ -59,11 +69,13 @@ export function ValuationTable() {
     }
   }, [watchlist, updateFund]);
 
-  // 定时刷新逻辑 - 使用useRef保持函数引用稳定
+  // 定时刷新逻辑 - watchlist变化时或定时触发
   useEffect(() => {
-    // 立即获取一次数据
-    fetchFundData();
-  }, []); // 组件挂载时获取一次
+    console.log("useEffect triggered, watchlist:", watchlist.length);
+    if (watchlist.length > 0) {
+      fetchFundData();
+    }
+  }, [watchlist.length]);
 
   // 单独的定时器 effect
   useEffect(() => {
@@ -71,14 +83,17 @@ export function ValuationTable() {
 
     if (autoRefresh && refreshInterval > 0) {
       interval = setInterval(() => {
-        fetchFundData();
+        console.log("定时刷新触发");
+        if (watchlist.length > 0) {
+          fetchFundData();
+        }
       }, refreshInterval * 1000);
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [autoRefresh, refreshInterval]);
+  }, [autoRefresh, refreshInterval, watchlist.length]);
 
   const getChangeIcon = (value: number) => {
     if (value > 0) return <TrendingUp className="w-3 h-3 inline" />;
@@ -122,10 +137,16 @@ export function ValuationTable() {
               基金名称
             </TableHead>
             <TableHead className="text-right font-['Source_Sans_3'] text-sm font-bold text-[#2D2A26] uppercase tracking-wider">
-              单位净值
+              昨日净值
             </TableHead>
             <TableHead className="text-right font-['Source_Sans_3'] text-sm font-bold text-[#2D2A26] uppercase tracking-wider">
-              日涨跌幅
+              估值净值
+            </TableHead>
+            <TableHead className="text-right font-['Source_Sans_3'] text-sm font-bold text-[#2D2A26] uppercase tracking-wider">
+              估值涨跌幅
+            </TableHead>
+            <TableHead className="text-right font-['Source_Sans_3'] text-sm font-bold text-[#2D2A26] uppercase tracking-wider">
+              昨日涨幅
             </TableHead>
             <TableHead className="text-right font-['Source_Sans_3'] text-sm font-bold text-[#2D2A26] uppercase tracking-wider">
               近一周
@@ -157,21 +178,47 @@ export function ValuationTable() {
                   {fund.code}
                 </div>
               </TableCell>
+              {/* 昨日净值 */}
               <TableCell className="text-right py-4">
-                <span className="font-['JetBrains_Mono'] text-xl text-[#2D2A26] font-bold">
-                  {fund.netAssetValue ? formatNumber(fund.netAssetValue) : "--"}
+                <span className="font-['JetBrains_Mono'] text-lg text-[#2D2A26] font-bold">
+                  {fund.previousNetAssetValue
+                    ? formatNumber(fund.previousNetAssetValue)
+                    : "--"}
                 </span>
               </TableCell>
+              {/* 估值净值 */}
+              <TableCell className="text-right py-4">
+                <span className="font-['JetBrains_Mono'] text-lg text-[#2D2A26] font-bold">
+                  {fund.estimatedNetValue
+                    ? formatNumber(fund.estimatedNetValue)
+                    : "--"}
+                </span>
+              </TableCell>
+              {/* 估值涨跌幅 */}
               <TableCell className="text-right py-4">
                 <span
                   className={cn(
                     "font-mono text-lg font-bold flex items-center justify-end gap-1",
-                    getChangeColor(fund.dailyGrowthRate || 0)
+                    getChangeColor(fund.estimatedGrowthRate || 0)
                   )}
                 >
-                  {getChangeIcon(fund.dailyGrowthRate || 0)}
-                  {fund.dailyGrowthRate !== undefined
-                    ? formatPercent(fund.dailyGrowthRate)
+                  {getChangeIcon(fund.estimatedGrowthRate || 0)}
+                  {fund.estimatedGrowthRate !== undefined
+                    ? formatPercent(fund.estimatedGrowthRate)
+                    : "--"}
+                </span>
+              </TableCell>
+              {/* 昨日涨幅 */}
+              <TableCell className="text-right py-4">
+                <span
+                  className={cn(
+                    "font-mono text-lg font-bold flex items-center justify-end gap-1",
+                    getChangeColor(fund.yesterdayChange || 0)
+                  )}
+                >
+                  {getChangeIcon(fund.yesterdayChange || 0)}
+                  {fund.yesterdayChange !== undefined
+                    ? formatPercent(fund.yesterdayChange)
                     : "--"}
                 </span>
               </TableCell>

@@ -1,0 +1,10 @@
+{
+  "editor.fontFamily": "'Maple Mono NF CN', 'Maple Mono','Courier New', monospace",
+  "editor.inlayHints.fontFamily": "'Maple Mono NF CN', 'Maple Mono','Courier New', monospace",
+  "editor.inlineSuggest.fontFamily": "'Maple Mono NF CN', 'Maple Mono','Courier New', monospace",
+  "debug.console.fontFamily": "'Maple Mono NF CN', 'Maple Mono','Courier New', monospace",
+  "scm.inputFontFamily": "'Maple Mono NF CN', 'Maple Mono','Courier New', monospace",
+  "notebook.output.fontFamily": "'Maple Mono NF CN', 'Maple Mono','Courier New', monospace",
+  "notebook.markup.fontFamily": "'Maple Mono NF CN', 'Maple Mono','Courier New', monospace",
+  "chat.editor.fontFamily": "'Maple Mono NF CN', 'Maple Mono','Courier New', monospace"
+}

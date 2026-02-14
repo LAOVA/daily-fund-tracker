@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+// 辅助函数：加载script (JSONP)
+const loadScript = (url: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    // 由于服务端无法执行script注入，这个函数实际上不会在服务端使用
+    // 数据获取改为客户端直接调用
+    reject(new Error("服务端不支持script加载"));
+  });
+};
+
 // 基金估值数据接口 - 使用天天基金JSONP接口
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -47,10 +56,12 @@ export async function GET(request: NextRequest) {
         return {
           code: data.fundcode,
           name: data.name,
-          netAssetValue: parseFloat(data.dwjz) || 0, // 单位净值
-          totalNetValue: parseFloat(data.dwjz) || 0, // 累计净值
-          dailyGrowthRate: parseFloat(data.gszzl) || 0, // 估算涨跌幅
-          gsz: parseFloat(data.gsz) || 0, // 估算净值
+          netAssetValue: parseFloat(data.gsz) || 0, // 估值净值
+          previousNetAssetValue: parseFloat(data.dwjz) || 0, // 昨日净值
+          estimatedNetValue: parseFloat(data.gsz) || 0, // 估值净值
+          estimatedGrowthRate: parseFloat(data.gszzl) || 0, // 估值涨跌幅
+          dailyGrowthRate: parseFloat(data.gszzl) || 0, // 日涨跌幅（同估值涨跌幅）
+          totalNetValue: parseFloat(data.dwjz) || 0, // 累计净值（使用昨日净值）
           gztime: data.gztime, // 估值时间
           updateTime: new Date().toISOString(),
         };

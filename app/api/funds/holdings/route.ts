@@ -31,14 +31,15 @@ export async function GET(request: NextRequest) {
 
     // 获取持仓数据 - 使用 pingzhongdata 接口
     const pingUrl = `https://fund.eastmoney.com/pingzhongdata/${fundCode}.js?v=${Date.now()}`;
-    
+
     const holdings: Array<{ code: string; name: string; ratio: number }> = [];
 
     try {
       const pingRes = await fetch(pingUrl, {
         headers: {
           Referer: "https://fund.eastmoney.com/",
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         },
       });
 
@@ -54,8 +55,13 @@ export async function GET(request: NextRequest) {
         const stockNames = JSON.parse(stockNamesMatch[1]);
         const holdRatios = JSON.parse(holdRatiosMatch[1]);
 
-        const count = Math.min(10, stockCodes.length, stockNames.length, holdRatios.length);
-        
+        const count = Math.min(
+          10,
+          stockCodes.length,
+          stockNames.length,
+          holdRatios.length
+        );
+
         for (let i = 0; i < count; i++) {
           if (stockCodes[i] && stockNames[i]) {
             holdings.push({

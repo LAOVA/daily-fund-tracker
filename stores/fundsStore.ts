@@ -4,7 +4,11 @@ import { persist } from "zustand/middleware";
 export interface Fund {
   code: string;
   name: string;
-  netAssetValue?: number;
+  netAssetValue?: number; // 单位净值（昨日净值）
+  previousNetAssetValue?: number; // 昨日净值
+  estimatedNetValue?: number; // 估值净值
+  estimatedGrowthRate?: number; // 估值涨跌幅
+  yesterdayChange?: number; // 昨日涨幅
   totalNetValue?: number;
   dailyGrowthRate?: number;
   lastWeekGrowthRate?: number;

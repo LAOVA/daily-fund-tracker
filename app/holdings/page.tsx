@@ -26,17 +26,16 @@ export default function HoldingsPage() {
 
     setLoading(true);
     try {
-      // 使用客户端JSONP方式获取持仓数据
-      const promises = watchlist.map(async (fund) => {
+      // 使用客户端JSONP方式获取持仓数据 - 串行获取避免JSONP回调冲突
+      const results = [];
+      for (const fund of watchlist) {
         const result = await fetchFundHoldingsByJsonp(fund.code);
-        return {
+        results.push({
           fundCode: fund.code,
           fundName: result.fundName || fund.name,
           holdings: result.holdings,
-        };
-      });
-
-      const results = await Promise.all(promises);
+        });
+      }
       setFundHoldings(results);
     } catch (error) {
       console.error("Fetch holdings error:", error);
@@ -132,7 +131,9 @@ export default function HoldingsPage() {
                       key={holding.code}
                       className="border border-gray-200 bg-white p-4 hover:shadow-md transition-shadow cursor-pointer"
                     >
-                      <div className="flex items-center justify-between mb-3">
+                      {/* 整体左右布局 */}
+                      <div className="flex items-center justify-between">
+                        {/* 左边：股票信息 */}
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-[#2D2A26] flex items-center justify-center font-['Playfair_Display'] font-bold text-white text-sm">
                             {holding.name.charAt(0)}
@@ -146,26 +147,30 @@ export default function HoldingsPage() {
                             </div>
                           </div>
                         </div>
-                        <Badge
-                          variant="secondary"
-                          className="bg-[#F5F0E6] text-[#8B0000] font-['Source_Sans_3']"
-                        >
-                          持仓 {holding.ratio}%
-                        </Badge>
-                      </div>
-                      {/* 股票涨跌幅数据（需要额外接口获取） */}
-                      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                        <span className="font-mono text-lg text-[#2D2A26] font-bold">
-                          --
-                        </span>
-                        <span
-                          className={cn(
-                            "font-mono text-lg font-bold",
-                            getChangeColor(0)
-                          )}
-                        >
-                          --
-                        </span>
+                        {/* 右边：持仓比例 + 涨跌幅 */}
+                        <div className="flex items-center gap-3">
+                          <Badge
+                            variant="secondary"
+                            className="bg-[#F5F0E6] text-[#8B0000] font-['Source_Sans_3'] text-xs"
+                          >
+                            持仓 {holding.ratio}%
+                          </Badge>
+                          <span
+                            className={cn(
+                              "font-mono text-lg font-bold",
+                              getChangeColor(holding.change || 0)
+                            )}
+                          >
+                            {holding.change !== undefined ? (
+                              <>
+                                {holding.change > 0 ? "+" : ""}
+                                {holding.change.toFixed(2)}%
+                              </>
+                            ) : (
+                              "--"
+                            )}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   ))}
