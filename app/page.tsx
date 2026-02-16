@@ -60,7 +60,7 @@ export default function Home() {
                 <div className="flex items-start gap-2">
                   <span className="text-[#C41E3A] font-bold">▸</span>
                   <p className="font-['Libre_Baskerville'] text-[#2D2A26]">
-                    使用"组合管理"功能分类管理基金
+                    使用"基金管理"功能分组管理基金
                   </p>
                 </div>
               </div>

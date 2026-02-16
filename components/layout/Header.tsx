@@ -79,7 +79,7 @@ export function Header() {
   const weekDay = weekDays[today.getDay()];
 
   // 计算期号：从2024年1月1日开始计算
-  const startDate = new Date("2024-01-01");
+  const startDate = new Date("2026-01-01");
   const daysDiff = Math.floor(
     (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
   );
@@ -157,3 +157,4 @@ export function Header() {
     </header>
   );
 }
+

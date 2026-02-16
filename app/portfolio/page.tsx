@@ -222,7 +222,7 @@ export default function PortfolioPage() {
                 总成本
               </div>
               <div className="font-['JetBrains_Mono'] text-lg text-[#2D2A26]">
-                ¥{formatNumber(portfolioSummary.totalCost)}
+                ¥{formatNumber(portfolioSummary.totalCost, 2)}
               </div>
             </div>
             <div>
@@ -230,7 +230,7 @@ export default function PortfolioPage() {
                 总市值
               </div>
               <div className="font-['JetBrains_Mono'] text-lg text-[#2D2A26]">
-                ¥{formatNumber(portfolioSummary.totalMarketValue)}
+                ¥{formatNumber(portfolioSummary.totalMarketValue, 2)}
               </div>
             </div>
             <div>
@@ -244,7 +244,7 @@ export default function PortfolioPage() {
                 )}
               >
                 {getChangeIcon(portfolioSummary.totalProfit)}¥
-                {formatNumber(Math.abs(portfolioSummary.totalProfit))}
+                {formatNumber(Math.abs(portfolioSummary.totalProfit), 2)}
               </div>
             </div>
             <div>
@@ -338,8 +338,8 @@ export default function PortfolioPage() {
                                 getChangeColor(profit)
                               )}
                             >
-                              {getChangeIcon(profit)}¥
-                              {formatNumber(Math.abs(profit))}
+                            {getChangeIcon(profit)}¥
+                              {formatNumber(Math.abs(profit), 2)}
                             </span>
                             <span
                               className={cn(
@@ -483,7 +483,7 @@ export default function PortfolioPage() {
                   <div className="text-xs text-[#6B6560] mt-1">
                     最新净值:{" "}
                     <span className="font-['JetBrains_Mono']">
-                      {formatNumber(editingFund.estimatedNetValue)}
+                      {formatNumber(editingFund.estimatedNetValue, 2)}
                     </span>
                   </div>
                 )}
@@ -527,7 +527,8 @@ export default function PortfolioPage() {
                   <span className="font-['JetBrains_Mono'] text-[#2D2A26]">
                     ¥
                     {formatNumber(
-                      parseFloat(positionShares) * parseFloat(positionCost)
+                      parseFloat(positionShares) * parseFloat(positionCost),
+                      2
                     )}
                   </span>
                 </div>
@@ -539,7 +540,8 @@ export default function PortfolioPage() {
                         ¥
                         {formatNumber(
                           parseFloat(positionShares) *
-                            editingFund.estimatedNetValue
+                            editingFund.estimatedNetValue,
+                          2
                         )}
                       </span>
                     </div>
@@ -567,7 +569,8 @@ export default function PortfolioPage() {
                             parseFloat(positionShares) *
                               (editingFund.estimatedNetValue -
                                 parseFloat(positionCost))
-                          )
+                          ),
+                          2
                         )}
                       </span>
                     </div>
