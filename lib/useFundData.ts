@@ -20,6 +20,30 @@ export interface Holding {
   change?: number;
 }
 
+// 请求队列，确保 JSONP 回调不会冲突
+const requestQueue: Array<() => void> = [];
+let isProcessing = false;
+
+const enqueueRequest = (fn: () => void) => {
+  requestQueue.push(fn);
+  processQueue();
+};
+
+const processQueue = () => {
+  if (isProcessing || requestQueue.length === 0) return;
+  isProcessing = true;
+  const next = requestQueue.shift();
+  if (next) {
+    next();
+  }
+};
+
+const finishRequest = () => {
+  isProcessing = false;
+  // 使用 setTimeout 确保当前调用栈清空后再处理下一个
+  setTimeout(processQueue, 10);
+};
+
 // 通用script加载器
 const loadScript = (url: string): Promise<void> => {
   return new Promise((resolve, reject) => {
@@ -70,131 +94,144 @@ export async function fetchFullFundData(code: string): Promise<{
   thisYearChange?: number;
   error?: string;
 } | null> {
-  cleanupGlobalData();
+  return new Promise((resolve) => {
+    enqueueRequest(async () => {
+      cleanupGlobalData();
 
-  try {
-    // 1. 获取实时估值数据
-    const gzData: any = await new Promise((resolve) => {
-      (window as any).jsonpgz = (data: unknown) => resolve(data);
+      try {
+        // 1. 获取实时估值数据
+        const gzData: any = await new Promise((resolveInner) => {
+          (window as any).jsonpgz = (data: unknown) => resolveInner(data);
 
-      const gzUrl = `https://fundgz.1234567.com.cn/js/${code}.js?rt=${Date.now()}`;
-      loadScript(gzUrl).catch(() => resolve(null));
+          const gzUrl = `https://fundgz.1234567.com.cn/js/${code}.js?rt=${Date.now()}`;
+          loadScript(gzUrl).catch(() => resolveInner(null));
 
-      setTimeout(() => resolve(null), 3000);
+          setTimeout(() => resolveInner(null), 3000);
+        });
+
+        // 如果没有获取到估值数据，直接返回null
+        if (!gzData || !gzData.gsz || !gzData.dwjz) {
+          console.warn(`基金 ${code} 估值数据无效`);
+          cleanupGlobalData();
+          finishRequest();
+          resolve(null);
+          return;
+        }
+
+        // 2. 获取历史净值走势
+        const pingUrl = `https://fund.eastmoney.com/pingzhongdata/${code}.js?v=${Date.now()}`;
+        await loadScript(pingUrl);
+
+        const trend = Array.isArray((window as any).Data_netWorthTrend)
+          ? (window as any).Data_netWorthTrend
+          : [];
+
+        let yesterdayChange: number | undefined;
+        let lastWeekChange: number | undefined;
+        let lastMonthChange: number | undefined;
+        let thisYearChange: number | undefined;
+
+        if (trend.length > 0) {
+          const sliced = trend.slice(-90);
+
+          // 昨日涨幅
+          const last = sliced[sliced.length - 2];
+          if (last && typeof last.equityReturn === "number") {
+            yesterdayChange = last.equityReturn;
+          }
+
+          // 近一周涨幅
+          if (sliced.length >= 8) {
+            const weekAgo = sliced[sliced.length - 8];
+            const current = sliced[sliced.length - 2];
+            if (weekAgo && current && weekAgo.y > 0) {
+              lastWeekChange = ((current.y - weekAgo.y) / weekAgo.y) * 100;
+            }
+          }
+
+          // 近一月涨幅
+          if (sliced.length >= 32) {
+            const monthAgo = sliced[sliced.length - 32];
+            const current = sliced[sliced.length - 2];
+            if (monthAgo && current && monthAgo.y > 0) {
+              lastMonthChange = ((current.y - monthAgo.y) / monthAgo.y) * 100;
+            }
+          }
+
+          // 今年来涨幅
+          const currentYear = new Date().getFullYear();
+          const yearStart = sliced.find((item: { x: number }) => {
+            const date = new Date(item.x);
+            return (
+              date.getFullYear() === currentYear &&
+              date.getMonth() === 0 &&
+              date.getDate() <= 10
+            );
+          });
+          const current = sliced[sliced.length - 2];
+          if (yearStart && current && yearStart.y > 0) {
+            thisYearChange = ((current.y - yearStart.y) / yearStart.y) * 100;
+          }
+        }
+
+        const previousNetAssetValue = safeParseFloat(gzData.dwjz);
+        const estimatedNetValue = safeParseFloat(gzData.gsz);
+        const estimatedGrowthRate = safeParseFloat(gzData.gszzl);
+
+        // 验证核心数据是否有效
+        if (!previousNetAssetValue || !estimatedNetValue || previousNetAssetValue <= 0 || estimatedNetValue <= 0) {
+          console.warn(`基金 ${code} 净值数据无效`);
+          cleanupGlobalData();
+          finishRequest();
+          resolve(null);
+          return;
+        }
+
+        const result = {
+          code: gzData.fundcode || code,
+          name: gzData.name || code,
+          previousNetAssetValue,
+          estimatedNetValue,
+          estimatedGrowthRate,
+          yesterdayChange,
+          lastWeekChange,
+          lastMonthChange,
+          thisYearChange,
+        };
+
+        cleanupGlobalData();
+        finishRequest();
+        resolve(result);
+      } catch (e) {
+        console.error("获取基金数据失败", e);
+        cleanupGlobalData();
+        finishRequest();
+        resolve(null);
+      }
     });
-
-    // 如果没有获取到估值数据，直接返回null
-    if (!gzData || !gzData.gsz || !gzData.dwjz) {
-      console.warn(`基金 ${code} 估值数据无效`);
-      return null;
-    }
-
-    // 2. 获取历史净值走势
-    const pingUrl = `https://fund.eastmoney.com/pingzhongdata/${code}.js?v=${Date.now()}`;
-    await loadScript(pingUrl);
-
-    const trend = Array.isArray((window as any).Data_netWorthTrend)
-      ? (window as any).Data_netWorthTrend
-      : [];
-
-    let yesterdayChange: number | undefined;
-    let lastWeekChange: number | undefined;
-    let lastMonthChange: number | undefined;
-    let thisYearChange: number | undefined;
-
-    if (trend.length > 0) {
-      const sliced = trend.slice(-90);
-
-      // 昨日涨幅
-      const last = sliced[sliced.length - 2];
-      if (last && typeof last.equityReturn === "number") {
-        yesterdayChange = last.equityReturn;
-      }
-
-      // 近一周涨幅
-      if (sliced.length >= 8) {
-        const weekAgo = sliced[sliced.length - 8];
-        const current = sliced[sliced.length - 2];
-        if (weekAgo && current && weekAgo.y > 0) {
-          lastWeekChange = ((current.y - weekAgo.y) / weekAgo.y) * 100;
-        }
-      }
-
-      // 近一月涨幅
-      if (sliced.length >= 32) {
-        const monthAgo = sliced[sliced.length - 32];
-        const current = sliced[sliced.length - 2];
-        if (monthAgo && current && monthAgo.y > 0) {
-          lastMonthChange = ((current.y - monthAgo.y) / monthAgo.y) * 100;
-        }
-      }
-
-      // 今年来涨幅
-      const currentYear = new Date().getFullYear();
-      const yearStart = sliced.find((item: { x: number }) => {
-        const date = new Date(item.x);
-        return (
-          date.getFullYear() === currentYear &&
-          date.getMonth() === 0 &&
-          date.getDate() <= 10
-        );
-      });
-      const current = sliced[sliced.length - 2];
-      if (yearStart && current && yearStart.y > 0) {
-        thisYearChange = ((current.y - yearStart.y) / yearStart.y) * 100;
-      }
-    }
-
-    const previousNetAssetValue = safeParseFloat(gzData.dwjz);
-    const estimatedNetValue = safeParseFloat(gzData.gsz);
-    const estimatedGrowthRate = safeParseFloat(gzData.gszzl);
-
-    // 验证核心数据是否有效
-    if (!previousNetAssetValue || !estimatedNetValue || previousNetAssetValue <= 0 || estimatedNetValue <= 0) {
-      console.warn(`基金 ${code} 净值数据无效`);
-      return null;
-    }
-
-    return {
-      code: gzData.fundcode || code,
-      name: gzData.name || code,
-      previousNetAssetValue,
-      estimatedNetValue,
-      estimatedGrowthRate,
-      yesterdayChange,
-      lastWeekChange,
-      lastMonthChange,
-      thisYearChange,
-    };
-  } catch (e) {
-    console.error("获取基金数据失败", e);
-    return null;
-  }
+  });
 }
 
-// 批量获取基金数据（并行）
+// 批量获取基金数据（串行执行避免回调冲突）
 export async function fetchMultipleFundData(
   codes: string[],
   onProgress?: (code: string, data: any) => void
 ): Promise<Map<string, any>> {
   const results = new Map<string, any>();
   
-  // 使用 Promise.allSettled 并行获取，单个失败不影响其他
-  const promises = codes.map(async (code) => {
+  // 串行获取，避免 JSONP 回调冲突
+  for (const code of codes) {
     try {
       const data = await fetchFullFundData(code);
       if (data) {
         results.set(code, data);
         onProgress?.(code, data);
       }
-      return { code, success: !!data };
     } catch (error) {
       console.error(`获取基金 ${code} 失败:`, error);
-      return { code, success: false };
     }
-  });
+  }
 
-  await Promise.allSettled(promises);
   return results;
 }
 

@@ -1,7 +1,24 @@
 "use client";
 
-import React, { useEffect, useCallback, useState, useRef, memo, Fragment } from "react";
-import { RefreshCw, Trash2, Loader2, TrendingUp, TrendingDown, Minus, ChevronRight, ChevronDown, Folder } from "lucide-react";
+import React, {
+  useEffect,
+  useCallback,
+  useState,
+  useRef,
+  memo,
+  Fragment,
+} from "react";
+import {
+  RefreshCw,
+  Trash2,
+  Loader2,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  ChevronRight,
+  ChevronDown,
+  Folder,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFundsStore, Fund, FundGroup } from "@/stores/fundsStore";
 import { formatNumber, formatPercent, getChangeColor } from "@/lib/utils";
@@ -40,7 +57,11 @@ const FundTableRow = memo(function FundTableRow({
       <td className="py-4 px-4">
         <div className="flex items-center gap-2">
           <span className="text-[#6B6560]">
-            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            {isExpanded ? (
+              <ChevronDown className="w-4 h-4" />
+            ) : (
+              <ChevronRight className="w-4 h-4" />
+            )}
           </span>
           <div>
             <div className="font-['Libre_Baskerville'] font-bold text-[#2D2A26]">
@@ -53,30 +74,50 @@ const FundTableRow = memo(function FundTableRow({
         </div>
       </td>
       <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-[#2D2A26]">
-        {fund.previousNetAssetValue ? formatNumber(fund.previousNetAssetValue) : "—"}
+        {fund.previousNetAssetValue
+          ? formatNumber(fund.previousNetAssetValue)
+          : "—"}
       </td>
       <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-[#2D2A26] font-bold">
         {fund.estimatedNetValue ? formatNumber(fund.estimatedNetValue) : "—"}
       </td>
       <td className="text-right py-4 px-4">
-        <span className={`font-['JetBrains_Mono'] font-bold flex items-center justify-end gap-1 ${getChangeColor(fund.estimatedGrowthRate || 0)}`}>
+        <span
+          className={`font-['JetBrains_Mono'] font-bold flex items-center justify-end gap-1 ${getChangeColor(
+            fund.estimatedGrowthRate || 0
+          )}`}
+        >
           {getChangeIcon(fund.estimatedGrowthRate || 0)}
-          {fund.estimatedGrowthRate !== undefined ? formatPercent(fund.estimatedGrowthRate) : "—"}
+          {fund.estimatedGrowthRate !== undefined
+            ? formatPercent(fund.estimatedGrowthRate)
+            : "—"}
         </span>
       </td>
       <td className="text-right py-4 px-4">
-        <span className={`font-['JetBrains_Mono'] ${getChangeColor(fund.yesterdayChange || 0)}`}>
-          {fund.yesterdayChange !== undefined ? formatPercent(fund.yesterdayChange) : "—"}
+        <span
+          className={`font-['JetBrains_Mono'] ${getChangeColor(
+            fund.yesterdayChange || 0
+          )}`}
+        >
+          {fund.yesterdayChange !== undefined
+            ? formatPercent(fund.yesterdayChange)
+            : "—"}
         </span>
       </td>
       <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-[#6B6560]">
-        {fund.lastWeekGrowthRate !== undefined ? formatPercent(fund.lastWeekGrowthRate) : "—"}
+        {fund.lastWeekGrowthRate !== undefined
+          ? formatPercent(fund.lastWeekGrowthRate)
+          : "—"}
       </td>
       <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-[#6B6560]">
-        {fund.lastMonthGrowthRate !== undefined ? formatPercent(fund.lastMonthGrowthRate) : "—"}
+        {fund.lastMonthGrowthRate !== undefined
+          ? formatPercent(fund.lastMonthGrowthRate)
+          : "—"}
       </td>
       <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-[#6B6560]">
-        {fund.thisYearGrowthRate !== undefined ? formatPercent(fund.thisYearGrowthRate) : "—"}
+        {fund.thisYearGrowthRate !== undefined
+          ? formatPercent(fund.thisYearGrowthRate)
+          : "—"}
       </td>
       <td className="text-right py-4 px-4">
         <Button
@@ -103,47 +144,57 @@ export function ValuationTable() {
   const [expandedFund, setExpandedFund] = useState<string | null>(null);
   const fetchingCodesRef = useRef<Set<string>>(new Set());
 
-  const fetchFundData = useCallback(async (force = false) => {
-    if (watchlist.length === 0) return;
+  const fetchFundData = useCallback(
+    async (force = false) => {
+      if (watchlist.length === 0) return;
 
-    const codesToFetch = force
-      ? watchlist.map((f: Fund) => f.code)
-      : watchlist
-          .filter((f: Fund) => !f.estimatedNetValue && !fetchingCodesRef.current.has(f.code))
-          .map((f: Fund) => f.code);
+      const codesToFetch = force
+        ? watchlist.map((f: Fund) => f.code)
+        : watchlist
+            .filter(
+              (f: Fund) =>
+                !f.estimatedNetValue && !fetchingCodesRef.current.has(f.code)
+            )
+            .map((f: Fund) => f.code);
 
-    if (codesToFetch.length === 0) return;
+      if (codesToFetch.length === 0) return;
 
-    codesToFetch.forEach((code: string) => fetchingCodesRef.current.add(code));
-    setLoading(true);
+      codesToFetch.forEach((code: string) =>
+        fetchingCodesRef.current.add(code)
+      );
+      setLoading(true);
 
-    try {
-      await fetchMultipleFundData(codesToFetch, (code: string, data: any) => {
-        const fund = watchlist.find((f: Fund) => f.code === code);
-        if (fund && data) {
-          updateFund(code, {
-            code: data.code,
-            name: data.name || fund.name,
-            previousNetAssetValue: data.previousNetAssetValue,
-            estimatedNetValue: data.estimatedNetValue,
-            estimatedGrowthRate: data.estimatedGrowthRate,
-            yesterdayChange: data.yesterdayChange,
-            lastWeekGrowthRate: data.lastWeekChange,
-            lastMonthGrowthRate: data.lastMonthChange,
-            thisYearGrowthRate: data.thisYearChange,
-            updateTime: new Date().toISOString(),
-          });
-        }
-      });
+      try {
+        await fetchMultipleFundData(codesToFetch, (code: string, data: any) => {
+          const fund = watchlist.find((f: Fund) => f.code === code);
+          if (fund && data) {
+            updateFund(code, {
+              code: data.code,
+              name: data.name || fund.name,
+              previousNetAssetValue: data.previousNetAssetValue,
+              estimatedNetValue: data.estimatedNetValue,
+              estimatedGrowthRate: data.estimatedGrowthRate,
+              yesterdayChange: data.yesterdayChange,
+              lastWeekGrowthRate: data.lastWeekChange,
+              lastMonthGrowthRate: data.lastMonthChange,
+              thisYearGrowthRate: data.thisYearChange,
+              updateTime: new Date().toISOString(),
+            });
+          }
+        });
 
-      setLastUpdate(new Date());
-    } catch (error) {
-      console.error("Fetch error:", error);
-    } finally {
-      codesToFetch.forEach((code: string) => fetchingCodesRef.current.delete(code));
-      setLoading(false);
-    }
-  }, [watchlist, updateFund]);
+        setLastUpdate(new Date());
+      } catch (error) {
+        console.error("Fetch error:", error);
+      } finally {
+        codesToFetch.forEach((code: string) =>
+          fetchingCodesRef.current.delete(code)
+        );
+        setLoading(false);
+      }
+    },
+    [watchlist, updateFund]
+  );
 
   useEffect(() => {
     fetchFundData();
@@ -162,12 +213,15 @@ export function ValuationTable() {
     setExpandedFund((prev) => (prev === code ? null : code));
   }, []);
 
-  const handleRemove = useCallback((code: string) => {
-    removeFund(code);
-    if (expandedFund === code) {
-      setExpandedFund(null);
-    }
-  }, [removeFund, expandedFund]);
+  const handleRemove = useCallback(
+    (code: string) => {
+      removeFund(code);
+      if (expandedFund === code) {
+        setExpandedFund(null);
+      }
+    },
+    [removeFund, expandedFund]
+  );
 
   return (
     <div className="bg-white">
@@ -189,9 +243,10 @@ export function ValuationTable() {
                 variant={selectedGroup === "all" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedGroup("all")}
-                className={selectedGroup === "all" 
-                  ? "bg-[#2D2A26] text-white font-['Source_Sans_3'] text-xs" 
-                  : "border-[#C9C2B5] hover:bg-[#F5F0E6] font-['Source_Sans_3'] text-xs"
+                className={
+                  selectedGroup === "all"
+                    ? "bg-[#2D2A26] text-white font-['Source_Sans_3'] text-xs"
+                    : "border-[#C9C2B5] hover:bg-[#F5F0E6] font-['Source_Sans_3'] text-xs"
                 }
               >
                 <Folder className="w-3 h-3 mr-1" />
@@ -203,14 +258,17 @@ export function ValuationTable() {
                   variant={selectedGroup === group.id ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedGroup(group.id)}
-                  className={selectedGroup === group.id 
-                    ? "bg-[#2D2A26] text-white font-['Source_Sans_3'] text-xs" 
-                    : "border-[#C9C2B5] hover:bg-[#F5F0E6] font-['Source_Sans_3'] text-xs"
+                  className={
+                    selectedGroup === group.id
+                      ? "bg-[#2D2A26] text-white font-['Source_Sans_3'] text-xs"
+                      : "border-[#C9C2B5] hover:bg-[#F5F0E6] font-['Source_Sans_3'] text-xs"
                   }
                 >
                   <Folder className="w-3 h-3 mr-1" />
                   {group.name}
-                  <span className="ml-1 text-[10px]">({group.funds.length})</span>
+                  <span className="ml-1 text-[10px]">
+                    ({group.funds.length})
+                  </span>
                 </Button>
               ))}
             </div>
@@ -226,7 +284,11 @@ export function ValuationTable() {
               disabled={loading}
               className="border-[#2D2A26] hover:bg-[#2D2A26] hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em]"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
               <span className="ml-2">刷新</span>
             </Button>
           </div>
@@ -274,10 +336,12 @@ export function ValuationTable() {
             </tr>
           </thead>
           <tbody>
-              {watchlist
+            {watchlist
               .filter((fund: Fund) => {
                 if (selectedGroup === "all") return true;
-                const group = groups.find((g: FundGroup) => g.id === selectedGroup);
+                const group = groups.find(
+                  (g: FundGroup) => g.id === selectedGroup
+                );
                 return group?.funds.includes(fund.code);
               })
               .map((fund: Fund, index: number) => (
@@ -312,22 +376,23 @@ export function ValuationTable() {
           </p>
         </div>
       )}
-      
+
       {/* 分组筛选空状态 */}
-      {watchlist.length > 0 && watchlist.filter((fund: Fund) => {
-        if (selectedGroup === "all") return true;
-        const group = groups.find((g: FundGroup) => g.id === selectedGroup);
-        return group?.funds.includes(fund.code);
-      }).length === 0 && (
-        <div className="py-12 text-center border-t border-[#C9C2B5]">
-          <p className="text-[#6B6560] font-['Libre_Baskerville'] text-lg mb-2">
-            该分组暂无基金
-          </p>
-          <p className="text-sm text-[#6B6560] font-['Source_Sans_3']">
-            请切换到其他分组或添加基金到该分组
-          </p>
-        </div>
-      )}
+      {watchlist.length > 0 &&
+        watchlist.filter((fund: Fund) => {
+          if (selectedGroup === "all") return true;
+          const group = groups.find((g: FundGroup) => g.id === selectedGroup);
+          return group?.funds.includes(fund.code);
+        }).length === 0 && (
+          <div className="py-12 text-center border-t border-[#C9C2B5]">
+            <p className="text-[#6B6560] font-['Libre_Baskerville'] text-lg mb-2">
+              该分组暂无基金
+            </p>
+            <p className="text-sm text-[#6B6560] font-['Source_Sans_3']">
+              请切换到其他分组或添加基金到该分组
+            </p>
+          </div>
+        )}
 
       {/* 表格底部装饰 */}
       {watchlist.length > 0 && (
@@ -341,3 +406,4 @@ export function ValuationTable() {
     </div>
   );
 }
+
