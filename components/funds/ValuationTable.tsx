@@ -11,16 +11,13 @@ import React, {
 import {
   RefreshCw,
   Loader2,
-  TrendingUp,
-  TrendingDown,
-  Minus,
   ChevronRight,
   ChevronDown,
   Folder,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFundsStore, Fund, FundGroup } from "@/stores/fundsStore";
-import { formatNumber, formatPercent, getChangeColor, cn } from "@/lib/utils";
+import { formatCurrency, formatPercent, getChangeColor, cn } from "@/lib/utils";
 import { fetchMultipleFundData } from "@/lib/useFundData";
 import { FundDetailPanel } from "./FundDetailPanel";
 
@@ -38,12 +35,6 @@ const FundTableRow = memo(function FundTableRow({
   isExpanded,
   onToggle,
 }: FundTableRowProps) {
-  const getChangeIcon = (value: number) => {
-    if (value > 0) return <TrendingUp className="w-3 h-3 inline" />;
-    if (value < 0) return <TrendingDown className="w-3 h-3 inline" />;
-    return <Minus className="w-3 h-3 inline" />;
-  };
-
   return (
     <tr
       className={`border-b border-[#E5E5E5] hover:bg-[#F9F8F6] transition-colors cursor-pointer ${
@@ -72,19 +63,20 @@ const FundTableRow = memo(function FundTableRow({
       </td>
       <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-[#2D2A26]">
         {fund.previousNetAssetValue
-          ? formatNumber(fund.previousNetAssetValue)
+          ? formatCurrency(fund.previousNetAssetValue, false)
           : "—"}
       </td>
       <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-[#2D2A26] font-bold">
-        {fund.estimatedNetValue ? formatNumber(fund.estimatedNetValue) : "—"}
+        {fund.estimatedNetValue
+          ? formatCurrency(fund.estimatedNetValue, false)
+          : "—"}
       </td>
       <td className="text-right py-4 px-4">
         <span
-          className={`font-['JetBrains_Mono'] font-bold flex items-center justify-end gap-1 ${getChangeColor(
+          className={`font-['JetBrains_Mono'] font-bold ${getChangeColor(
             fund.estimatedGrowthRate || 0
           )}`}
         >
-          {getChangeIcon(fund.estimatedGrowthRate || 0)}
           {fund.estimatedGrowthRate !== undefined
             ? formatPercent(fund.estimatedGrowthRate)
             : "—"}
@@ -125,19 +117,10 @@ const FundTableRow = memo(function FundTableRow({
               )
             )}
           >
-            {fund.shares *
-              fund.previousNetAssetValue *
-              (fund.yesterdayChange / 100) >=
-            0
-              ? "+"
-              : ""}
-            ¥
-            {formatNumber(
-              Math.abs(
-                fund.shares *
-                  fund.previousNetAssetValue *
-                  (fund.yesterdayChange / 100)
-              )
+            {formatCurrency(
+              fund.shares *
+                fund.previousNetAssetValue *
+                (fund.yesterdayChange / 100)
             )}
           </span>
         ) : (
@@ -155,14 +138,8 @@ const FundTableRow = memo(function FundTableRow({
                 )
               )}
             >
-              {getChangeIcon(
+              {formatCurrency(
                 fund.shares * (fund.estimatedNetValue - fund.costPrice)
-              )}
-              ¥
-              {formatNumber(
-                Math.abs(
-                  fund.shares * (fund.estimatedNetValue - fund.costPrice)
-                )
               )}
             </span>
             <span

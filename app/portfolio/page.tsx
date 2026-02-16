@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useFundsStore, Fund, FundGroup } from "@/stores/fundsStore";
-import { formatNumber, formatPercent, getChangeColor, cn } from "@/lib/utils";
+import { formatCurrency, formatPercent, getChangeColor, cn } from "@/lib/utils";
 import {
   Trash2,
   FolderPlus,
@@ -216,49 +216,62 @@ export default function PortfolioPage() {
             <Wallet className="w-5 h-5" />
             投资组合总览
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <div className="text-xs text-[#6B6560] font-['Source_Sans_3'] mb-1">
-                总成本
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="bg-white border border-[#E5E5E5] rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-full bg-[#2D2A26] flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">¥</span>
+                </div>
+                <span className="text-xs text-[#6B6560] font-['Source_Sans_3']">
+                  总成本
+                </span>
               </div>
-              <div className="font-['JetBrains_Mono'] text-lg text-[#2D2A26]">
-                ¥{formatNumber(portfolioSummary.totalCost, 2)}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-[#6B6560] font-['Source_Sans_3'] mb-1">
-                总市值
-              </div>
-              <div className="font-['JetBrains_Mono'] text-lg text-[#2D2A26]">
-                ¥{formatNumber(portfolioSummary.totalMarketValue, 2)}
+              <div className="font-['JetBrains_Mono'] text-xl font-bold text-[#2D2A26]">
+                {formatCurrency(portfolioSummary.totalCost)}
               </div>
             </div>
-            <div>
-              <div className="text-xs text-[#6B6560] font-['Source_Sans_3'] mb-1">
-                总收益
+            <div className="bg-white border border-[#E5E5E5] rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-full bg-[#8B0000] flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">¥</span>
+                </div>
+                <span className="text-xs text-[#6B6560] font-['Source_Sans_3']">
+                  总市值
+                </span>
+              </div>
+              <div className="font-['JetBrains_Mono'] text-xl font-bold text-[#2D2A26]">
+                {formatCurrency(portfolioSummary.totalMarketValue)}
+              </div>
+            </div>
+            <div className="bg-white border border-[#E5E5E5] rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-full bg-[#8B0000] flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 text-white" />
+                </div>
+                <span className="text-xs text-[#6B6560] font-['Source_Sans_3']">
+                  总收益
+                </span>
               </div>
               <div
                 className={cn(
-                  "font-['JetBrains_Mono'] text-lg font-bold flex items-center gap-1",
+                  "font-['JetBrains_Mono'] text-xl font-bold flex items-center gap-1",
                   getChangeColor(portfolioSummary.totalProfit)
                 )}
               >
-                {getChangeIcon(portfolioSummary.totalProfit)}¥
-                {formatNumber(Math.abs(portfolioSummary.totalProfit), 2)}
+                {formatCurrency(portfolioSummary.totalProfit)}
               </div>
             </div>
-            <div>
-              <div className="text-xs text-[#6B6560] font-['Source_Sans_3'] mb-1">
-                收益率
+            <div className="bg-white border border-[#E5E5E5] rounded-lg p-4">
+              <div className="w-8 h-8 rounded-full bg-[#8B0000] flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-white" />
               </div>
               <div
                 className={cn(
-                  "font-['JetBrains_Mono'] text-lg font-bold flex items-center gap-1",
+                  "font-['JetBrains_Mono'] text-xl font-bold flex items-center gap-1",
                   getChangeColor(totalProfitPercent)
                 )}
               >
-                {getChangeIcon(totalProfitPercent)}
-                {formatPercent(totalProfitPercent)}
+                {formatPercent(Math.abs(totalProfitPercent))}
               </div>
             </div>
           </div>
@@ -338,8 +351,7 @@ export default function PortfolioPage() {
                                 getChangeColor(profit)
                               )}
                             >
-                            {getChangeIcon(profit)}¥
-                              {formatNumber(Math.abs(profit), 2)}
+                              {formatCurrency(profit)}
                             </span>
                             <span
                               className={cn(
@@ -472,21 +484,36 @@ export default function PortfolioPage() {
           </DialogHeader>
           <div className="mt-4 space-y-4">
             {editingFund && (
-              <div className="p-3 bg-[#F5F0E6] rounded">
-                <div className="font-['Libre_Baskerville'] font-bold text-[#2D2A26]">
-                  {editingFund.name}
+              <div className="flex items-center gap-4 p-4 bg-[#F5F0E6] rounded-lg border border-[#C9C2B5]">
+                <div className="w-12 h-12 bg-[#2D2A26] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span className="font-['Newsreader'] font-bold text-white text-lg">
+                    {editingFund.name.charAt(0)}
+                  </span>
                 </div>
-                <div className="text-xs text-[#6B6560] font-['JetBrains_Mono']">
-                  {editingFund.code}
-                </div>
-                {editingFund.estimatedNetValue && (
-                  <div className="text-xs text-[#6B6560] mt-1">
-                    最新净值:{" "}
-                    <span className="font-['JetBrains_Mono']">
-                      {formatNumber(editingFund.estimatedNetValue, 2)}
-                    </span>
+                <div className="flex-1 min-w-0">
+                  <div className="font-['Libre_Baskerville'] font-bold text-[#2D2A26] truncate">
+                    {editingFund.name}
                   </div>
-                )}
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-xs text-[#6B6560] font-['JetBrains_Mono']">
+                      {editingFund.code}
+                    </span>
+                    {editingFund.estimatedNetValue && (
+                      <>
+                        <span className="text-[#C9C2B5]">|</span>
+                        <span className="text-xs text-[#6B6560]">
+                          最新净值:{" "}
+                          <span className="font-['JetBrains_Mono'] font-medium">
+                            {formatCurrency(
+                              editingFund.estimatedNetValue,
+                              false
+                            )}
+                          </span>
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -518,64 +545,58 @@ export default function PortfolioPage() {
             </div>
 
             {positionShares && positionCost && editingFund && (
-              <div className="p-3 bg-[#F9F8F6] rounded border border-[#C9C2B5]">
-                <div className="text-xs text-[#6B6560] font-['Source_Sans_3'] mb-2">
+              <div className="space-y-3">
+                <div className="text-xs text-[#6B6560] font-['Source_Sans_3'] font-medium">
                   预估信息
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-[#6B6560]">总成本:</span>
-                  <span className="font-['JetBrains_Mono'] text-[#2D2A26]">
-                    ¥
-                    {formatNumber(
-                      parseFloat(positionShares) * parseFloat(positionCost),
-                      2
-                    )}
-                  </span>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-[#F5F0E6] rounded-lg p-3 text-center">
+                    <div className="text-xs text-[#6B6560] mb-1">总成本</div>
+                    <div className="font-['JetBrains_Mono'] text-sm font-bold text-[#2D2A26]">
+                      {formatCurrency(
+                        parseFloat(positionShares) * parseFloat(positionCost),
+                        false
+                      )}
+                    </div>
+                  </div>
+                  {editingFund.estimatedNetValue && (
+                    <>
+                      <div className="bg-[#F5F0E6] rounded-lg p-3 text-center">
+                        <div className="text-xs text-[#6B6560] mb-1">
+                          预估市值
+                        </div>
+                        <div className="font-['JetBrains_Mono'] text-sm font-bold text-[#2D2A26]">
+                          {formatCurrency(
+                            parseFloat(positionShares) *
+                              editingFund.estimatedNetValue,
+                            false
+                          )}
+                        </div>
+                      </div>
+                      <div className="bg-[#F5F0E6] rounded-lg p-3 text-center">
+                        <div className="text-xs text-[#6B6560] mb-1">
+                          预估收益
+                        </div>
+                        <div
+                          className={cn(
+                            "font-['JetBrains_Mono'] text-sm font-bold",
+                            getChangeColor(
+                              parseFloat(positionShares) *
+                                (editingFund.estimatedNetValue -
+                                  parseFloat(positionCost))
+                            )
+                          )}
+                        >
+                          {formatCurrency(
+                            parseFloat(positionShares) *
+                              (editingFund.estimatedNetValue -
+                                parseFloat(positionCost))
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
-                {editingFund.estimatedNetValue && (
-                  <>
-                    <div className="flex justify-between text-sm mt-1">
-                      <span className="text-[#6B6560]">预估市值:</span>
-                      <span className="font-['JetBrains_Mono'] text-[#2D2A26]">
-                        ¥
-                        {formatNumber(
-                          parseFloat(positionShares) *
-                            editingFund.estimatedNetValue,
-                          2
-                        )}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm mt-1">
-                      <span className="text-[#6B6560]">预估收益:</span>
-                      <span
-                        className={cn(
-                          "font-['JetBrains_Mono'] font-bold",
-                          getChangeColor(
-                            parseFloat(positionShares) *
-                              (editingFund.estimatedNetValue -
-                                parseFloat(positionCost))
-                          )
-                        )}
-                      >
-                        {parseFloat(positionShares) *
-                          (editingFund.estimatedNetValue -
-                            parseFloat(positionCost)) >=
-                        0
-                          ? "+"
-                          : ""}
-                        ¥
-                        {formatNumber(
-                          Math.abs(
-                            parseFloat(positionShares) *
-                              (editingFund.estimatedNetValue -
-                                parseFloat(positionCost))
-                          ),
-                          2
-                        )}
-                      </span>
-                    </div>
-                  </>
-                )}
               </div>
             )}
 
@@ -610,4 +631,3 @@ export default function PortfolioPage() {
     </div>
   );
 }
-

@@ -5,10 +5,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatNumber(value: number, decimals: number = 4): string {
-  return value.toFixed(decimals);
-}
-
 export function formatPercent(value: number, showSign: boolean = true): string {
   const formatted = Math.abs(value).toFixed(2);
   if (value > 0 && showSign) {
@@ -20,8 +16,17 @@ export function formatPercent(value: number, showSign: boolean = true): string {
   return `${formatted}%`;
 }
 
-export function formatCurrency(value: number, currency: string = "¥"): string {
-  return `${currency}${value.toFixed(2)}`;
+export function formatCurrency(
+  value: number,
+  showSign: boolean = true
+): string {
+  if (value > 0 && showSign) {
+    return `¥${value.toFixed(2)}`;
+  }
+  if (value < 0) {
+    return `-¥${Math.abs(value).toFixed(2)}`;
+  }
+  return `¥${value.toFixed(2)}`;
 }
 
 export function getChangeColor(value: number): string {
