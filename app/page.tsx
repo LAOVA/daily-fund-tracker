@@ -81,7 +81,7 @@ export default function Home() {
             </span>
           </div>
         </div>
-        
+
         <ValuationTable />
       </section>
 
@@ -102,8 +102,7 @@ export default function Home() {
               数据来源
             </h4>
             <p className="text-xs text-[#6B6560] font-['Libre_Baskerville'] leading-relaxed">
-              数据来源于天天基金网、东方财富等公开渠道，
-              仅供参考使用。
+              数据来源于天天基金网、东方财富等公开渠道， 仅供参考使用。
             </p>
           </div>
           <div>
@@ -121,3 +120,4 @@ export default function Home() {
     </div>
   );
 }
+

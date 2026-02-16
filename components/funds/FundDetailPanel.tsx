@@ -13,9 +13,9 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { ChevronUp, TrendingUp, TrendingDown, Minus } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { useFundsStore, Fund } from "@/stores/fundsStore";
-import { formatPercent, getChangeColor } from "@/lib/utils";
+import { Loading } from "@/components/ui/loading";
+import { Fund } from "@/stores/fundsStore";
+import { getChangeColor } from "@/lib/utils";
 import { fetchFundHoldingsByJsonp, Holding } from "@/lib/useFundData";
 
 // 注册 Chart.js 组件
@@ -219,11 +219,9 @@ export const FundDetailPanel = memo(function FundDetailPanel({
                   近30日净值走势
                 </h4>
               </div>
-              <div className="h-64 border border-[#C9C2B5] bg-white p-4 h-72">
+              <div className="border border-[#C9C2B5] bg-white p-4 h-72">
                 {loading ? (
-                  <div className="h-full flex items-center justify-center text-[#6B6560] font-['Source_Sans_3']">
-                    加载中...
-                  </div>
+                  <Loading />
                 ) : historyData.length > 0 ? (
                   <Line data={chartData} options={chartOptions} />
                 ) : (
@@ -243,9 +241,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
               </div>
               <div className="border border-[#C9C2B5] bg-white h-72 overflow-hidden">
                 {loading ? (
-                  <div className="h-full flex items-center justify-center text-[#6B6560] font-['Source_Sans_3']">
-                    加载中...
-                  </div>
+                  <Loading />
                 ) : holdings.length > 0 ? (
                   <div className="h-full overflow-y-auto">
                     <table className="w-full">

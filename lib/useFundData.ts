@@ -78,6 +78,7 @@ const cleanupGlobalData = () => {
     (window as any).Data_netWorthTrend = null;
   } catch (e) {
     // 忽略错误
+    console.log(e);
   }
 };
 
@@ -91,7 +92,6 @@ export async function fetchFullFundData(code: string): Promise<{
   yesterdayChange?: number;
   lastWeekChange?: number;
   lastMonthChange?: number;
-  thisYearChange?: number;
   error?: string;
 } | null> {
   return new Promise((resolve) => {
@@ -129,7 +129,7 @@ export async function fetchFullFundData(code: string): Promise<{
         let yesterdayChange: number | undefined;
         let lastWeekChange: number | undefined;
         let lastMonthChange: number | undefined;
-        let thisYearChange: number | undefined;
+        // let thisYearChange: number | undefined;
 
         if (trend.length > 0) {
           const sliced = trend.slice(-90);
@@ -158,20 +158,20 @@ export async function fetchFullFundData(code: string): Promise<{
             }
           }
 
-          // 今年来涨幅
-          const currentYear = new Date().getFullYear();
-          const yearStart = sliced.find((item: { x: number }) => {
-            const date = new Date(item.x);
-            return (
-              date.getFullYear() === currentYear &&
-              date.getMonth() === 0 &&
-              date.getDate() <= 10
-            );
-          });
-          const current = sliced[sliced.length - 2];
-          if (yearStart && current && yearStart.y > 0) {
-            thisYearChange = ((current.y - yearStart.y) / yearStart.y) * 100;
-          }
+          // // 今年来涨幅
+          // const currentYear = new Date().getFullYear();
+          // const yearStart = sliced.find((item: { x: number }) => {
+          //   const date = new Date(item.x);
+          //   return (
+          //     date.getFullYear() === currentYear &&
+          //     date.getMonth() === 0 &&
+          //     date.getDate() <= 10
+          //   );
+          // });
+          // const current = sliced[sliced.length - 2];
+          // if (yearStart && current && yearStart.y > 0) {
+          //   thisYearChange = ((current.y - yearStart.y) / yearStart.y) * 100;
+          // }
         }
 
         const previousNetAssetValue = safeParseFloat(gzData.dwjz);
@@ -179,7 +179,12 @@ export async function fetchFullFundData(code: string): Promise<{
         const estimatedGrowthRate = safeParseFloat(gzData.gszzl);
 
         // 验证核心数据是否有效
-        if (!previousNetAssetValue || !estimatedNetValue || previousNetAssetValue <= 0 || estimatedNetValue <= 0) {
+        if (
+          !previousNetAssetValue ||
+          !estimatedNetValue ||
+          previousNetAssetValue <= 0 ||
+          estimatedNetValue <= 0
+        ) {
           console.warn(`基金 ${code} 净值数据无效`);
           cleanupGlobalData();
           finishRequest();
@@ -196,7 +201,6 @@ export async function fetchFullFundData(code: string): Promise<{
           yesterdayChange,
           lastWeekChange,
           lastMonthChange,
-          thisYearChange,
         };
 
         cleanupGlobalData();
@@ -218,7 +222,7 @@ export async function fetchMultipleFundData(
   onProgress?: (code: string, data: any) => void
 ): Promise<Map<string, any>> {
   const results = new Map<string, any>();
-  
+
   // 串行获取，避免 JSONP 回调冲突
   for (const code of codes) {
     try {
@@ -286,7 +290,10 @@ export async function fetchFundHoldingsByJsonp(code: string): Promise<{
     let fundName = code;
     const titleMatch = html.match(/title='([^']+)'/);
     if (titleMatch && titleMatch[1]) {
-      fundName = titleMatch[1].trim().replace(/\([^)]*\)[A-Z]?$/, "").trim();
+      fundName = titleMatch[1]
+        .trim()
+        .replace(/\([^)]*\)[A-Z]?$/, "")
+        .trim();
     }
 
     // 获取历史净值
@@ -402,3 +409,4 @@ export async function searchFundsDirect(
     return [];
   }
 }
+

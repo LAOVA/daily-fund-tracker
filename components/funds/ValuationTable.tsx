@@ -10,7 +10,6 @@ import React, {
 } from "react";
 import {
   RefreshCw,
-  Trash2,
   Loader2,
   TrendingUp,
   TrendingDown,
@@ -21,7 +20,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFundsStore, Fund, FundGroup } from "@/stores/fundsStore";
-import { formatNumber, formatPercent, getChangeColor } from "@/lib/utils";
+import { formatNumber, formatPercent, getChangeColor, cn } from "@/lib/utils";
 import { fetchMultipleFundData } from "@/lib/useFundData";
 import { FundDetailPanel } from "./FundDetailPanel";
 
@@ -30,7 +29,6 @@ interface FundTableRowProps {
   fund: Fund;
   index: number;
   isExpanded: boolean;
-  onRemove: (code: string) => void;
   onToggle: (code: string) => void;
 }
 
@@ -38,7 +36,6 @@ const FundTableRow = memo(function FundTableRow({
   fund,
   index,
   isExpanded,
-  onRemove,
   onToggle,
 }: FundTableRowProps) {
   const getChangeIcon = (value: number) => {
@@ -114,35 +111,91 @@ const FundTableRow = memo(function FundTableRow({
           ? formatPercent(fund.lastMonthGrowthRate)
           : "—"}
       </td>
-      <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-[#6B6560]">
-        {fund.thisYearGrowthRate !== undefined
-          ? formatPercent(fund.thisYearGrowthRate)
-          : "—"}
+      <td className="text-right py-4 px-4">
+        {fund.shares &&
+        fund.previousNetAssetValue &&
+        fund.yesterdayChange !== undefined ? (
+          <span
+            className={cn(
+              "font-['JetBrains_Mono'] font-bold",
+              getChangeColor(
+                fund.shares *
+                  fund.previousNetAssetValue *
+                  (fund.yesterdayChange / 100)
+              )
+            )}
+          >
+            {fund.shares *
+              fund.previousNetAssetValue *
+              (fund.yesterdayChange / 100) >=
+            0
+              ? "+"
+              : ""}
+            ¥
+            {formatNumber(
+              Math.abs(
+                fund.shares *
+                  fund.previousNetAssetValue *
+                  (fund.yesterdayChange / 100)
+              )
+            )}
+          </span>
+        ) : (
+          <span className="text-[#6B6560] font-['JetBrains_Mono']">—</span>
+        )}
       </td>
       <td className="text-right py-4 px-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemove(fund.code);
-          }}
-          className="text-[#6B6560] hover:text-[#C41E3A] hover:bg-red-50 h-8 w-8 p-0"
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
+        {fund.shares && fund.costPrice && fund.estimatedNetValue ? (
+          <div>
+            <span
+              className={cn(
+                "font-['JetBrains_Mono'] font-bold flex items-center justify-end gap-1",
+                getChangeColor(
+                  fund.shares * (fund.estimatedNetValue - fund.costPrice)
+                )
+              )}
+            >
+              {getChangeIcon(
+                fund.shares * (fund.estimatedNetValue - fund.costPrice)
+              )}
+              ¥
+              {formatNumber(
+                Math.abs(
+                  fund.shares * (fund.estimatedNetValue - fund.costPrice)
+                )
+              )}
+            </span>
+            <span
+              className={cn(
+                "text-xs font-['JetBrains_Mono'] block",
+                getChangeColor(
+                  ((fund.estimatedNetValue - fund.costPrice) / fund.costPrice) *
+                    100
+                )
+              )}
+            >
+              {formatPercent(
+                ((fund.estimatedNetValue - fund.costPrice) / fund.costPrice) *
+                  100
+              )}
+            </span>
+          </div>
+        ) : (
+          <span className="text-[#6B6560] font-['JetBrains_Mono']">—</span>
+        )}
       </td>
     </tr>
   );
 });
 
 export function ValuationTable() {
-  const { watchlist, groups, updateFund, removeFund } = useFundsStore();
+  const { watchlist, groups, updateFund } = useFundsStore();
   const [loading, setLoading] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<string>("all");
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [expandedFund, setExpandedFund] = useState<string | null>(null);
   const fetchingCodesRef = useRef<Set<string>>(new Set());
+  const hasInitializedRef = useRef(false);
 
   const fetchFundData = useCallback(
     async (force = false) => {
@@ -177,7 +230,6 @@ export function ValuationTable() {
               yesterdayChange: data.yesterdayChange,
               lastWeekGrowthRate: data.lastWeekChange,
               lastMonthGrowthRate: data.lastMonthChange,
-              thisYearGrowthRate: data.thisYearChange,
               updateTime: new Date().toISOString(),
             });
           }
@@ -196,32 +248,27 @@ export function ValuationTable() {
     [watchlist, updateFund]
   );
 
+  // 初始加载和监听新基金
   useEffect(() => {
-    fetchFundData();
-  }, []);
+    // 初始加载
+    if (!hasInitializedRef.current) {
+      fetchFundData();
+      hasInitializedRef.current = true;
+      return;
+    }
 
-  useEffect(() => {
+    // 监听新基金（只在非初始加载时执行）
     const hasNewFundWithoutData = watchlist.some(
       (f: Fund) => !f.estimatedNetValue && !fetchingCodesRef.current.has(f.code)
     );
     if (hasNewFundWithoutData && !loading) {
       fetchFundData();
     }
-  }, [watchlist.length]);
+  }, [fetchFundData, loading, watchlist]);
 
   const handleToggleExpand = useCallback((code: string) => {
     setExpandedFund((prev) => (prev === code ? null : code));
   }, []);
-
-  const handleRemove = useCallback(
-    (code: string) => {
-      removeFund(code);
-      if (expandedFund === code) {
-        setExpandedFund(null);
-      }
-    },
-    [removeFund, expandedFund]
-  );
 
   return (
     <div className="bg-white">
@@ -243,11 +290,12 @@ export function ValuationTable() {
                 variant={selectedGroup === "all" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedGroup("all")}
-                className={
+                className={cn(
+                  "font-['Source_Sans_3'] text-xs cursor-pointer",
                   selectedGroup === "all"
-                    ? "bg-[#2D2A26] text-white font-['Source_Sans_3'] text-xs"
-                    : "border-[#C9C2B5] hover:bg-[#F5F0E6] font-['Source_Sans_3'] text-xs"
-                }
+                    ? "bg-[#2D2A26] text-white "
+                    : "border-[#C9C2B5] hover:bg-[#F5F0E6] "
+                )}
               >
                 <Folder className="w-3 h-3 mr-1" />
                 全部
@@ -258,11 +306,12 @@ export function ValuationTable() {
                   variant={selectedGroup === group.id ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedGroup(group.id)}
-                  className={
+                  className={cn(
+                    "font-['Source_Sans_3'] text-xs cursor-pointer",
                     selectedGroup === group.id
-                      ? "bg-[#2D2A26] text-white font-['Source_Sans_3'] text-xs"
-                      : "border-[#C9C2B5] hover:bg-[#F5F0E6] font-['Source_Sans_3'] text-xs"
-                  }
+                      ? "bg-[#2D2A26] text-white"
+                      : "border-[#C9C2B5] hover:bg-[#F5F0E6]"
+                  )}
                 >
                   <Folder className="w-3 h-3 mr-1" />
                   {group.name}
@@ -282,7 +331,7 @@ export function ValuationTable() {
               size="sm"
               onClick={() => fetchFundData(true)}
               disabled={loading}
-              className="border-[#2D2A26] hover:bg-[#2D2A26] hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em]"
+              className="border-[#2D2A26] hover:bg-[#2D2A26] hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em] cursor-pointer"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -328,10 +377,10 @@ export function ValuationTable() {
                 近一月
               </th>
               <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-[#2D2A26]">
-                今年来
+                昨日收益
               </th>
-              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-[#2D2A26] w-16">
-                操作
+              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-[#2D2A26]">
+                持仓收益
               </th>
             </tr>
           </thead>
@@ -350,7 +399,6 @@ export function ValuationTable() {
                     fund={fund}
                     index={index}
                     isExpanded={expandedFund === fund.code}
-                    onRemove={handleRemove}
                     onToggle={handleToggleExpand}
                   />
                   {expandedFund === fund.code && (

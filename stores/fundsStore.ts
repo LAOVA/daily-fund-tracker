@@ -15,6 +15,10 @@ export interface Fund {
   lastMonthGrowthRate?: number;
   thisYearGrowthRate?: number;
   updateTime?: string;
+  // 持仓信息
+  shares?: number; // 持有份额
+  costPrice?: number; // 成本价
+  costAmount?: number; // 成本金额
 }
 
 export interface FundGroup {
@@ -33,6 +37,9 @@ interface FundsState {
   removeGroup: (id: string) => void;
   addFundToGroup: (fundCode: string, groupId: string) => void;
   removeFundFromGroup: (fundCode: string, groupId: string) => void;
+  // 持仓管理
+  setFundPosition: (code: string, shares: number, costPrice: number) => void;
+  removeFundPosition: (code: string) => void;
 }
 
 export const useFundsStore = create<FundsState>()(
@@ -121,6 +128,31 @@ export const useFundsStore = create<FundsState>()(
             g.id === groupId
               ? { ...g, funds: g.funds.filter((c) => c !== fundCode) }
               : g
+          ),
+        })),
+
+      // 设置基金持仓
+      setFundPosition: (code: string, shares: number, costPrice: number) =>
+        set((state) => ({
+          watchlist: state.watchlist.map((f) =>
+            f.code === code
+              ? {
+                  ...f,
+                  shares,
+                  costPrice,
+                  costAmount: shares * costPrice,
+                }
+              : f
+          ),
+        })),
+
+      // 移除基金持仓
+      removeFundPosition: (code: string) =>
+        set((state) => ({
+          watchlist: state.watchlist.map((f) =>
+            f.code === code
+              ? { ...f, shares: undefined, costPrice: undefined, costAmount: undefined }
+              : f
           ),
         })),
     }),

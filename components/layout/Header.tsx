@@ -2,25 +2,64 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 
 const navItems = [
   { href: "/", label: "首页" },
   { href: "/holdings", label: "重仓追踪" },
-  { href: "/portfolio", label: "组合管理" },
+  { href: "/portfolio", label: "基金管理" },
 ];
+
+// 创建时间 store
+function createTimeStore() {
+  let listeners: (() => void)[] = [];
+  let currentTime = "";
+  let timer: NodeJS.Timeout | null = null;
+
+  function getCurrentTime() {
+    return new Date().toLocaleTimeString("zh-CN", { hour12: false });
+  }
+
+  function subscribe(listener: () => void) {
+    listeners.push(listener);
+    // 第一次订阅时启动定时器
+    if (timer === null) {
+      currentTime = getCurrentTime();
+      timer = setInterval(() => {
+        currentTime = getCurrentTime();
+        listeners.forEach((l) => l());
+      }, 1000);
+    }
+    return () => {
+      listeners = listeners.filter((l) => l !== listener);
+      // 没有订阅者时清理定时器
+      if (listeners.length === 0 && timer !== null) {
+        clearInterval(timer);
+        timer = null;
+      }
+    };
+  }
+
+  function getSnapshot() {
+    return currentTime;
+  }
+
+  function getServerSnapshot() {
+    return "";
+  }
+
+  return { subscribe, getSnapshot, getServerSnapshot };
+}
+
+const timeStore = createTimeStore();
 
 export function Header() {
   const pathname = usePathname();
-  const [currentTime, setCurrentTime] = useState<string>("");
-
-  useEffect(() => {
-    setCurrentTime(new Date().toLocaleTimeString("zh-CN", { hour12: false }));
-    const timer = setInterval(() => {
-      setCurrentTime(new Date().toLocaleTimeString("zh-CN", { hour12: false }));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+  const currentTime = useSyncExternalStore(
+    timeStore.subscribe,
+    timeStore.getSnapshot,
+    timeStore.getServerSnapshot
+  );
 
   const today = new Date();
   const dateStr = today.toLocaleDateString("zh-CN", {
@@ -77,7 +116,7 @@ export function Header() {
           </div>
 
           {/* 主标题 - 使用 Newsreader 字体 */}
-          <h1 className="font-['Newsreader'] text-6xl md:text-7xl font-bold text-[#2D2A26] tracking-wide mb-2">
+          <h1 className="font-['Newsreader'] text-6xl md:text-7xl font-bold text-[#2D2A26] tracking-wide leading-tight">
             追基日报
           </h1>
 
@@ -95,7 +134,7 @@ export function Header() {
         </div>
 
         {/* 导航栏 */}
-        <nav className="flex items-center justify-center gap-8 border-b border-[#2D2A26] pb-3">
+        <nav className="flex items-center justify-center gap-8 border-b border-[#2D2A26] pb-3 min-h-[3rem]">
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -118,4 +157,3 @@ export function Header() {
     </header>
   );
 }
-

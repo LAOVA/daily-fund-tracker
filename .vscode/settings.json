@@ -6,5 +6,8 @@
   "scm.inputFontFamily": "'Maple Mono NF CN', 'Maple Mono','Courier New', monospace",
   "notebook.output.fontFamily": "'Maple Mono NF CN', 'Maple Mono','Courier New', monospace",
   "notebook.markup.fontFamily": "'Maple Mono NF CN', 'Maple Mono','Courier New', monospace",
-  "chat.editor.fontFamily": "'Maple Mono NF CN', 'Maple Mono','Courier New', monospace"
+  "chat.editor.fontFamily": "'Maple Mono NF CN', 'Maple Mono','Courier New', monospace",
+  "tailwindCSS.lint.suggestCanonicalClasses": "ignore",
+  "css.validate": false,
+  "scss.validate": false
 }

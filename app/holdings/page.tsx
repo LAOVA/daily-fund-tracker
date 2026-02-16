@@ -7,6 +7,7 @@ import { useFundsStore } from "@/stores/fundsStore";
 import { cn, getChangeColor } from "@/lib/utils";
 import { ChevronDown, ChevronUp, RefreshCw, Loader2, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { fetchFundHoldingsByJsonp, Holding } from "@/lib/useFundData";
+import { Loading } from "@/components/ui/loading";
 
 interface FundHoldings {
   fundCode: string;
@@ -97,6 +98,12 @@ export default function HoldingsPage() {
 
       {/* 基金持仓列表 */}
       <div className="space-y-6">
+        {loading && fundHoldings.length === 0 && (
+          <div className="h-64">
+            <Loading text="正在加载持仓数据..." />
+          </div>
+        )}
+
         {fundHoldings.map((fund) => (
           <div key={fund.fundCode} className="border border-[#C9C2B5] bg-white">
             {/* 基金标题栏 */}
