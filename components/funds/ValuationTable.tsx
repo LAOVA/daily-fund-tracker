@@ -37,14 +37,14 @@ const FundTableRow = memo(function FundTableRow({
 }: FundTableRowProps) {
   return (
     <tr
-      className={`border-b border-[#E5E5E5] hover:bg-[#F9F8F6] transition-colors cursor-pointer ${
-        index % 2 === 0 ? "bg-white" : "bg-[#FDFCFB]"
-      } ${isExpanded ? "bg-[#F5F0E6]" : ""}`}
+      className={`border-b border-paper-300 hover:bg-paper-100 transition-colors cursor-pointer ${
+        index % 2 === 0 ? "bg-white" : "bg-paper-100"
+      } ${isExpanded ? "bg-news-accent" : ""}`}
       onClick={() => onToggle(fund.code)}
     >
       <td className="py-4 px-4">
         <div className="flex items-center gap-2">
-          <span className="text-[#6B6560]">
+          <span className="text-news-muted">
             {isExpanded ? (
               <ChevronDown className="w-4 h-4" />
             ) : (
@@ -52,21 +52,21 @@ const FundTableRow = memo(function FundTableRow({
             )}
           </span>
           <div>
-            <div className="font-['Libre_Baskerville'] font-bold text-[#2D2A26]">
+            <div className="font-['Libre_Baskerville'] font-bold text-news-text">
               {fund.name}
             </div>
-            <div className="text-xs text-[#6B6560] font-['JetBrains_Mono'] mt-1">
+            <div className="text-xs text-news-muted font-['JetBrains_Mono'] mt-1">
               {fund.code}
             </div>
           </div>
         </div>
       </td>
-      <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-[#2D2A26]">
+      <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-news-text">
         {fund.previousNetAssetValue
           ? formatCurrency(fund.previousNetAssetValue, false)
           : "—"}
       </td>
-      <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-[#2D2A26] font-bold">
+      <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-news-text font-bold">
         {fund.estimatedNetValue
           ? formatCurrency(fund.estimatedNetValue, false)
           : "—"}
@@ -93,12 +93,12 @@ const FundTableRow = memo(function FundTableRow({
             : "—"}
         </span>
       </td>
-      <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-[#6B6560]">
+      <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-news-muted">
         {fund.lastWeekGrowthRate !== undefined
           ? formatPercent(fund.lastWeekGrowthRate)
           : "—"}
       </td>
-      <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-[#6B6560]">
+      <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-news-muted">
         {fund.lastMonthGrowthRate !== undefined
           ? formatPercent(fund.lastMonthGrowthRate)
           : "—"}
@@ -124,7 +124,7 @@ const FundTableRow = memo(function FundTableRow({
             )}
           </span>
         ) : (
-          <span className="text-[#6B6560] font-['JetBrains_Mono']">—</span>
+          <span className="text-news-muted font-['JetBrains_Mono']">—</span>
         )}
       </td>
       <td className="text-right py-4 px-4">
@@ -158,7 +158,7 @@ const FundTableRow = memo(function FundTableRow({
             </span>
           </div>
         ) : (
-          <span className="text-[#6B6560] font-['JetBrains_Mono']">—</span>
+          <span className="text-news-muted font-['JetBrains_Mono']">—</span>
         )}
       </td>
     </tr>
@@ -250,13 +250,13 @@ export function ValuationTable() {
   return (
     <div className="bg-white">
       {/* 表头装饰 */}
-      <div className="border-b-2 border-[#2D2A26] pb-4 mb-4">
+      <div className="border-b-2 border-news-text pb-4 mb-4">
         <div className="flex items-center justify-between">
           <div>
-            <span className="inline-block bg-[#C41E3A] text-white text-xs font-bold px-2 py-1 uppercase tracking-[0.2em] font-['Source_Sans_3'] mb-2">
+            <span className="inline-block bg-finance-rise text-white text-xs font-bold px-2 py-1 uppercase tracking-[0.2em] font-['Source_Sans_3'] mb-2">
               实时行情
             </span>
-            <h3 className="font-['Newsreader'] text-3xl font-bold text-[#2D2A26]">
+            <h3 className="font-['Newsreader'] text-3xl font-bold text-news-text">
               基金估值表
             </h3>
           </div>
@@ -270,8 +270,8 @@ export function ValuationTable() {
                 className={cn(
                   "font-['Source_Sans_3'] text-xs cursor-pointer",
                   selectedGroup === "all"
-                    ? "bg-[#2D2A26] text-white "
-                    : "border-[#C9C2B5] hover:bg-[#F5F0E6] "
+                    ? "bg-news-text text-white "
+                    : "border-news-border hover:bg-news-accent "
                 )}
               >
                 <Folder className="w-3 h-3 mr-1" />
@@ -286,8 +286,8 @@ export function ValuationTable() {
                   className={cn(
                     "font-['Source_Sans_3'] text-xs cursor-pointer",
                     selectedGroup === group.id
-                      ? "bg-[#2D2A26] text-white"
-                      : "border-[#C9C2B5] hover:bg-[#F5F0E6]"
+                      ? "bg-news-text text-white"
+                      : "border-news-border hover:bg-news-accent"
                   )}
                 >
                   <Folder className="w-3 h-3 mr-1" />
@@ -299,7 +299,7 @@ export function ValuationTable() {
               ))}
             </div>
             {lastUpdate && (
-              <span className="text-xs text-[#6B6560] font-['Source_Sans_3']">
+              <span className="text-xs text-news-muted font-['Source_Sans_3']">
                 更新于 {lastUpdate.toLocaleTimeString()}
               </span>
             )}
@@ -308,7 +308,7 @@ export function ValuationTable() {
               size="sm"
               onClick={() => fetchFundData(true)}
               disabled={loading}
-              className="border-[#2D2A26] hover:bg-[#2D2A26] hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em] cursor-pointer"
+              className="border-news-text hover:bg-news-text hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em] cursor-pointer"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -322,8 +322,8 @@ export function ValuationTable() {
       </div>
 
       {/* 提示信息 */}
-      <div className="mb-4 text-sm text-[#6B6560] font-['Source_Sans_3'] flex items-center gap-2">
-        <span className="text-[#C41E3A]">💡</span>
+      <div className="mb-4 text-sm text-news-muted font-['Source_Sans_3'] flex items-center gap-2">
+        <span className="text-finance-rise">💡</span>
         <span>点击任意基金行可查看历史净值走势和重仓股信息</span>
       </div>
 
@@ -331,32 +331,32 @@ export function ValuationTable() {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b-2 border-[#2D2A26] bg-[#F5F0E6]">
-              <th className="text-left py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-[#2D2A26]">
+            <tr className="border-b-2 border-news-text bg-news-accent">
+              <th className="text-left py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
                 基金名称
               </th>
-              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-[#2D2A26]">
+              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
                 昨日净值
               </th>
-              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-[#2D2A26]">
+              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
                 估值净值
               </th>
-              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-[#2D2A26]">
+              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
                 估值涨跌
               </th>
-              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-[#2D2A26]">
+              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
                 昨日涨幅
               </th>
-              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-[#2D2A26]">
+              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
                 近一周
               </th>
-              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-[#2D2A26]">
+              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
                 近一月
               </th>
-              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-[#2D2A26]">
+              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
                 昨日收益
               </th>
-              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-[#2D2A26]">
+              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
                 持仓收益
               </th>
             </tr>
@@ -392,11 +392,11 @@ export function ValuationTable() {
 
       {/* 空状态 */}
       {watchlist.length === 0 && (
-        <div className="py-12 text-center border-t border-[#C9C2B5]">
-          <p className="text-[#6B6560] font-['Libre_Baskerville'] text-lg mb-2">
+        <div className="py-12 text-center border-t border-news-border">
+          <p className="text-news-muted font-['Libre_Baskerville'] text-lg mb-2">
             暂无关注基金
           </p>
-          <p className="text-sm text-[#6B6560] font-['Source_Sans_3']">
+          <p className="text-sm text-news-muted font-['Source_Sans_3']">
             请在上方搜索框添加基金代码
           </p>
         </div>
@@ -409,11 +409,11 @@ export function ValuationTable() {
           const group = groups.find((g: FundGroup) => g.id === selectedGroup);
           return group?.funds.includes(fund.code);
         }).length === 0 && (
-          <div className="py-12 text-center border-t border-[#C9C2B5]">
-            <p className="text-[#6B6560] font-['Libre_Baskerville'] text-lg mb-2">
+          <div className="py-12 text-center border-t border-news-border">
+            <p className="text-news-muted font-['Libre_Baskerville'] text-lg mb-2">
               该分组暂无基金
             </p>
-            <p className="text-sm text-[#6B6560] font-['Source_Sans_3']">
+            <p className="text-sm text-news-muted font-['Source_Sans_3']">
               请切换到其他分组或添加基金到该分组
             </p>
           </div>
@@ -421,8 +421,8 @@ export function ValuationTable() {
 
       {/* 表格底部装饰 */}
       {watchlist.length > 0 && (
-        <div className="border-t-2 border-[#C9C2B5] mt-4 pt-4">
-          <div className="flex items-center justify-between text-xs text-[#6B6560] font-['Source_Sans_3']">
+        <div className="border-t-2 border-news-border mt-4 pt-4">
+          <div className="flex items-center justify-between text-xs text-news-muted font-['Source_Sans_3']">
             <span>共 {watchlist.length} 只基金</span>
             <span>数据来源：天天基金网</span>
           </div>

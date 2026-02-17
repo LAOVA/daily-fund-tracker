@@ -397,7 +397,7 @@ export function FundSearch() {
   return (
     <div ref={searchRef} className="relative w-full max-w-md">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B6560]" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-news-muted" />
         <Input
           type="text"
           placeholder="输入基金代码或名称搜索..."
@@ -407,38 +407,38 @@ export function FundSearch() {
             setShowResults(true);
           }}
           onFocus={() => setShowResults(true)}
-          className="pl-10 pr-4 h-10 bg-white border-[#C9C2B5] focus:border-[#2D2A26] focus:ring-[#2D2A26] font-['Source_Sans_3']"
+          className="pl-10 pr-4 h-10 bg-white border-news-border focus:border-news-text focus:ring-news-text font-['Source_Sans_3']"
         />
         {loading && (
-          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B6560] animate-spin" />
+          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-news-muted animate-spin" />
         )}
       </div>
 
       {showResults && results.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-[#C9C2B5] z-50 max-h-64 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-news-border z-50 max-h-64 overflow-y-auto">
           {results.map((result) => (
             <div
               key={result.code}
               onClick={() => handleSelectFund(result)}
               className={cn(
-                "px-4 py-3 cursor-pointer hover:bg-[#F5F0E6] border-b border-[#E5E5E5] last:border-b-0 transition-colors flex items-center justify-between",
+                "px-4 py-3 cursor-pointer hover:bg-news-accent border-b border-paper-300 last:border-b-0 transition-colors flex items-center justify-between",
                 isInWatchlist(result.code) && "opacity-50 cursor-not-allowed"
               )}
             >
               <div>
-                <div className="font-['Libre_Baskerville'] font-bold text-[#2D2A26]">
+                <div className="font-['Libre_Baskerville'] font-bold text-news-text">
                   {result.name}
                 </div>
-                <div className="text-xs text-[#6B6560] font-['Source_Sans_3']">
+                <div className="text-xs text-news-muted font-['Source_Sans_3']">
                   {result.code} · {result.type}
                 </div>
               </div>
               {isInWatchlist(result.code) ? (
-                <span className="text-xs text-[#6B6560] font-['Source_Sans_3']">
+                <span className="text-xs text-news-muted font-['Source_Sans_3']">
                   已添加
                 </span>
               ) : (
-                <Plus className="w-4 h-4 text-[#2D2A26]" />
+                <Plus className="w-4 h-4 text-news-text" />
               )}
             </div>
           ))}
@@ -447,26 +447,26 @@ export function FundSearch() {
 
       {/* 分组选择对话框 */}
       <Dialog open={showGroupDialog} onOpenChange={setShowGroupDialog}>
-        <DialogContent className="sm:max-w-md border-2 border-[#2D2A26]">
+        <DialogContent className="sm:max-w-md border-2 border-news-text">
           <DialogHeader>
-            <DialogTitle className="font-['Newsreader'] text-2xl font-bold text-[#2D2A26]">
+            <DialogTitle className="font-['Newsreader'] text-2xl font-bold text-news-text">
               选择分组
             </DialogTitle>
           </DialogHeader>
           <div className="mt-4 space-y-2">
-            <p className="text-sm text-[#6B6560] font-['Source_Sans_3'] mb-4">
-              将 <span className="font-bold text-[#2D2A26]">{selectedFund?.name}</span> 添加到：
+            <p className="text-sm text-news-muted font-['Source_Sans_3'] mb-4">
+              将 <span className="font-bold text-news-text">{selectedFund?.name}</span> 添加到：
             </p>
             {groups.map((group: FundGroup) => (
               <Button
                 key={group.id}
                 variant="outline"
-                className="w-full justify-start border-[#C9C2B5] hover:bg-[#F5F0E6] hover:border-[#2D2A26] font-['Source_Sans_3']"
+                className="w-full justify-start border-news-border hover:bg-news-accent hover:border-news-text font-['Source_Sans_3']"
                 onClick={() => handleAddToGroup(group.id)}
               >
-                <Folder className="w-4 h-4 mr-2 text-[#6B6560]" />
+                <Folder className="w-4 h-4 mr-2 text-news-muted" />
                 {group.name}
-                <span className="ml-auto text-xs text-[#6B6560]">
+                <span className="ml-auto text-xs text-news-muted">
                   {group.funds.length}只基金
                 </span>
               </Button>

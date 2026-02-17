@@ -15,10 +15,9 @@ export interface Fund {
   lastMonthGrowthRate?: number;
   thisYearGrowthRate?: number;
   updateTime?: string;
-  // 持仓信息
-  shares?: number; // 持有份额
-  costPrice?: number; // 成本价
-  costAmount?: number; // 成本金额
+  shares?: number;
+  costPrice?: number;
+  costAmount?: number;
 }
 
 export interface FundGroup {
@@ -27,9 +26,35 @@ export interface FundGroup {
   funds: string[];
 }
 
+export type TransactionType = "buy" | "sell" | "dividend";
+
+export interface Transaction {
+  id: string;
+  fundCode: string;
+  type: TransactionType;
+  date: string;
+  shares: number;
+  price: number;
+  amount: number;
+  fee: number;
+  remark?: string;
+}
+
+export interface DividendRecord {
+  id: string;
+  fundCode: string;
+  date: string;
+  amountPerShare: number;
+  totalShares: number;
+  totalAmount: number;
+  reinvest: boolean;
+}
+
 interface FundsState {
   watchlist: Fund[];
   groups: FundGroup[];
+  transactions: Transaction[];
+  dividends: DividendRecord[];
   addFund: (fund: Fund, groupId?: string) => void;
   removeFund: (code: string) => void;
   updateFund: (code: string, data: Partial<Fund>) => void;
@@ -37,14 +62,21 @@ interface FundsState {
   removeGroup: (id: string) => void;
   addFundToGroup: (fundCode: string, groupId: string) => void;
   removeFundFromGroup: (fundCode: string, groupId: string) => void;
-  // 持仓管理
   setFundPosition: (code: string, shares: number, costPrice: number) => void;
   removeFundPosition: (code: string) => void;
+  addTransaction: (transaction: Omit<Transaction, "id">) => void;
+  updateTransaction: (id: string, data: Partial<Transaction>) => void;
+  removeTransaction: (id: string) => void;
+  addDividend: (dividend: Omit<DividendRecord, "id">) => void;
+  removeDividend: (id: string) => void;
+  recalculatePosition: (fundCode: string) => void;
 }
+
+const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 export const useFundsStore = create<FundsState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       watchlist: [],
       groups: [
         {
@@ -53,6 +85,8 @@ export const useFundsStore = create<FundsState>()(
           funds: [],
         },
       ],
+      transactions: [],
+      dividends: [],
 
       addFund: (fund: Fund, groupId?: string) =>
         set((state) => {
@@ -79,6 +113,8 @@ export const useFundsStore = create<FundsState>()(
             ...g,
             funds: g.funds.filter((c) => c !== code),
           })),
+          transactions: state.transactions.filter((t) => t.fundCode !== code),
+          dividends: state.dividends.filter((d) => d.fundCode !== code),
         })),
 
       updateFund: (code: string, data: Partial<Fund>) =>
@@ -131,7 +167,6 @@ export const useFundsStore = create<FundsState>()(
           ),
         })),
 
-      // 设置基金持仓
       setFundPosition: (code: string, shares: number, costPrice: number) =>
         set((state) => ({
           watchlist: state.watchlist.map((f) =>
@@ -146,7 +181,6 @@ export const useFundsStore = create<FundsState>()(
           ),
         })),
 
-      // 移除基金持仓
       removeFundPosition: (code: string) =>
         set((state) => ({
           watchlist: state.watchlist.map((f) =>
@@ -155,6 +189,95 @@ export const useFundsStore = create<FundsState>()(
               : f
           ),
         })),
+
+      addTransaction: (transaction: Omit<Transaction, "id">) =>
+        set((state) => {
+          const newTransaction: Transaction = {
+            ...transaction,
+            id: generateId(),
+          };
+          const newState = {
+            ...state,
+            transactions: [...state.transactions, newTransaction].sort(
+              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+            ),
+          };
+          return newState;
+        }),
+
+      updateTransaction: (id: string, data: Partial<Transaction>) =>
+        set((state) => ({
+          transactions: state.transactions
+            .map((t) => (t.id === id ? { ...t, ...data } : t))
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+        })),
+
+      removeTransaction: (id: string) =>
+        set((state) => ({
+          transactions: state.transactions.filter((t) => t.id !== id),
+        })),
+
+      addDividend: (dividend: Omit<DividendRecord, "id">) =>
+        set((state) => {
+          const newDividend: DividendRecord = {
+            ...dividend,
+            id: generateId(),
+          };
+          return {
+            dividends: [...state.dividends, newDividend].sort(
+              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+            ),
+          };
+        }),
+
+      removeDividend: (id: string) =>
+        set((state) => ({
+          dividends: state.dividends.filter((d) => d.id !== id),
+        })),
+
+      recalculatePosition: (fundCode: string) => {
+        const state = get();
+        const fundTransactions = state.transactions.filter(
+          (t) => t.fundCode === fundCode
+        );
+
+        let totalShares = 0;
+        let totalCost = 0;
+
+        fundTransactions.forEach((t) => {
+          if (t.type === "buy") {
+            totalShares += t.shares;
+            totalCost += t.amount + t.fee;
+          } else if (t.type === "sell") {
+            const sellRatio = t.shares / totalShares;
+            totalCost -= totalCost * sellRatio;
+            totalShares -= t.shares;
+          }
+        });
+
+        state.dividends
+          .filter((d) => d.fundCode === fundCode)
+          .forEach((d) => {
+            if (d.reinvest) {
+              totalShares += d.totalAmount / 1;
+            }
+          });
+
+        const avgCostPrice = totalShares > 0 ? totalCost / totalShares : 0;
+
+        set((s) => ({
+          watchlist: s.watchlist.map((f) =>
+            f.code === fundCode
+              ? {
+                  ...f,
+                  shares: totalShares > 0 ? totalShares : undefined,
+                  costPrice: avgCostPrice > 0 ? avgCostPrice : undefined,
+                  costAmount: totalCost > 0 ? totalCost : undefined,
+                }
+              : f
+          ),
+        }));
+      },
     }),
     {
       name: "fund-tracker-storage",
@@ -162,3 +285,45 @@ export const useFundsStore = create<FundsState>()(
   )
 );
 
+export function calculatePositionFromTransactions(
+  transactions: Transaction[],
+  dividends: DividendRecord[],
+  fundCode: string
+): { shares: number; costPrice: number; costAmount: number } {
+  const fundTransactions = transactions.filter((t) => t.fundCode === fundCode);
+  const fundDividends = dividends.filter((d) => d.fundCode === fundCode);
+
+  let totalShares = 0;
+  let totalCost = 0;
+
+  const sortedTransactions = [...fundTransactions].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+
+  sortedTransactions.forEach((t) => {
+    if (t.type === "buy") {
+      totalShares += t.shares;
+      totalCost += t.amount + t.fee;
+    } else if (t.type === "sell") {
+      if (totalShares > 0) {
+        const sellRatio = t.shares / totalShares;
+        totalCost -= totalCost * sellRatio;
+        totalShares -= t.shares;
+        if (totalShares < 0) totalShares = 0;
+      }
+    }
+  });
+
+  fundDividends.forEach((d) => {
+    if (d.reinvest && d.totalAmount > 0) {
+    }
+  });
+
+  const avgCostPrice = totalShares > 0 ? totalCost / totalShares : 0;
+
+  return {
+    shares: totalShares,
+    costPrice: avgCostPrice,
+    costAmount: totalCost,
+  };
+}
