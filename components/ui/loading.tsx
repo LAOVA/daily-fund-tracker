@@ -30,7 +30,7 @@ export function Loading({
   return (
     <div
       className={cn(
-        "h-full flex items-center justify-center text-[#6B6560] font-['Source_Sans_3']",
+        "h-full flex items-center justify-center text-news-muted font-['Source_Sans_3']",
         sizeClasses[size],
         className
       )}
@@ -63,7 +63,7 @@ export function InlineLoading({
   return (
     <span
       className={cn(
-        "inline-flex items-center text-[#6B6560] font-['Source_Sans_3'] text-sm",
+        "inline-flex items-center text-news-muted font-['Source_Sans_3'] text-sm",
         className
       )}
     >

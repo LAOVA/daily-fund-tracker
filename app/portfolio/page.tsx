@@ -21,9 +21,11 @@ import {
   Minus,
   Move,
   Wallet,
-  Edit3,
-  X,
+  ChevronDown,
+  ChevronUp,
+  History,
 } from "lucide-react";
+import { TransactionManager } from "@/components/funds/TransactionManager";
 
 export default function PortfolioPage() {
   const {
@@ -34,9 +36,9 @@ export default function PortfolioPage() {
     removeFund,
     addFundToGroup,
     removeFundFromGroup,
-    setFundPosition,
-    removeFundPosition,
+    transactions,
   } = useFundsStore();
+
   const [newGroupName, setNewGroupName] = useState("");
   const [isAddGroupOpen, setIsAddGroupOpen] = useState(false);
   const [movingFund, setMovingFund] = useState<{
@@ -44,12 +46,7 @@ export default function PortfolioPage() {
     fromGroupId: string;
   } | null>(null);
   const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
-
-  // 持仓配置对话框状态
-  const [editingFund, setEditingFund] = useState<Fund | null>(null);
-  const [positionShares, setPositionShares] = useState("");
-  const [positionCost, setPositionCost] = useState("");
-  const [isPositionDialogOpen, setIsPositionDialogOpen] = useState(false);
+  const [expandedFund, setExpandedFund] = useState<string | null>(null);
 
   const handleAddGroup = () => {
     if (newGroupName.trim()) {
@@ -83,35 +80,10 @@ export default function PortfolioPage() {
     }
   };
 
-  // 打开持仓配置对话框
-  const handleEditPosition = (fund: Fund) => {
-    setEditingFund(fund);
-    setPositionShares(fund.shares?.toString() || "");
-    setPositionCost(fund.costPrice?.toString() || "");
-    setIsPositionDialogOpen(true);
+  const toggleFundExpand = (fundCode: string) => {
+    setExpandedFund(expandedFund === fundCode ? null : fundCode);
   };
 
-  // 保存持仓配置
-  const handleSavePosition = () => {
-    if (editingFund && positionShares && positionCost) {
-      const shares = parseFloat(positionShares);
-      const costPrice = parseFloat(positionCost);
-      if (shares > 0 && costPrice > 0) {
-        setFundPosition(editingFund.code, shares, costPrice);
-      }
-    }
-    setIsPositionDialogOpen(false);
-    setEditingFund(null);
-    setPositionShares("");
-    setPositionCost("");
-  };
-
-  // 移除持仓配置
-  const handleRemovePosition = (code: string) => {
-    removeFundPosition(code);
-  };
-
-  // 计算持仓市值
   const calculateMarketValue = (fund: Fund) => {
     if (fund.shares && fund.estimatedNetValue) {
       return fund.shares * fund.estimatedNetValue;
@@ -119,7 +91,6 @@ export default function PortfolioPage() {
     return 0;
   };
 
-  // 计算持仓收益
   const calculateProfit = (fund: Fund) => {
     if (fund.shares && fund.costPrice && fund.estimatedNetValue) {
       return fund.shares * (fund.estimatedNetValue - fund.costPrice);
@@ -127,7 +98,6 @@ export default function PortfolioPage() {
     return 0;
   };
 
-  // 计算收益百分比
   const calculateProfitPercent = (fund: Fund) => {
     if (fund.costPrice && fund.estimatedNetValue && fund.costPrice > 0) {
       return ((fund.estimatedNetValue - fund.costPrice) / fund.costPrice) * 100;
@@ -135,12 +105,14 @@ export default function PortfolioPage() {
     return 0;
   };
 
-  // 计算总成本
   const calculateTotalCost = (fund: Fund) => {
     return (fund.shares || 0) * (fund.costPrice || 0);
   };
 
-  // 计算所有持仓基金的总市值和总收益
+  const getTransactionCount = (fundCode: string) => {
+    return transactions.filter((t) => t.fundCode === fundCode).length;
+  };
+
   const portfolioSummary = watchlist.reduce(
     (acc, fund) => {
       if (fund.shares && fund.costPrice) {
@@ -162,14 +134,13 @@ export default function PortfolioPage() {
 
   return (
     <div className="space-y-8">
-      {/* 页面标题区 */}
-      <div className="border-b-2 border-[#2D2A26] pb-4">
+      <div className="border-b-2 border-news-text pb-4">
         <div className="flex items-center justify-between">
           <div>
-            <span className="inline-block bg-[#C41E3A] text-white text-xs font-bold px-2 py-1 uppercase tracking-[0.2em] font-['Source_Sans_3'] mb-2">
+            <span className="inline-block bg-finance-rise text-white text-xs font-bold px-2 py-1 uppercase tracking-[0.2em] font-['Source_Sans_3'] mb-2">
               投资管理
             </span>
-            <h1 className="font-['Newsreader'] text-3xl font-bold text-[#2D2A26]">
+            <h1 className="font-['Newsreader'] text-3xl font-bold text-news-text">
               基金管理
             </h1>
           </div>
@@ -177,15 +148,15 @@ export default function PortfolioPage() {
             <DialogTrigger asChild>
               <Button
                 variant="outline"
-                className="border-[#2D2A26] hover:bg-[#2D2A26] hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em]"
+                className="border-news-text hover:bg-news-text hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em]"
               >
                 <FolderPlus className="w-4 h-4 mr-2" />
                 新建分组
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md border-2 border-[#2D2A26]">
+            <DialogContent className="sm:max-w-md border-2 border-news-text">
               <DialogHeader>
-                <DialogTitle className="font-['Newsreader'] text-2xl font-bold text-[#2D2A26]">
+                <DialogTitle className="font-['Newsreader'] text-2xl font-bold text-news-text">
                   新建分组
                 </DialogTitle>
               </DialogHeader>
@@ -195,11 +166,11 @@ export default function PortfolioPage() {
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleAddGroup()}
-                  className="flex-1 border-[#C9C2B5]"
+                  className="flex-1 border-news-border"
                 />
                 <Button
                   onClick={handleAddGroup}
-                  className="bg-[#2D2A26] hover:bg-[#1a1815]"
+                  className="bg-news-text hover:bg-paper-900"
                 >
                   添加
                 </Button>
@@ -209,53 +180,55 @@ export default function PortfolioPage() {
         </div>
       </div>
 
-      {/* 投资组合总览 */}
       {portfolioSummary.totalCost > 0 && (
-        <div className="bg-[#F5F0E6] border border-[#C9C2B5] p-6">
-          <h2 className="font-['Newsreader'] text-xl font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
+        <div className="bg-news-accent border border-news-border p-6">
+          <h2 className="font-['Newsreader'] text-xl font-bold text-news-text mb-4 flex items-center gap-2">
             <Wallet className="w-5 h-5" />
             投资组合总览
           </h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="bg-white border border-[#E5E5E5] rounded-lg p-4">
+            <div className="bg-white border border-paper-300 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-full bg-[#2D2A26] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-news-text flex items-center justify-center">
                   <span className="text-white text-xs font-bold">¥</span>
                 </div>
-                <span className="text-xs text-[#6B6560] font-['Source_Sans_3']">
+                <span className="text-xs text-news-muted font-['Source_Sans_3']">
                   总成本
                 </span>
               </div>
-              <div className="font-['JetBrains_Mono'] text-xl font-bold text-[#2D2A26]">
+              <div className="font-['JetBrains_Mono'] text-xl font-bold text-news-text">
                 {formatCurrency(portfolioSummary.totalCost)}
               </div>
             </div>
-            <div className="bg-white border border-[#E5E5E5] rounded-lg p-4">
+            <div className="bg-white border border-paper-300 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <div
                   className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center",
-                    portfolioSummary.totalMarketValue >= portfolioSummary.totalCost
-                      ? "bg-[#C41E3A]"
-                      : "bg-[#228B22]"
+                    portfolioSummary.totalMarketValue >=
+                      portfolioSummary.totalCost
+                      ? "bg-finance-rise"
+                      : "bg-finance-fall"
                   )}
                 >
                   <span className="text-white text-xs font-bold">¥</span>
                 </div>
-                <span className="text-xs text-[#6B6560] font-['Source_Sans_3']">
+                <span className="text-xs text-news-muted font-['Source_Sans_3']">
                   总市值
                 </span>
               </div>
-              <div className="font-['JetBrains_Mono'] text-xl font-bold text-[#2D2A26]">
+              <div className="font-['JetBrains_Mono'] text-xl font-bold text-news-text">
                 {formatCurrency(portfolioSummary.totalMarketValue)}
               </div>
             </div>
-            <div className="bg-white border border-[#E5E5E5] rounded-lg p-4">
+            <div className="bg-white border border-paper-300 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <div
                   className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center",
-                    portfolioSummary.totalProfit >= 0 ? "bg-[#C41E3A]" : "bg-[#228B22]"
+                    portfolioSummary.totalProfit >= 0
+                      ? "bg-finance-rise"
+                      : "bg-finance-fall"
                   )}
                 >
                   {portfolioSummary.totalProfit >= 0 ? (
@@ -264,7 +237,7 @@ export default function PortfolioPage() {
                     <TrendingDown className="w-4 h-4 text-white" />
                   )}
                 </div>
-                <span className="text-xs text-[#6B6560] font-['Source_Sans_3']">
+                <span className="text-xs text-news-muted font-['Source_Sans_3']">
                   总收益
                 </span>
               </div>
@@ -277,12 +250,14 @@ export default function PortfolioPage() {
                 {formatCurrency(portfolioSummary.totalProfit)}
               </div>
             </div>
-            <div className="bg-white border border-[#E5E5E5] rounded-lg p-4">
+            <div className="bg-white border border-paper-300 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <div
                   className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center",
-                    totalProfitPercent >= 0 ? "bg-[#C41E3A]" : "bg-[#228B22]"
+                    totalProfitPercent >= 0
+                      ? "bg-finance-rise"
+                      : "bg-finance-fall"
                   )}
                 >
                   {totalProfitPercent >= 0 ? (
@@ -291,7 +266,7 @@ export default function PortfolioPage() {
                     <TrendingDown className="w-4 h-4 text-white" />
                   )}
                 </div>
-                <span className="text-xs text-[#6B6560] font-['Source_Sans_3']">
+                <span className="text-xs text-news-muted font-['Source_Sans_3']">
                   总收益率
                 </span>
               </div>
@@ -308,19 +283,17 @@ export default function PortfolioPage() {
         </div>
       )}
 
-      {/* 分组卡片网格 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {groups.map((group: FundGroup) => (
-          <div key={group.id} className="border border-[#C9C2B5] bg-white">
-            {/* 分组标题栏 */}
-            <div className="border-b-2 border-[#2D2A26] px-5 py-4 flex items-center justify-between bg-[#F5F0E6]">
-              <h2 className="font-['Libre_Baskerville'] text-xl font-bold text-[#2D2A26]">
+          <div key={group.id} className="border border-news-border bg-white">
+            <div className="border-b-2 border-news-text px-5 py-4 flex items-center justify-between bg-news-accent">
+              <h2 className="font-['Libre_Baskerville'] text-xl font-bold text-news-text">
                 {group.name}
               </h2>
               <div className="flex items-center gap-3">
                 <Badge
                   variant="secondary"
-                  className="bg-white text-[#8B0000] font-['Source_Sans_3'] text-xs border border-[#C9C2B5]"
+                  className="bg-white text-finance-highlight font-['Source_Sans_3'] text-xs border border-news-border"
                 >
                   {group.funds.length}只基金
                 </Badge>
@@ -329,7 +302,7 @@ export default function PortfolioPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => removeGroup(group.id)}
-                    className="text-[#6B6560] hover:text-[#C41E3A] hover:bg-red-50 h-8 w-8 p-0"
+                    className="text-news-muted hover:text-finance-rise hover:bg-red-50 h-8 w-8 p-0"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -337,7 +310,6 @@ export default function PortfolioPage() {
               </div>
             </div>
 
-            {/* 基金列表 */}
             <div>
               {group.funds.map((fundCode: string, index: number) => {
                 const fund = getFundByCode(fundCode);
@@ -346,111 +318,122 @@ export default function PortfolioPage() {
                 const hasPosition = fund.shares && fund.costPrice;
                 const profit = calculateProfit(fund);
                 const profitPercent = calculateProfitPercent(fund);
+                const transactionCount = getTransactionCount(fundCode);
+                const isExpanded = expandedFund === fundCode;
 
                 return (
-                  <div
-                    key={fundCode}
-                    className={`flex items-center justify-between p-4 hover:bg-[#F9F8F6] transition-colors ${
-                      index !== group.funds.length - 1
-                        ? "border-b border-[#E5E5E5]"
-                        : ""
-                    }`}
-                  >
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className="w-10 h-10 bg-[#2D2A26] flex items-center justify-center">
-                        <span className="font-['Newsreader'] font-bold text-white text-sm">
-                          {fund.name.charAt(0)}
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-['Libre_Baskerville'] font-bold text-[#2D2A26] truncate">
-                          {fund.name}
+                  <div key={fundCode}>
+                    <div
+                      className={`flex items-center justify-between p-4 hover:bg-paper-100 transition-colors cursor-pointer ${
+                        index !== group.funds.length - 1 || isExpanded
+                          ? "border-b border-paper-300"
+                          : ""
+                      }`}
+                      onClick={() => toggleFundExpand(fundCode)}
+                    >
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="w-10 h-10 bg-news-text flex items-center justify-center">
+                          <span className="font-['Newsreader'] font-bold text-white text-sm">
+                            {fund.name.charAt(0)}
+                          </span>
                         </div>
-                        <span className="text-xs text-[#6B6560] font-['JetBrains_Mono']">
-                          {fundCode}
-                        </span>
-                        {hasPosition && (
-                          <div className="flex items-center gap-3 mt-1 text-xs">
-                            <span className="text-[#6B6560] font-['JetBrains_Mono']">
-                              {fund.shares}份
-                            </span>
-                            <span className="text-[#6B6560]">|</span>
-                            <span
-                              className={cn(
-                                "font-['JetBrains_Mono'] font-bold flex items-center gap-1",
-                                getChangeColor(profit)
-                              )}
-                            >
-                              {formatCurrency(profit)}
-                            </span>
-                            <span
-                              className={cn(
-                                "font-['JetBrains_Mono']",
-                                getChangeColor(profitPercent)
-                              )}
-                            >
-                              ({formatPercent(profitPercent)})
-                            </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-['Libre_Baskerville'] font-bold text-news-text truncate">
+                            {fund.name}
                           </div>
+                          <span className="text-xs text-news-muted font-['JetBrains_Mono']">
+                            {fundCode}
+                          </span>
+                          {hasPosition && (
+                            <div className="flex items-center gap-3 mt-1 text-xs">
+                              <span className="text-news-muted font-['JetBrains_Mono']">
+                                {fund.shares?.toFixed(2)}份
+                              </span>
+                              <span className="text-news-muted">|</span>
+                              <span
+                                className={cn(
+                                  "font-['JetBrains_Mono'] font-bold flex items-center gap-1",
+                                  getChangeColor(profit)
+                                )}
+                              >
+                                {formatCurrency(profit)}
+                              </span>
+                              <span
+                                className={cn(
+                                  "font-['JetBrains_Mono']",
+                                  getChangeColor(profitPercent)
+                                )}
+                              >
+                                ({formatPercent(profitPercent)})
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {fund.estimatedGrowthRate !== undefined && (
+                          <span
+                            className={`font-['JetBrains_Mono'] font-bold flex items-center gap-1 text-sm ${getChangeColor(
+                              fund.estimatedGrowthRate
+                            )}`}
+                          >
+                            {getChangeIcon(fund.estimatedGrowthRate)}
+                            {formatPercent(fund.estimatedGrowthRate)}
+                          </span>
+                        )}
+
+                        {transactionCount > 0 && (
+                          <Badge
+                            variant="secondary"
+                            className="bg-news-accent text-news-muted font-['Source_Sans_3'] text-xs"
+                          >
+                            <History className="w-3 h-3 mr-1" />
+                            {transactionCount}笔
+                          </Badge>
+                        )}
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMoveFund(fundCode, group.id);
+                          }}
+                          className="text-news-muted hover:text-news-text hover:bg-gray-100 h-8 w-8 p-0"
+                          title="移动到分组"
+                        >
+                          <Move className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeFund(fundCode);
+                          }}
+                          className="text-news-muted hover:text-finance-rise hover:bg-red-50 h-8 w-8 p-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                        {isExpanded ? (
+                          <ChevronUp className="w-4 h-4 text-news-muted" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-news-muted" />
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      {fund.estimatedGrowthRate !== undefined && (
-                        <span
-                          className={`font-['JetBrains_Mono'] font-bold flex items-center gap-1 text-sm ${getChangeColor(
-                            fund.estimatedGrowthRate
-                          )}`}
-                        >
-                          {getChangeIcon(fund.estimatedGrowthRate)}
-                          {formatPercent(fund.estimatedGrowthRate)}
-                        </span>
-                      )}
 
-                      {/* 持仓配置按钮 */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditPosition(fund)}
-                        className={cn(
-                          "hover:bg-gray-100 h-8 w-8 p-0",
-                          hasPosition
-                            ? "text-[#2D2A26]"
-                            : "text-[#6B6560] hover:text-[#2D2A26]"
-                        )}
-                        title={hasPosition ? "修改持仓" : "添加持仓"}
-                      >
-                        {hasPosition ? (
-                          <Edit3 className="w-4 h-4" />
-                        ) : (
-                          <Wallet className="w-4 h-4" />
-                        )}
-                      </Button>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleMoveFund(fundCode, group.id)}
-                        className="text-[#6B6560] hover:text-[#2D2A26] hover:bg-gray-100 h-8 w-8 p-0"
-                        title="移动到分组"
-                      >
-                        <Move className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFund(fundCode)}
-                        className="text-[#6B6560] hover:text-[#C41E3A] hover:bg-red-50 h-8 w-8 p-0"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    {isExpanded && (
+                      <div className="px-4 pb-4 pt-2 bg-paper-100 border-b border-paper-300">
+                        <TransactionManager fund={fund} />
+                      </div>
+                    )}
                   </div>
                 );
               })}
 
               {group.funds.length === 0 && (
-                <div className="p-8 text-center text-[#6B6560] font-['Source_Sans_3']">
+                <div className="p-8 text-center text-news-muted font-['Source_Sans_3']">
                   该分组暂无基金
                 </div>
               )}
@@ -459,9 +442,8 @@ export default function PortfolioPage() {
         ))}
       </div>
 
-      {/* 底部统计 */}
-      <div className="border-t-2 border-[#C9C2B5] pt-4">
-        <div className="flex items-center justify-between text-xs text-[#6B6560] font-['Source_Sans_3']">
+      <div className="border-t-2 border-news-border pt-4">
+        <div className="flex items-center justify-between text-xs text-news-muted font-['Source_Sans_3']">
           <span>
             共 {groups.length} 个分组，{watchlist.length} 只基金
           </span>
@@ -469,16 +451,15 @@ export default function PortfolioPage() {
         </div>
       </div>
 
-      {/* 移动基金对话框 */}
       <Dialog open={isMoveDialogOpen} onOpenChange={setIsMoveDialogOpen}>
-        <DialogContent className="sm:max-w-md border-2 border-[#2D2A26]">
+        <DialogContent className="sm:max-w-md border-2 border-news-text">
           <DialogHeader>
-            <DialogTitle className="font-['Newsreader'] text-2xl font-bold text-[#2D2A26]">
+            <DialogTitle className="font-['Newsreader'] text-2xl font-bold text-news-text">
               移动到其他分组
             </DialogTitle>
           </DialogHeader>
           <div className="mt-4 space-y-2">
-            <p className="text-sm text-[#6B6560] font-['Source_Sans_3'] mb-4">
+            <p className="text-sm text-news-muted font-['Source_Sans_3'] mb-4">
               选择目标分组：
             </p>
             {groups
@@ -487,174 +468,16 @@ export default function PortfolioPage() {
                 <Button
                   key={group.id}
                   variant="outline"
-                  className="w-full justify-start border-[#C9C2B5] hover:bg-[#F5F0E6] hover:border-[#2D2A26] font-['Source_Sans_3']"
+                  className="w-full justify-start border-news-border hover:bg-news-accent hover:border-news-text font-['Source_Sans_3']"
                   onClick={() => executeMoveFund(group.id)}
                 >
-                  <FolderPlus className="w-4 h-4 mr-2 text-[#6B6560]" />
+                  <FolderPlus className="w-4 h-4 mr-2 text-news-muted" />
                   {group.name}
-                  <span className="ml-auto text-xs text-[#6B6560]">
+                  <span className="ml-auto text-xs text-news-muted">
                     {group.funds.length}只基金
                   </span>
                 </Button>
               ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* 持仓配置对话框 */}
-      <Dialog
-        open={isPositionDialogOpen}
-        onOpenChange={setIsPositionDialogOpen}
-      >
-        <DialogContent className="sm:max-w-md border-2 border-[#2D2A26]">
-          <DialogHeader>
-            <DialogTitle className="font-['Newsreader'] text-2xl font-bold text-[#2D2A26]">
-              {editingFund?.shares ? "修改持仓" : "添加持仓"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="mt-4 space-y-4">
-            {editingFund && (
-              <div className="flex items-center gap-4 p-4 bg-[#F5F0E6] rounded-lg border border-[#C9C2B5]">
-                <div className="w-12 h-12 bg-[#2D2A26] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="font-['Newsreader'] font-bold text-white text-lg">
-                    {editingFund.name.charAt(0)}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-['Libre_Baskerville'] font-bold text-[#2D2A26] truncate">
-                    {editingFund.name}
-                  </div>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-xs text-[#6B6560] font-['JetBrains_Mono']">
-                      {editingFund.code}
-                    </span>
-                    {editingFund.estimatedNetValue && (
-                      <>
-                        <span className="text-[#C9C2B5]">|</span>
-                        <span className="text-xs text-[#6B6560]">
-                          最新净值:{" "}
-                          <span className="font-['JetBrains_Mono'] font-medium">
-                            {formatCurrency(
-                              editingFund.estimatedNetValue,
-                              false
-                            )}
-                          </span>
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div>
-              <label className="text-sm text-[#6B6560] font-['Source_Sans_3'] block mb-2">
-                持有份额
-              </label>
-              <Input
-                type="number"
-                placeholder="输入持有份额..."
-                value={positionShares}
-                onChange={(e) => setPositionShares(e.target.value)}
-                className="border-[#C9C2B5] font-['JetBrains_Mono']"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm text-[#6B6560] font-['Source_Sans_3'] block mb-2">
-                成本价（元/份）
-              </label>
-              <Input
-                type="number"
-                step="0.0001"
-                placeholder="输入成本价..."
-                value={positionCost}
-                onChange={(e) => setPositionCost(e.target.value)}
-                className="border-[#C9C2B5] font-['JetBrains_Mono']"
-              />
-            </div>
-
-            {positionShares && positionCost && editingFund && (
-              <div className="space-y-3">
-                <div className="text-xs text-[#6B6560] font-['Source_Sans_3'] font-medium">
-                  预估信息
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-[#F5F0E6] rounded-lg p-3 text-center">
-                    <div className="text-xs text-[#6B6560] mb-1">总成本</div>
-                    <div className="font-['JetBrains_Mono'] text-sm font-bold text-[#2D2A26]">
-                      {formatCurrency(
-                        parseFloat(positionShares) * parseFloat(positionCost),
-                        false
-                      )}
-                    </div>
-                  </div>
-                  {editingFund.estimatedNetValue && (
-                    <>
-                      <div className="bg-[#F5F0E6] rounded-lg p-3 text-center">
-                        <div className="text-xs text-[#6B6560] mb-1">
-                          预估市值
-                        </div>
-                        <div className="font-['JetBrains_Mono'] text-sm font-bold text-[#2D2A26]">
-                          {formatCurrency(
-                            parseFloat(positionShares) *
-                              editingFund.estimatedNetValue,
-                            false
-                          )}
-                        </div>
-                      </div>
-                      <div className="bg-[#F5F0E6] rounded-lg p-3 text-center">
-                        <div className="text-xs text-[#6B6560] mb-1">
-                          预估收益
-                        </div>
-                        <div
-                          className={cn(
-                            "font-['JetBrains_Mono'] text-sm font-bold",
-                            getChangeColor(
-                              parseFloat(positionShares) *
-                                (editingFund.estimatedNetValue -
-                                  parseFloat(positionCost))
-                            )
-                          )}
-                        >
-                          {formatCurrency(
-                            parseFloat(positionShares) *
-                              (editingFund.estimatedNetValue -
-                                parseFloat(positionCost))
-                          )}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <div className="flex gap-2">
-              {editingFund?.shares && (
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    if (editingFund) {
-                      handleRemovePosition(editingFund.code);
-                      setIsPositionDialogOpen(false);
-                      setEditingFund(null);
-                    }
-                  }}
-                  className="flex-1 border-[#C41E3A] text-[#C41E3A] hover:bg-red-50"
-                >
-                  <X className="w-4 h-4 mr-1" />
-                  清除持仓
-                </Button>
-              )}
-              <Button
-                onClick={handleSavePosition}
-                disabled={!positionShares || !positionCost}
-                className="flex-1 bg-[#2D2A26] hover:bg-[#1a1815] disabled:opacity-50"
-              >
-                保存
-              </Button>
-            </div>
           </div>
         </DialogContent>
       </Dialog>

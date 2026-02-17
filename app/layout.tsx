@@ -22,7 +22,7 @@ export default function RootLayout({
           rel="stylesheet" 
         />
       </head>
-      <body className="min-h-screen bg-[#FFFEFB] text-[#2D2A26] antialiased">
+      <body className="min-h-screen bg-news-bg text-news-text antialiased">
         <Header />
         <main className="max-w-7xl mx-auto px-4 py-6">{children}</main>
       </body>

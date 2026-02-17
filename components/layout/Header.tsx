@@ -86,15 +86,15 @@ export function Header() {
   const issueNumber = daysDiff + 1;
 
   return (
-    <header className="bg-[#FFFEFB] border-b-2 border-[#C9C2B5]">
+    <header className="bg-news-bg border-b-2 border-news-border">
       {/* 顶部信息栏 */}
       <div className="max-w-7xl mx-auto px-4 pt-4">
-        <div className="flex items-center justify-between text-xs text-[#6B6560] border-b border-[#C9C2B5] pb-2 mb-4">
+        <div className="flex items-center justify-between text-xs text-news-muted border-b border-news-border pb-2 mb-4">
           <div className="flex items-center gap-4">
             <span className="font-['Source_Sans_3']">
               {dateStr} {weekDay}
             </span>
-            <span className="text-[#C41E3A] font-['JetBrains_Mono'] font-bold">
+            <span className="text-finance-rise font-['JetBrains_Mono'] font-bold">
               第 {issueNumber} 期
             </span>
           </div>
@@ -107,34 +107,34 @@ export function Header() {
 
       {/* 报头 */}
       <div className="max-w-7xl mx-auto px-4 pb-4">
-        <div className="text-center border-b-4 border-[#2D2A26] pb-4 mb-4">
+        <div className="text-center border-b-4 border-news-text pb-4 mb-4">
           {/* 报纸装饰线 */}
           <div className="flex items-center justify-center gap-4 mb-2">
-            <div className="h-[2px] w-32 bg-[#2D2A26]"></div>
-            <div className="h-[1px] w-20 bg-[#C9C2B5]"></div>
-            <div className="h-[2px] w-32 bg-[#2D2A26]"></div>
+            <div className="h-[2px] w-32 bg-news-text"></div>
+            <div className="h-[1px] w-20 bg-news-border"></div>
+            <div className="h-[2px] w-32 bg-news-text"></div>
           </div>
 
           {/* 主标题 - 使用 Newsreader 字体 */}
-          <h1 className="font-['Newsreader'] text-6xl md:text-7xl font-bold text-[#2D2A26] tracking-wide leading-tight">
+          <h1 className="font-['Newsreader'] text-6xl md:text-7xl font-bold text-news-text tracking-wide ">
             追基日报
           </h1>
 
           {/* 副标题 */}
-          <p className="font-['Source_Sans_3'] text-sm text-[#6B6560] tracking-[0.4em] uppercase">
+          <p className="font-['Source_Sans_3'] text-sm text-news-muted tracking-[0.4em] uppercase">
             Daily Fund Tracker
           </p>
 
           {/* 报纸装饰线 */}
           <div className="flex items-center justify-center gap-4 mt-2">
-            <div className="h-[2px] w-32 bg-[#2D2A26]"></div>
-            <div className="h-[1px] w-20 bg-[#C9C2B5]"></div>
-            <div className="h-[2px] w-32 bg-[#2D2A26]"></div>
+            <div className="h-[2px] w-32 bg-news-text"></div>
+            <div className="h-[1px] w-20 bg-news-border"></div>
+            <div className="h-[2px] w-32 bg-news-text"></div>
           </div>
         </div>
 
         {/* 导航栏 */}
-        <nav className="flex items-center justify-center gap-8 border-b border-[#2D2A26] pb-3 min-h-[3rem]">
+        <nav className="flex items-center justify-center gap-8 border-b border-news-text pb-3 min-h-[3rem]">
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -144,8 +144,8 @@ export function Header() {
                 transition-all duration-200 hover:scale-105
                 ${
                   pathname === item.href
-                    ? "text-[#C41E3A] border-b-2 border-[#C41E3A] pb-1"
-                    : "text-[#2D2A26] hover:text-[#C41E3A]"
+                    ? "text-finance-rise border-b-2 border-finance-rise pb-1"
+                    : "text-news-text hover:text-finance-rise"
                 }
               `}
             >

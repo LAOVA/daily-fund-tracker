@@ -30,13 +30,13 @@ export function formatCurrency(
 }
 
 export function getChangeColor(value: number): string {
-  if (value > 0) return "text-[#C41E3A]";
-  if (value < 0) return "text-[#228B22]";
-  return "text-[#1565C0]";
+  if (value > 0) return "text-finance-rise";
+  if (value < 0) return "text-finance-fall";
+  return "text-finance-neutral";
 }
 
 export function getChangeBgColor(value: number): string {
-  if (value > 0) return "bg-[#C41E3A]";
-  if (value < 0) return "bg-[#228B22]";
-  return "bg-[#1565C0]";
+  if (value > 0) return "bg-finance-rise";
+  if (value < 0) return "bg-finance-fall";
+  return "bg-finance-neutral";
 }
