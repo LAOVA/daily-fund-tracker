@@ -232,7 +232,14 @@ export default function PortfolioPage() {
             </div>
             <div className="bg-white border border-[#E5E5E5] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-full bg-[#8B0000] flex items-center justify-center">
+                <div
+                  className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center",
+                    portfolioSummary.totalMarketValue >= portfolioSummary.totalCost
+                      ? "bg-[#C41E3A]"
+                      : "bg-[#228B22]"
+                  )}
+                >
                   <span className="text-white text-xs font-bold">¥</span>
                 </div>
                 <span className="text-xs text-[#6B6560] font-['Source_Sans_3']">
@@ -245,8 +252,17 @@ export default function PortfolioPage() {
             </div>
             <div className="bg-white border border-[#E5E5E5] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-full bg-[#8B0000] flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-white" />
+                <div
+                  className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center",
+                    portfolioSummary.totalProfit >= 0 ? "bg-[#C41E3A]" : "bg-[#228B22]"
+                  )}
+                >
+                  {portfolioSummary.totalProfit >= 0 ? (
+                    <TrendingUp className="w-4 h-4 text-white" />
+                  ) : (
+                    <TrendingDown className="w-4 h-4 text-white" />
+                  )}
                 </div>
                 <span className="text-xs text-[#6B6560] font-['Source_Sans_3']">
                   总收益
@@ -262,8 +278,22 @@ export default function PortfolioPage() {
               </div>
             </div>
             <div className="bg-white border border-[#E5E5E5] rounded-lg p-4">
-              <div className="w-8 h-8 rounded-full bg-[#8B0000] flex items-center justify-center">
-                <TrendingUp className="w-4 h-4 text-white" />
+              <div className="flex items-center gap-2 mb-2">
+                <div
+                  className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center",
+                    totalProfitPercent >= 0 ? "bg-[#C41E3A]" : "bg-[#228B22]"
+                  )}
+                >
+                  {totalProfitPercent >= 0 ? (
+                    <TrendingUp className="w-4 h-4 text-white" />
+                  ) : (
+                    <TrendingDown className="w-4 h-4 text-white" />
+                  )}
+                </div>
+                <span className="text-xs text-[#6B6560] font-['Source_Sans_3']">
+                  总收益率
+                </span>
               </div>
               <div
                 className={cn(
