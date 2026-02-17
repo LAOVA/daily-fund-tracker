@@ -1,9 +1,17 @@
 "use client";
 
-import { FundSearch } from "@/components/funds/FundSearch";
+import { useRef } from "react";
+import Link from "next/link";
+import { FundSearch, FundSearchRef } from "@/components/funds/FundSearch";
 import { ValuationTable } from "@/components/funds/ValuationTable";
 
 export default function Home() {
+  const fundSearchRef = useRef<FundSearchRef>(null);
+
+  const handleSearchClick = () => {
+    fundSearchRef.current?.focus();
+  };
+
   return (
     <div className="space-y-8">
       {/* 头版头条区域 */}
@@ -36,33 +44,42 @@ export default function Home() {
               <h3 className="font-['Playfair_Display'] text-xl font-bold text-news-text mb-3">
                 快速操作
               </h3>
-              <FundSearch />
+              <FundSearch ref={fundSearchRef} />
             </div>
 
-            {/* 简讯列表 */}
+            {/* 日报导航 */}
             <div className="space-y-3">
               <h4 className="font-['Source_Sans_3'] text-xs font-bold text-finance-rise uppercase tracking-[0.2em] border-b border-news-border pb-2">
-                市场简报
+                日报导航
               </h4>
               <div className="space-y-3 text-sm">
-                <div className="flex items-start gap-2">
+                <button
+                  onClick={handleSearchClick}
+                  className="flex items-start gap-2 w-full text-left hover:opacity-70 transition-opacity"
+                >
                   <span className="text-finance-rise font-bold">▸</span>
                   <p className="font-['Libre_Baskerville'] text-news-text">
                     添加基金代码即可查看实时估值
                   </p>
-                </div>
-                <div className="flex items-start gap-2">
+                </button>
+                <Link
+                  href="/holdings"
+                  className="flex items-start gap-2 hover:opacity-70 transition-opacity"
+                >
                   <span className="text-finance-rise font-bold">▸</span>
                   <p className="font-['Libre_Baskerville'] text-news-text">
                     点击"重仓追踪"查看基金持仓明细
                   </p>
-                </div>
-                <div className="flex items-start gap-2">
+                </Link>
+                <Link
+                  href="/portfolio"
+                  className="flex items-start gap-2 hover:opacity-70 transition-opacity"
+                >
                   <span className="text-finance-rise font-bold">▸</span>
                   <p className="font-['Libre_Baskerville'] text-news-text">
                     使用"基金管理"功能分组管理基金
                   </p>
-                </div>
+                </Link>
               </div>
             </div>
           </div>
@@ -71,17 +88,6 @@ export default function Home() {
 
       {/* 主要内容区域 */}
       <section>
-        <div className="border-b-2 border-news-text pb-3 mb-6">
-          <div className="flex items-center justify-between">
-            <h3 className="font-['Newsreader'] text-3xl font-bold text-news-text">
-              基金估值一览
-            </h3>
-            <span className="text-xs text-news-muted font-['Source_Sans_3'] uppercase tracking-wider">
-              实时数据更新
-            </span>
-          </div>
-        </div>
-
         <ValuationTable />
       </section>
 

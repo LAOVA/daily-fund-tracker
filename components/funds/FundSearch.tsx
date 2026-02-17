@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from "react";
 import { Search, Loader2, Plus, Folder } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useFundsStore, FundGroup } from "@/stores/fundsStore";
@@ -12,6 +12,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+
+export interface FundSearchRef {
+  focus: () => void;
+}
 
 interface SearchResult {
   code: string;
@@ -301,7 +305,7 @@ const localSearchData: SearchResult[] = [
   { code: "770001", name: "鹏华行业成长证券投资基金", type: "混合型" },
 ];
 
-export function FundSearch() {
+export const FundSearch = forwardRef<FundSearchRef>((_, ref) => {
   const [keyword, setKeyword] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -309,7 +313,15 @@ export function FundSearch() {
   const [selectedFund, setSelectedFund] = useState<SearchResult | null>(null);
   const [showGroupDialog, setShowGroupDialog] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const { watchlist, addFund, groups } = useFundsStore();
+
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current?.focus();
+      setShowResults(true);
+    },
+  }));
 
   // 点击外部关闭下拉框
   useEffect(() => {
@@ -399,6 +411,7 @@ export function FundSearch() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-news-muted" />
         <Input
+          ref={inputRef}
           type="text"
           placeholder="输入基金代码或名称搜索..."
           value={keyword}
@@ -414,34 +427,40 @@ export function FundSearch() {
         )}
       </div>
 
-      {showResults && results.length > 0 && (
+      {showResults && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-news-border z-50 max-h-64 overflow-y-auto">
-          {results.map((result) => (
-            <div
-              key={result.code}
-              onClick={() => handleSelectFund(result)}
-              className={cn(
-                "px-4 py-3 cursor-pointer hover:bg-news-accent border-b border-paper-300 last:border-b-0 transition-colors flex items-center justify-between",
-                isInWatchlist(result.code) && "opacity-50 cursor-not-allowed"
-              )}
-            >
-              <div>
-                <div className="font-['Libre_Baskerville'] font-bold text-news-text">
-                  {result.name}
-                </div>
-                <div className="text-xs text-news-muted font-['Source_Sans_3']">
-                  {result.code} · {result.type}
-                </div>
-              </div>
-              {isInWatchlist(result.code) ? (
-                <span className="text-xs text-news-muted font-['Source_Sans_3']">
-                  已添加
-                </span>
-              ) : (
-                <Plus className="w-4 h-4 text-news-text" />
-              )}
+          {results.length === 0 ? (
+            <div className="px-4 py-6 text-center text-news-muted font-['Source_Sans_3'] text-sm">
+              请输入基金代码或名称搜索
             </div>
-          ))}
+          ) : (
+            results.map((result) => (
+              <div
+                key={result.code}
+                onClick={() => handleSelectFund(result)}
+                className={cn(
+                  "px-4 py-3 cursor-pointer hover:bg-news-accent border-b border-paper-300 last:border-b-0 transition-colors flex items-center justify-between",
+                  isInWatchlist(result.code) && "opacity-50 cursor-not-allowed"
+                )}
+              >
+                <div>
+                  <div className="font-['Libre_Baskerville'] font-bold text-news-text">
+                    {result.name}
+                  </div>
+                  <div className="text-xs text-news-muted font-['Source_Sans_3']">
+                    {result.code} · {result.type}
+                  </div>
+                </div>
+                {isInWatchlist(result.code) ? (
+                  <span className="text-xs text-news-muted font-['Source_Sans_3']">
+                    已添加
+                  </span>
+                ) : (
+                  <Plus className="w-4 h-4 text-news-text" />
+                )}
+              </div>
+            ))
+          )}
         </div>
       )}
 
@@ -476,4 +495,6 @@ export function FundSearch() {
       </Dialog>
     </div>
   );
-}
+});
+
+FundSearch.displayName = "FundSearch";

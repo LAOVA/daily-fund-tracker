@@ -26,6 +26,8 @@ import {
   History,
 } from "lucide-react";
 import { TransactionManager } from "@/components/funds/TransactionManager";
+import { PortfolioAnalysis } from "@/components/analysis/PortfolioAnalysis";
+import { ProfitAttribution } from "@/components/analysis/ProfitAttribution";
 
 export default function PortfolioPage() {
   const {
@@ -283,6 +285,13 @@ export default function PortfolioPage() {
         </div>
       )}
 
+      {portfolioSummary.totalCost > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <PortfolioAnalysis />
+          <ProfitAttribution />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-6">
         {groups.map((group: FundGroup) => (
           <div key={group.id} className="border border-news-border bg-white">
@@ -371,7 +380,7 @@ export default function PortfolioPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {fund.estimatedGrowthRate !== undefined && (
+                        {/* {fund.estimatedGrowthRate !== undefined && (
                           <span
                             className={`font-['JetBrains_Mono'] font-bold flex items-center gap-1 text-sm ${getChangeColor(
                               fund.estimatedGrowthRate
@@ -380,7 +389,7 @@ export default function PortfolioPage() {
                             {getChangeIcon(fund.estimatedGrowthRate)}
                             {formatPercent(fund.estimatedGrowthRate)}
                           </span>
-                        )}
+                        )} */}
 
                         {transactionCount > 0 && (
                           <Badge
@@ -484,3 +493,4 @@ export default function PortfolioPage() {
     </div>
   );
 }
+

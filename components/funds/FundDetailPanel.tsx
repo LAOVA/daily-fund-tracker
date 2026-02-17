@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, memo } from "react";
+import { useEffect, useState, memo, useMemo } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,6 +10,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { ChevronUp, TrendingUp, TrendingDown, Minus } from "lucide-react";
@@ -18,7 +19,6 @@ import { Fund } from "@/stores/fundsStore";
 import { getChangeColor } from "@/lib/utils";
 import { fetchFundHoldingsByJsonp, Holding } from "@/lib/useFundData";
 
-// 注册 Chart.js 组件
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -26,7 +26,8 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 interface FundDetailPanelProps {
@@ -34,12 +35,26 @@ interface FundDetailPanelProps {
   onClose: () => void;
 }
 
-// 获取历史净值数据
-const fetchFundHistory = async (code: string) => {
+type TimePeriod = "1m" | "3m" | "6m" | "1y" | "all";
+
+const timePeriodConfig: Record<TimePeriod, { label: string; days: number }> = {
+  "1m": { label: "近1月", days: 30 },
+  "3m": { label: "近3月", days: 90 },
+  "6m": { label: "近6月", days: 180 },
+  "1y": { label: "近1年", days: 365 },
+  all: { label: "全部", days: 0 },
+};
+
+interface HistoryDataPoint {
+  date: string;
+  value: number;
+  fullDate: string;
+}
+
+const fetchFundHistory = async (code: string): Promise<HistoryDataPoint[]> => {
   try {
     const pingUrl = `https://fund.eastmoney.com/pingzhongdata/${code}.js?v=${Date.now()}`;
 
-    // 动态加载脚本
     await new Promise<void>((resolve, reject) => {
       const script = document.createElement("script");
       script.src = pingUrl;
@@ -64,14 +79,21 @@ const fetchFundHistory = async (code: string) => {
     const trend = (window as any).Data_netWorthTrend;
     if (!Array.isArray(trend)) return [];
 
-    // 取最近30天的数据
-    return trend.slice(-30).map((item: { x: number; y: number }) => ({
-      date: new Date(item.x).toLocaleDateString("zh-CN", {
-        month: "2-digit",
-        day: "2-digit",
-      }),
-      value: item.y,
-    }));
+    return trend.map((item: { x: number; y: number }) => {
+      const date = new Date(item.x);
+      return {
+        date: date.toLocaleDateString("zh-CN", {
+          month: "2-digit",
+          day: "2-digit",
+        }),
+        value: item.y,
+        fullDate: date.toLocaleDateString("zh-CN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }),
+      };
+    });
   } catch (error) {
     console.error("获取历史数据失败:", error);
     return [];
@@ -82,11 +104,10 @@ export const FundDetailPanel = memo(function FundDetailPanel({
   fund,
   onClose,
 }: FundDetailPanelProps) {
-  const [historyData, setHistoryData] = useState<
-    { date: string; value: number }[]
-  >([]);
+  const [allHistoryData, setAllHistoryData] = useState<HistoryDataPoint[]>([]);
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("1m");
 
   useEffect(() => {
     const loadData = async () => {
@@ -96,7 +117,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
           fetchFundHistory(fund.code),
           fetchFundHoldingsByJsonp(fund.code),
         ]);
-        setHistoryData(history);
+        setAllHistoryData(history);
         setHoldings(holdingsData?.holdings || []);
       } catch (error) {
         console.error("加载数据失败:", error);
@@ -108,85 +129,158 @@ export const FundDetailPanel = memo(function FundDetailPanel({
     loadData();
   }, [fund.code]);
 
+  const historyData = useMemo(() => {
+    if (selectedPeriod === "all") return allHistoryData;
+    const days = timePeriodConfig[selectedPeriod].days;
+    return allHistoryData.slice(-days);
+  }, [allHistoryData, selectedPeriod]);
+
   const getChangeIcon = (value: number) => {
     if (value > 0) return <TrendingUp className="w-3 h-3" />;
     if (value < 0) return <TrendingDown className="w-3 h-3" />;
     return <Minus className="w-3 h-3" />;
   };
 
-  // 图表配置
-  const chartData = {
-    labels: historyData.map((d) => d.date),
-    datasets: [
-      {
-        label: "单位净值",
-        data: historyData.map((d) => d.value),
-        borderColor: "var(--color-finance-rise)",
-        backgroundColor: "rgba(196, 30, 58, 0.1)",
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHoverRadius: 4,
-        tension: 0.4,
-        fill: true,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        mode: "index" as const,
-        intersect: false,
-        callbacks: {
-          label: (context: any) => `净值: ${context.parsed.y.toFixed(4)}`,
+  const chartData = useMemo(
+    () => ({
+      labels: historyData.map((d) => d.date),
+      datasets: [
+        {
+          label: "单位净值",
+          data: historyData.map((d) => d.value),
+          borderColor: "#C41E3A",
+          backgroundColor: (context: { chart: ChartJS; dataIndex: number }) => {
+            const ctx = context.chart.ctx;
+            const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+            gradient.addColorStop(0, "rgba(196, 30, 58, 0.15)");
+            gradient.addColorStop(1, "rgba(196, 30, 58, 0.02)");
+            return gradient;
+          },
+          borderWidth: 2,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: "#C41E3A",
+          pointHoverBorderColor: "#fff",
+          pointHoverBorderWidth: 2,
+          tension: 0.2,
+          fill: true,
         },
-      },
-    },
-    scales: {
-      x: {
-        grid: {
+      ],
+    }),
+    [historyData]
+  );
+
+  const chartOptions = useMemo(() => {
+    const values = historyData.map((d) => d.value);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+    const padding = (maxValue - minValue) * 0.1;
+
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 300,
+      } as const,
+      plugins: {
+        legend: {
           display: false,
         },
-        ticks: {
-          maxTicksLimit: 6,
-          font: {
-            family: "'JetBrains Mono', monospace",
-            size: 10,
+        tooltip: {
+          enabled: true,
+          mode: "index" as const,
+          intersect: false,
+          backgroundColor: "rgba(45, 42, 38, 0.95)",
+          titleColor: "#fff",
+          bodyColor: "#fff",
+          borderColor: "#C9C2B5",
+          borderWidth: 1,
+          padding: 12,
+          titleFont: {
+            family: "'Source Sans 3', sans-serif",
+            size: 12,
+            weight: 600,
           },
-          color: "var(--color-news-muted)",
+          bodyFont: {
+            family: "'JetBrains Mono', monospace",
+            size: 14,
+            weight: 700,
+          },
+          displayColors: false,
+          callbacks: {
+            title: (items: { dataIndex: number }[]) => {
+              const idx = items[0]?.dataIndex;
+              if (idx !== undefined && historyData[idx]) {
+                return historyData[idx].fullDate;
+              }
+              return "";
+            },
+            label: (context: { parsed: { y: number | null } }) => {
+              const value = context.parsed.y;
+              return `净值: ${value !== null ? value.toFixed(4) : "-"}`;
+            },
+          },
         },
       },
-      y: {
-        grid: {
-          color: "var(--color-paper-300)",
-        },
-        ticks: {
-          font: {
-            family: "'JetBrains Mono', monospace",
-            size: 10,
+      scales: {
+        x: {
+          grid: {
+            display: false,
           },
-          color: "var(--color-news-muted)",
-          callback: (value: any) => value.toFixed(2),
+          border: {
+            display: false,
+          },
+          ticks: {
+            maxTicksLimit: 6,
+            font: {
+              family: "'JetBrains Mono', monospace",
+              size: 10,
+            },
+            color: "#6B6560",
+          },
+        },
+        y: {
+          min: Math.max(0, minValue - padding),
+          max: maxValue + padding,
+          grid: {
+            color: "rgba(229, 229, 229, 0.5)",
+            drawBorder: false,
+          },
+          border: {
+            display: false,
+          },
+          ticks: {
+            font: {
+              family: "'JetBrains Mono', monospace",
+              size: 10,
+            },
+            color: "#6B6560",
+            padding: 8,
+            callback: (value: string | number) => Number(value).toFixed(4),
+          },
         },
       },
-    },
-    interaction: {
-      mode: "nearest" as const,
-      axis: "x" as const,
-      intersect: false,
-    },
-  };
+      interaction: {
+        mode: "index" as const,
+        intersect: false,
+      },
+      elements: {
+        line: {
+          capBezierPoints: true,
+        },
+        point: {
+          hoverRadius: 6,
+        },
+      },
+    };
+  }, [historyData]);
+
+  const periodButtons: TimePeriod[] = ["1m", "3m", "6m", "1y", "all"];
 
   return (
     <tr>
       <td colSpan={9} className="bg-paper-100 border-b-2 border-news-text">
         <div className="p-6">
-          {/* 头部信息 */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-news-text flex items-center justify-center">
@@ -212,14 +306,28 @@ export const FundDetailPanel = memo(function FundDetailPanel({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* 左侧：净值趋势图 */}
             <div>
-              <div className="border-b-2 border-news-text pb-2 mb-4">
+              <div className="flex items-center justify-between border-b-2 border-news-text pb-2 mb-4">
                 <h4 className="font-['Source_Sans_3'] text-sm font-bold uppercase tracking-[0.15em] text-news-text">
-                  近30日净值走势
+                  净值走势
                 </h4>
+                <div className="flex gap-1">
+                  {periodButtons.map((period) => (
+                    <button
+                      key={period}
+                      onClick={() => setSelectedPeriod(period)}
+                      className={`px-2 py-1 text-xs font-['Source_Sans_3'] rounded transition-colors ${
+                        selectedPeriod === period
+                          ? "bg-news-text text-white"
+                          : "text-news-muted hover:text-news-text hover:bg-paper-200"
+                      }`}
+                    >
+                      {timePeriodConfig[period].label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="border border-news-border bg-white p-4 h-72">
+              <div className="border border-news-border bg-white p-4 h-72 relative">
                 {loading ? (
                   <Loading />
                 ) : historyData.length > 0 ? (
@@ -229,10 +337,14 @@ export const FundDetailPanel = memo(function FundDetailPanel({
                     暂无历史数据
                   </div>
                 )}
+                {/* {!loading && historyData.length > 0 && (
+                  <div className="absolute bottom-2 left-4 text-xs text-news-muted font-['Source_Sans_3']">
+                    共 {historyData.length} 个交易日
+                  </div>
+                )} */}
               </div>
             </div>
 
-            {/* 右侧：重仓信息 */}
             <div className="flex flex-col">
               <div className="border-b-2 border-news-text pb-2 mb-4">
                 <h4 className="font-['Source_Sans_3'] text-sm font-bold uppercase tracking-[0.15em] text-news-text">
