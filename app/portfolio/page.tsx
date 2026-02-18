@@ -28,6 +28,7 @@ import {
 import { TransactionManager } from "@/components/funds/TransactionManager";
 import { PortfolioAnalysis } from "@/components/analysis/PortfolioAnalysis";
 import { ProfitAttribution } from "@/components/analysis/ProfitAttribution";
+import { DataImportExport } from "@/components/funds/DataImportExport";
 
 export default function PortfolioPage() {
   const {
@@ -137,48 +138,49 @@ export default function PortfolioPage() {
   return (
     <div className="space-y-8">
       <div className="border-b-2 border-news-text pb-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="inline-block bg-finance-rise text-white text-xs font-bold px-2 py-1 uppercase tracking-[0.2em] font-['Source_Sans_3'] mb-2">
-              投资管理
-            </span>
-            <h1 className="font-['Newsreader'] text-3xl font-bold text-news-text">
+        <div className="flex flex-col">
+          <span className="inline-block bg-finance-rise text-white text-xs font-bold px-2 py-1 uppercase tracking-[0.2em] font-['Source_Sans_3'] mb-2 w-fit">
+            投资管理
+          </span>
+          <div className="flex items-center gap-2">
+            <h1 className="font-['Newsreader'] text-3xl font-bold text-news-text mr-auto">
               基金管理
             </h1>
-          </div>
-          <Dialog open={isAddGroupOpen} onOpenChange={setIsAddGroupOpen}>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                className="border-news-text hover:bg-news-text hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em]"
-              >
-                <FolderPlus className="w-4 h-4 mr-2" />
-                新建分组
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md border-2 border-news-text">
-              <DialogHeader>
-                <DialogTitle className="font-['Newsreader'] text-2xl font-bold text-news-text">
-                  新建分组
-                </DialogTitle>
-              </DialogHeader>
-              <div className="flex gap-2 mt-4">
-                <Input
-                  placeholder="输入分组名称..."
-                  value={newGroupName}
-                  onChange={(e) => setNewGroupName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleAddGroup()}
-                  className="flex-1 border-news-border"
-                />
+            <DataImportExport />
+            <Dialog open={isAddGroupOpen} onOpenChange={setIsAddGroupOpen}>
+              <DialogTrigger asChild>
                 <Button
-                  onClick={handleAddGroup}
-                  className="bg-news-text hover:bg-paper-900"
+                  variant="outline"
+                  className="border-news-text hover:bg-news-text hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em]"
                 >
-                  添加
+                  <FolderPlus className="w-4 h-4 mr-2" />
+                  新建分组
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md border-2 border-news-text">
+                <DialogHeader>
+                  <DialogTitle className="font-['Newsreader'] text-2xl font-bold text-news-text">
+                    新建分组
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="flex gap-2 mt-4">
+                  <Input
+                    placeholder="输入分组名称..."
+                    value={newGroupName}
+                    onChange={(e) => setNewGroupName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleAddGroup()}
+                    className="flex-1 border-news-border"
+                  />
+                  <Button
+                    onClick={handleAddGroup}
+                    className="bg-news-text hover:bg-paper-900"
+                  >
+                    添加
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
 

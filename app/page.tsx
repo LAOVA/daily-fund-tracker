@@ -42,7 +42,7 @@ export default function Home() {
           <div className="lg:col-span-4">
             <div className="border-b-2 border-news-text pb-4 mb-4">
               <h3 className="font-['Playfair_Display'] text-xl font-bold text-news-text mb-3">
-                快速操作
+                快速添加
               </h3>
               <FundSearch ref={fundSearchRef} />
             </div>
@@ -55,7 +55,7 @@ export default function Home() {
               <div className="space-y-3 text-sm">
                 <button
                   onClick={handleSearchClick}
-                  className="flex items-start gap-2 w-full text-left hover:opacity-70 transition-opacity"
+                  className="flex items-start gap-2 w-full text-left hover:opacity-70 transition-opacity cursor-pointer"
                 >
                   <span className="text-finance-rise font-bold">▸</span>
                   <p className="font-['Libre_Baskerville'] text-news-text">
