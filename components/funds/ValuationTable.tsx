@@ -471,12 +471,11 @@ export function ValuationTable() {
               onToggle={handleToggleExpand}
             />
             {expandedFund === fund.code && (
-              <div className="mb-3">
-                <FundDetailPanel
-                  fund={fund}
-                  onClose={() => setExpandedFund(null)}
-                />
-              </div>
+              <FundDetailPanel
+                fund={fund}
+                onClose={() => setExpandedFund(null)}
+                variant="card"
+              />
             )}
           </Fragment>
         ))}
