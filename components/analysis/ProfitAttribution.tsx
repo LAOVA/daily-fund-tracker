@@ -73,7 +73,7 @@ export function ProfitAttribution({ className }: ProfitAttributionProps) {
 
   if (!attributionData) {
     return (
-      <div className={cn("bg-white border border-news-border p-6", className)}>
+      <div className={cn("bg-card border border-news-border p-6", className)}>
         <div className="flex items-center gap-2 mb-4">
           <BarChart3 className="w-5 h-5 text-news-muted" />
           <h3 className="font-['Newsreader'] text-xl font-bold text-news-text">
@@ -90,7 +90,7 @@ export function ProfitAttribution({ className }: ProfitAttributionProps) {
   const { fundAttributions, topGainers, topLosers } = attributionData;
 
   return (
-    <div className={cn("bg-white border border-news-border p-6", className)}>
+    <div className={cn("bg-card border border-news-border p-6", className)}>
       <div className="flex items-center gap-2 mb-6">
         <BarChart3 className="w-5 h-5 text-news-muted" />
         <h3 className="font-['Newsreader'] text-xl font-bold text-news-text">

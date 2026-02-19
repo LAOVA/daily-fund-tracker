@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSyncExternalStore } from "react";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const navItems = [
   { href: "/", label: "首页" },
@@ -99,8 +100,9 @@ export function Header() {
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="font-['Source_Sans_3']">农历甲辰年</span>
+            <span className="font-['Source_Sans_3'] hidden sm:inline">农历甲辰年</span>
             <span className="font-['JetBrains_Mono']">{currentTime}</span>
+            <ThemeToggle />
           </div>
         </div>
       </div>

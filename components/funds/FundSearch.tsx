@@ -420,7 +420,7 @@ export const FundSearch = forwardRef<FundSearchRef>((_, ref) => {
             setShowResults(true);
           }}
           onFocus={() => setShowResults(true)}
-          className="pl-10 pr-4 h-10 bg-white border-news-border focus:border-news-text focus:ring-news-text font-['Source_Sans_3']"
+className="pl-10 pr-4 h-10 bg-card border-news-border focus:border-news-text focus:ring-news-text font-['Source_Sans_3']"
         />
         {loading && (
           <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-news-muted animate-spin" />
@@ -428,7 +428,7 @@ export const FundSearch = forwardRef<FundSearchRef>((_, ref) => {
       </div>
 
       {showResults && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-news-border z-50 max-h-64 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-card border-2 border-news-border z-50 max-h-64 overflow-y-auto">
           {results.length === 0 ? (
             <div className="px-4 py-6 text-center text-news-muted font-['Source_Sans_3'] text-sm">
               请输入基金代码或名称搜索

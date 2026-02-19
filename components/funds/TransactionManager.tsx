@@ -383,7 +383,7 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
                       key={transaction.id}
                       className={cn(
                         "border-b border-paper-300",
-                        index % 2 === 0 ? "bg-white" : "bg-paper-100"
+                        index % 2 === 0 ? "bg-card" : "bg-paper-100"
                       )}
                     >
                       <td className="py-2 px-2 sm:px-3 font-['JetBrains_Mono'] text-news-text text-xs sm:text-sm whitespace-nowrap">

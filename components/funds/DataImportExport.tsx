@@ -492,7 +492,7 @@ export function DataImportExport() {
 
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-3">
-              <div className="border border-news-border p-4 bg-white">
+              <div className="border border-news-border p-4 bg-card">
                 <h3 className="font-['Libre_Baskerville'] font-bold text-news-text mb-3">
                   基金列表
                 </h3>
@@ -521,7 +521,7 @@ export function DataImportExport() {
                 </div>
               </div>
 
-              <div className="border border-news-border p-4 bg-white">
+              <div className="border border-news-border p-4 bg-card">
                 <h3 className="font-['Libre_Baskerville'] font-bold text-news-text mb-3">
                   交易记录
                 </h3>
@@ -551,7 +551,7 @@ export function DataImportExport() {
               </div>
 
               {watchlist.some((f) => f.shares && f.costPrice) && (
-                <div className="border border-news-border p-4 bg-white">
+                <div className="border border-news-border p-4 bg-card">
                   <h3 className="font-['Libre_Baskerville'] font-bold text-news-text mb-3">
                     持仓报告
                   </h3>

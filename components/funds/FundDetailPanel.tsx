@@ -327,7 +327,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
               ))}
             </div>
           </div>
-          <div className="border border-news-border bg-white p-4 h-64 sm:h-72 relative">
+          <div className="border border-news-border bg-card p-4 h-64 sm:h-72 relative">
             {loading ? (
               <Loading />
             ) : historyData.length > 0 ? (
@@ -346,7 +346,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
               重仓股 ({holdings.length}只)
             </h4>
           </div>
-          <div className="border border-news-border bg-white h-64 sm:h-72 overflow-hidden">
+          <div className="border border-news-border bg-card h-64 sm:h-72 overflow-hidden">
             {loading ? (
               <Loading />
             ) : holdings.length > 0 ? (
@@ -370,7 +370,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
                       <tr
                         key={holding.code}
                         className={`border-b border-paper-300 ${
-                          index % 2 === 0 ? "bg-white" : "bg-paper-100"
+                          index % 2 === 0 ? "bg-card" : "bg-paper-100"
                         }`}
                       >
                         <td className="py-3 px-4">

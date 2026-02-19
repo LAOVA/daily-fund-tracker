@@ -115,11 +115,11 @@ export default function HoldingsPage() {
         {fundHoldings.map((fund) => (
           <div
             key={fund.fundCode}
-            className="border border-news-border bg-white"
+            className="border border-news-border bg-card"
           >
             {/* 基金标题栏 */}
             <div
-              className="border-b-2 border-news-text px-3 sm:px-5 py-3 sm:py-4 cursor-pointer hover:bg-paper-100 transition-colors flex items-center justify-between gap-2"
+              className="border-b-2 border-news-text px-3 sm:px-5 py-3 sm:py-4 cursor-pointer hover:bg-paper-100 dark:hover:bg-paper-800 transition-colors flex items-center justify-between gap-2"
               onClick={() => toggleExpand(fund.fundCode)}
             >
               <div className="flex items-center gap-2 sm:gap-4 min-w-0">
@@ -177,7 +177,7 @@ export default function HoldingsPage() {
                       <tr
                         key={holding.code}
                         className={`border-b border-paper-300 hover:bg-paper-100 transition-colors ${
-                          index % 2 === 0 ? "bg-white" : "bg-paper-100"
+                          index % 2 === 0 ? "bg-card" : "bg-paper-100"
                         }`}
                       >
                         <td className="py-2 px-2 sm:py-3 sm:px-3">

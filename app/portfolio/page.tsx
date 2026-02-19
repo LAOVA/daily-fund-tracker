@@ -194,7 +194,7 @@ export default function PortfolioPage() {
             投资组合总览
           </h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="bg-white border border-paper-300 rounded-lg p-4">
+            <div className="bg-card border border-paper-300 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-8 h-8 rounded-full bg-news-text flex items-center justify-center">
                   <span className="text-white text-xs font-bold">¥</span>
@@ -207,7 +207,7 @@ export default function PortfolioPage() {
                 {formatCurrency(portfolioSummary.totalCost)}
               </div>
             </div>
-            <div className="bg-white border border-paper-300 rounded-lg p-4">
+            <div className="bg-card border border-paper-300 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <div
                   className={cn(
@@ -228,7 +228,7 @@ export default function PortfolioPage() {
                 {formatCurrency(portfolioSummary.totalMarketValue)}
               </div>
             </div>
-            <div className="bg-white border border-paper-300 rounded-lg p-4">
+            <div className="bg-card border border-paper-300 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <div
                   className={cn(
@@ -257,7 +257,7 @@ export default function PortfolioPage() {
                 {formatCurrency(portfolioSummary.totalProfit)}
               </div>
             </div>
-            <div className="bg-white border border-paper-300 rounded-lg p-4">
+            <div className="bg-card border border-paper-300 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <div
                   className={cn(
@@ -299,7 +299,7 @@ export default function PortfolioPage() {
 
       <div className="grid grid-cols-1 gap-6">
         {groups.map((group: FundGroup) => (
-          <div key={group.id} className="border border-news-border bg-white">
+          <div key={group.id} className="border border-news-border bg-card">
             <div className="border-b-2 border-news-text px-5 py-4 flex items-center justify-between bg-news-accent">
               <h2 className="font-['Libre_Baskerville'] text-xl font-bold text-news-text">
                 {group.name}
@@ -307,7 +307,7 @@ export default function PortfolioPage() {
               <div className="flex items-center gap-3">
                 <Badge
                   variant="secondary"
-                  className="bg-white text-finance-highlight font-['Source_Sans_3'] text-xs border border-news-border"
+                  className="bg-card text-finance-highlight font-['Source_Sans_3'] text-xs border border-news-border"
                 >
                   {group.funds.length}只基金
                 </Badge>

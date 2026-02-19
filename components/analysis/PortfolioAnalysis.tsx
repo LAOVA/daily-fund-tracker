@@ -149,7 +149,7 @@ export function PortfolioAnalysis({ className }: PortfolioAnalysisProps) {
 
   if (!portfolioData) {
     return (
-      <div className={cn("bg-white border border-news-border p-6", className)}>
+      <div className={cn("bg-card border border-news-border p-6", className)}>
         <div className="flex items-center gap-2 mb-4">
           <PieChart className="w-5 h-5 text-news-muted" />
           <h3 className="font-['Newsreader'] text-xl font-bold text-news-text">
@@ -164,7 +164,7 @@ export function PortfolioAnalysis({ className }: PortfolioAnalysisProps) {
   }
 
   return (
-    <div className={cn("bg-white border border-news-border p-6", className)}>
+    <div className={cn("bg-card border border-news-border p-6", className)}>
       <div className="flex items-center gap-2 mb-6">
         <PieChart className="w-5 h-5 text-news-muted" />
         <h3 className="font-['Newsreader'] text-xl font-bold text-news-text">

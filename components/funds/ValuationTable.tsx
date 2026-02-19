@@ -40,7 +40,7 @@ const FundTableRow = memo(function FundTableRow({
   return (
     <tr
       className={`border-b border-paper-300 hover:bg-paper-100 transition-colors cursor-pointer ${
-        index % 2 === 0 ? "bg-white" : "bg-paper-100"
+        index % 2 === 0 ? "bg-card" : "bg-paper-100"
       } ${isExpanded ? "bg-news-accent" : ""}`}
       onClick={() => onToggle(fund.code)}
     >
@@ -184,9 +184,9 @@ const FundMobileCard = memo(function FundMobileCard({
     return null;
   };
 
-  return (
+return (
     <div
-      className={`border border-news-border bg-white mb-3 ${
+      className={`border border-news-border bg-card mb-3 ${
         isExpanded ? "ring-2 ring-news-text" : ""
       }`}
     >
@@ -377,7 +377,7 @@ export function ValuationTable() {
   });
 
   return (
-    <div className="bg-white">
+    <div className="bg-card">
       <div className="border-b-2 border-news-text pb-4 mb-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
