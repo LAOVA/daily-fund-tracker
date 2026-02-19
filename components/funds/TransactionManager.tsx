@@ -351,26 +351,26 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
 
       {fundTransactions.length > 0 ? (
         <div className="border border-news-border rounded-lg overflow-hidden">
-          <div className="max-h-48 overflow-y-auto">
-            <table className="w-full text-sm">
+          <div className="max-h-48 overflow-y-auto overflow-x-auto">
+            <table className="w-full min-w-[500px] text-sm">
               <thead className="sticky top-0 z-10">
                 <tr className="border-b border-news-border bg-news-accent">
-                  <th className="text-left py-2 px-3 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-wider text-news-text">
+                  <th className="text-left py-2 px-2 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-wider text-news-text whitespace-nowrap">
                     日期
                   </th>
-                  <th className="text-left py-2 px-3 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-wider text-news-text">
+                  <th className="text-left py-2 px-2 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-wider text-news-text">
                     类型
                   </th>
-                  <th className="text-right py-2 px-3 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-wider text-news-text">
+                  <th className="text-right py-2 px-2 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-wider text-news-text whitespace-nowrap">
                     份额
                   </th>
-                  <th className="text-right py-2 px-3 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-wider text-news-text">
+                  <th className="text-right py-2 px-2 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-wider text-news-text whitespace-nowrap">
                     单价
                   </th>
-                  <th className="text-right py-2 px-3 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-wider text-news-text">
+                  <th className="text-right py-2 px-2 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-wider text-news-text whitespace-nowrap">
                     金额
                   </th>
-                  <th className="text-right py-2 px-3 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-wider text-news-text w-16">
+                  <th className="text-right py-2 px-2 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-wider text-news-text w-14 sm:w-16">
                     操作
                   </th>
                 </tr>
@@ -386,43 +386,44 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
                         index % 2 === 0 ? "bg-white" : "bg-paper-100"
                       )}
                     >
-                      <td className="py-2 px-3 font-['JetBrains_Mono'] text-news-text">
+                      <td className="py-2 px-2 sm:px-3 font-['JetBrains_Mono'] text-news-text text-xs sm:text-sm whitespace-nowrap">
                         {transaction.date}
                       </td>
-                      <td className="py-2 px-3">
+                      <td className="py-2 px-2 sm:px-3">
                         <span
                           className={cn(
-                            "flex items-center gap-1 font-['Source_Sans_3'] font-medium",
+                            "flex items-center gap-0.5 sm:gap-1 font-['Source_Sans_3'] font-medium text-xs sm:text-sm",
                             config.color
                           )}
                         >
                           {config.icon}
-                          {config.label}
+                          <span className="hidden sm:inline">{config.label}</span>
+                          <span className="sm:hidden">{config.label.charAt(0)}</span>
                         </span>
                       </td>
-                      <td className="py-2 px-3 text-right font-['JetBrains_Mono'] text-news-text">
+                      <td className="py-2 px-2 sm:px-3 text-right font-['JetBrains_Mono'] text-news-text text-xs sm:text-sm whitespace-nowrap">
                         {transaction.shares.toFixed(2)}
                       </td>
-                      <td className="py-2 px-3 text-right font-['JetBrains_Mono'] text-news-text">
+                      <td className="py-2 px-2 sm:px-3 text-right font-['JetBrains_Mono'] text-news-text text-xs sm:text-sm whitespace-nowrap">
                         {transaction.price.toFixed(4)}
                       </td>
-                      <td className="py-2 px-3 text-right">
-                        <div className="font-['JetBrains_Mono'] font-bold text-news-text">
+                      <td className="py-2 px-2 sm:px-3 text-right">
+                        <div className="font-['JetBrains_Mono'] font-bold text-news-text text-xs sm:text-sm whitespace-nowrap">
                           {formatCurrency(transaction.amount, false)}
                         </div>
                         {transaction.fee > 0 && (
-                          <div className="text-xs text-news-muted">
+                          <div className="text-[10px] sm:text-xs text-news-muted">
                             +{transaction.fee.toFixed(2)}费
                           </div>
                         )}
                       </td>
-                      <td className="py-2 px-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
+                      <td className="py-2 px-2 sm:px-3 text-right">
+                        <div className="flex items-center justify-end gap-0.5 sm:gap-1">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleEditTransaction(transaction)}
-                            className="h-6 w-6 p-0 text-news-muted hover:text-news-text hover:bg-paper-100"
+                            className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-news-muted hover:text-news-text hover:bg-paper-100"
                           >
                             <Edit3 className="w-3 h-3" />
                           </Button>
@@ -430,7 +431,7 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeleteTransaction(transaction.id)}
-                            className="h-6 w-6 p-0 text-news-muted hover:text-finance-rise hover:bg-red-50"
+                            className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-news-muted hover:text-finance-rise hover:bg-red-50"
                           >
                             <Trash2 className="w-3 h-3" />
                           </Button>
@@ -450,16 +451,20 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
       )}
 
       {fundTransactions.length > 0 && (
-        <div className="flex items-center justify-between text-xs p-3 bg-news-accent rounded-lg border border-news-border">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs p-3 bg-news-accent rounded-lg border border-news-border">
           <div className="flex items-center gap-1 text-news-muted">
             <Calculator className="w-3 h-3" />
             <span className="font-['Source_Sans_3']">持仓成本自动计算</span>
           </div>
-          <div className="font-['JetBrains_Mono'] text-news-text">
-            <span className="text-news-muted">当前份额：</span>
-            <span className="font-bold">{fund.shares?.toFixed(2) || "0.00"}</span>
-            <span className="text-news-muted ml-3">成本价：</span>
-            <span className="font-bold">{fund.costPrice?.toFixed(4) || "0.0000"}</span>
+          <div className="font-['JetBrains_Mono'] text-news-text flex flex-wrap gap-x-3 gap-y-1">
+            <span>
+              <span className="text-news-muted">当前份额：</span>
+              <span className="font-bold">{fund.shares?.toFixed(2) || "0.00"}</span>
+            </span>
+            <span>
+              <span className="text-news-muted">成本价：</span>
+              <span className="font-bold">{fund.costPrice?.toFixed(4) || "0.0000"}</span>
+            </span>
           </div>
         </div>
       )}

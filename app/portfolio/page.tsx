@@ -138,23 +138,26 @@ export default function PortfolioPage() {
   return (
     <div className="space-y-8">
       <div className="border-b-2 border-news-text pb-4">
-        <div className="flex flex-col">
-          <span className="inline-block bg-finance-rise text-white text-xs font-bold px-2 py-1 uppercase tracking-[0.2em] font-['Source_Sans_3'] mb-2 w-fit">
-            投资管理
-          </span>
-          <div className="flex items-center gap-2">
-            <h1 className="font-['Newsreader'] text-3xl font-bold text-news-text mr-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <span className="inline-block bg-finance-rise text-white text-xs font-bold px-2 py-1 uppercase tracking-[0.2em] font-['Source_Sans_3'] mb-2 w-fit">
+              投资管理
+            </span>
+            <h1 className="font-['Newsreader'] text-2xl sm:text-3xl font-bold text-news-text">
               基金管理
             </h1>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
             <DataImportExport />
             <Dialog open={isAddGroupOpen} onOpenChange={setIsAddGroupOpen}>
               <DialogTrigger asChild>
                 <Button
                   variant="outline"
-                  className="border-news-text hover:bg-news-text hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em]"
+                  className="border-news-text hover:bg-news-text hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em] whitespace-nowrap"
                 >
-                  <FolderPlus className="w-4 h-4 mr-2" />
-                  新建分组
+                  <FolderPlus className="w-4 h-4 mr-1" />
+                  <span className="hidden sm:inline">新建分组</span>
+                  <span className="sm:hidden">分组</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md border-2 border-news-text">
@@ -328,114 +331,95 @@ export default function PortfolioPage() {
 
                 const hasPosition = fund.shares && fund.costPrice;
                 const profit = calculateProfit(fund);
-                const profitPercent = calculateProfitPercent(fund);
                 const transactionCount = getTransactionCount(fundCode);
                 const isExpanded = expandedFund === fundCode;
 
                 return (
                   <div key={fundCode}>
                     <div
-                      className={`flex items-center justify-between p-4 hover:bg-paper-100 transition-colors cursor-pointer ${
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 hover:bg-paper-100 transition-colors cursor-pointer ${
                         index !== group.funds.length - 1 || isExpanded
                           ? "border-b border-paper-300"
                           : ""
                       }`}
                       onClick={() => toggleFundExpand(fundCode)}
                     >
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className="w-10 h-10 bg-news-text flex items-center justify-center">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-news-text flex-shrink-0 flex items-center justify-center">
                           <span className="font-['Newsreader'] font-bold text-white text-sm">
                             {fund.name.charAt(0)}
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-['Libre_Baskerville'] font-bold text-news-text truncate">
+                          <div className="font-['Libre_Baskerville'] font-bold text-news-text truncate text-sm sm:text-base">
                             {fund.name}
                           </div>
-                          <span className="text-xs text-news-muted font-['JetBrains_Mono']">
-                            {fundCode}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-news-muted font-['JetBrains_Mono']">
+                              {fundCode}
+                            </span>
+                            {transactionCount > 0 && (
+                              <Badge
+                                variant="secondary"
+                                className="bg-news-accent text-news-muted font-['Source_Sans_3'] text-[10px] px-1 py-0"
+                              >
+                                {transactionCount}笔
+                              </Badge>
+                            )}
+                          </div>
                           {hasPosition && (
-                            <div className="flex items-center gap-3 mt-1 text-xs">
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0 mt-1 text-xs">
                               <span className="text-news-muted font-['JetBrains_Mono']">
                                 {fund.shares?.toFixed(2)}份
                               </span>
-                              <span className="text-news-muted">|</span>
                               <span
                                 className={cn(
-                                  "font-['JetBrains_Mono'] font-bold flex items-center gap-1",
+                                  "font-['JetBrains_Mono'] font-bold",
                                   getChangeColor(profit)
                                 )}
                               >
                                 {formatCurrency(profit)}
                               </span>
-                              <span
-                                className={cn(
-                                  "font-['JetBrains_Mono']",
-                                  getChangeColor(profitPercent)
-                                )}
-                              >
-                                ({formatPercent(profitPercent)})
-                              </span>
                             </div>
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {/* {fund.estimatedGrowthRate !== undefined && (
-                          <span
-                            className={`font-['JetBrains_Mono'] font-bold flex items-center gap-1 text-sm ${getChangeColor(
-                              fund.estimatedGrowthRate
-                            )}`}
+                      <div className="flex items-center justify-end gap-1 mt-2 sm:mt-0">
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMoveFund(fundCode, group.id);
+                            }}
+                            className="text-news-muted hover:text-news-text hover:bg-gray-100 h-7 w-7 sm:h-8 sm:w-8 p-0"
+                            title="移动到分组"
                           >
-                            {getChangeIcon(fund.estimatedGrowthRate)}
-                            {formatPercent(fund.estimatedGrowthRate)}
-                          </span>
-                        )} */}
-
-                        {transactionCount > 0 && (
-                          <Badge
-                            variant="secondary"
-                            className="bg-news-accent text-news-muted font-['Source_Sans_3'] text-xs"
+                            <Move className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeFund(fundCode);
+                            }}
+                            className="text-news-muted hover:text-finance-rise hover:bg-red-50 h-7 w-7 sm:h-8 sm:w-8 p-0"
                           >
-                            <History className="w-3 h-3 mr-1" />
-                            {transactionCount}笔
-                          </Badge>
-                        )}
-
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleMoveFund(fundCode, group.id);
-                          }}
-                          className="text-news-muted hover:text-news-text hover:bg-gray-100 h-8 w-8 p-0"
-                          title="移动到分组"
-                        >
-                          <Move className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeFund(fundCode);
-                          }}
-                          className="text-news-muted hover:text-finance-rise hover:bg-red-50 h-8 w-8 p-0"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                        {isExpanded ? (
-                          <ChevronUp className="w-4 h-4 text-news-muted" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-news-muted" />
-                        )}
+                            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          </Button>
+                          {isExpanded ? (
+                            <ChevronUp className="w-4 h-4 text-news-muted ml-1" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4 text-news-muted ml-1" />
+                          )}
+                        </div>
                       </div>
                     </div>
 
                     {isExpanded && (
-                      <div className="px-4 pb-4 pt-2 bg-paper-100 border-b border-paper-300">
+                      <div className="px-3 sm:px-4 pb-4 pt-2 bg-paper-100 border-b border-paper-300">
                         <TransactionManager fund={fund} />
                       </div>
                     )}

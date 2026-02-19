@@ -5,7 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useFundsStore } from "@/stores/fundsStore";
 import { cn, getChangeColor } from "@/lib/utils";
-import { ChevronDown, ChevronUp, RefreshCw, Loader2, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  RefreshCw,
+  Loader2,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+} from "lucide-react";
 import { fetchFundHoldingsByJsonp, Holding } from "@/lib/useFundData";
 import { Loading } from "@/components/ui/loading";
 
@@ -71,12 +79,12 @@ export default function HoldingsPage() {
     <div className="space-y-8">
       {/* 页面标题区 */}
       <div className="border-b-2 border-news-text pb-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <span className="inline-block bg-finance-rise text-white text-xs font-bold px-2 py-1 uppercase tracking-[0.2em] font-['Source_Sans_3'] mb-2">
+            <span className="inline-block bg-finance-rise text-white text-xs font-bold px-2 py-1 uppercase tracking-[0.2em] font-['Source_Sans_3'] mb-2 w-fit">
               深度分析
             </span>
-            <h1 className="font-['Newsreader'] text-3xl font-bold text-news-text">
+            <h1 className="font-['Newsreader'] text-2xl sm:text-3xl font-bold text-news-text">
               重仓股票追踪
             </h1>
           </div>
@@ -84,7 +92,7 @@ export default function HoldingsPage() {
             variant="outline"
             onClick={fetchHoldings}
             disabled={loading}
-            className="border-news-text hover:bg-news-text hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em]"
+            className="border-news-text hover:bg-news-text hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em] w-fit"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -105,20 +113,23 @@ export default function HoldingsPage() {
         )}
 
         {fundHoldings.map((fund) => (
-          <div key={fund.fundCode} className="border border-news-border bg-white">
+          <div
+            key={fund.fundCode}
+            className="border border-news-border bg-white"
+          >
             {/* 基金标题栏 */}
             <div
-              className="border-b-2 border-news-text px-5 py-4 cursor-pointer hover:bg-paper-100 transition-colors flex items-center justify-between"
+              className="border-b-2 border-news-text px-3 sm:px-5 py-3 sm:py-4 cursor-pointer hover:bg-paper-100 transition-colors flex items-center justify-between gap-2"
               onClick={() => toggleExpand(fund.fundCode)}
             >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-news-text flex items-center justify-center">
-                  <span className="font-['Newsreader'] text-xl font-bold text-white">
+              <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-news-text flex-shrink-0 flex items-center justify-center">
+                  <span className="font-['Newsreader'] text-lg sm:text-xl font-bold text-white">
                     {fund.fundName.charAt(0)}
                   </span>
                 </div>
-                <div>
-                  <h2 className="font-['Libre_Baskerville'] text-lg font-bold text-news-text">
+                <div className="min-w-0">
+                  <h2 className="font-['Libre_Baskerville'] text-base sm:text-lg font-bold text-news-text truncate">
                     {fund.fundName}
                   </h2>
                   <span className="text-xs text-news-muted font-['JetBrains_Mono']">
@@ -126,10 +137,10 @@ export default function HoldingsPage() {
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
                 <Badge
                   variant="secondary"
-                  className="bg-news-accent text-finance-highlight font-['Source_Sans_3'] text-xs"
+                  className="bg-news-accent text-finance-highlight font-['Source_Sans_3'] text-xs whitespace-nowrap"
                 >
                   {fund.holdings.length}只重仓股
                 </Badge>
@@ -143,20 +154,20 @@ export default function HoldingsPage() {
 
             {/* 持仓明细表格 */}
             {expandedFunds.has(fund.fundCode) && (
-              <div className="p-0">
-                <table className="w-full">
+              <div>
+                <table className="w-full table-fixed">
                   <thead>
                     <tr className="border-b border-news-border bg-news-accent">
-                      <th className="text-left py-3 px-5 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
+                      <th className="text-left py-2 px-2 sm:py-3 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-news-text w-[30%]">
                         股票名称
                       </th>
-                      <th className="text-right py-3 px-5 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
+                      <th className="text-right py-2 px-1 sm:py-3 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-news-text ">
                         股票代码
                       </th>
-                      <th className="text-right py-3 px-5 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
+                      <th className="text-right py-2 px-1 sm:py-3 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-news-text ">
                         持仓比例
                       </th>
-                      <th className="text-right py-3 px-5 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
+                      <th className="text-right py-2 px-2 sm:py-3 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-news-text ">
                         今日涨跌
                       </th>
                     </tr>
@@ -169,30 +180,30 @@ export default function HoldingsPage() {
                           index % 2 === 0 ? "bg-white" : "bg-paper-100"
                         }`}
                       >
-                        <td className="py-3 px-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-news-text flex items-center justify-center">
-                              <span className="font-['Newsreader'] font-bold text-white text-sm">
+                        <td className="py-2 px-2 sm:py-3 sm:px-3">
+                          <div className="flex items-center gap-1.5 sm:gap-2 overflow-hidden">
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-news-text flex-shrink-0 flex items-center justify-center">
+                              <span className="font-['Newsreader'] font-bold text-white text-[10px] sm:text-xs">
                                 {holding.name.charAt(0)}
                               </span>
                             </div>
-                            <span className="font-['Libre_Baskerville'] font-bold text-news-text">
+                            <span className="font-['Libre_Baskerville'] font-semibold text-news-text text-xs sm:text-sm truncate">
                               {holding.name}
                             </span>
                           </div>
                         </td>
-                        <td className="text-right py-3 px-5 font-['JetBrains_Mono'] text-news-muted">
+                        <td className="text-right py-2 px-1 sm:py-3 sm:px-3 font-['JetBrains_Mono'] text-news-muted text-[10px] sm:text-xs">
                           {holding.code}
                         </td>
-                        <td className="text-right py-3 px-5">
-                          <span className="font-['JetBrains_Mono'] text-finance-highlight">
+                        <td className="text-right py-2 px-1 sm:py-3 sm:px-3">
+                          <span className="font-['JetBrains_Mono'] text-finance-highlight text-[10px] sm:text-xs">
                             {holding.ratio}%
                           </span>
                         </td>
-                        <td className="text-right py-3 px-5">
+                        <td className="text-right py-2 px-2 sm:py-3 sm:px-3">
                           <span
                             className={cn(
-                              "font-['JetBrains_Mono'] font-bold flex items-center justify-end gap-1",
+                              "font-['JetBrains_Mono'] font-bold flex items-center justify-end gap-0.5 text-[10px] sm:text-xs",
                               getChangeColor(holding.change || 0)
                             )}
                           >
@@ -237,3 +248,4 @@ export default function HoldingsPage() {
     </div>
   );
 }
+
