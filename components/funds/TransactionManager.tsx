@@ -176,7 +176,7 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
 
             <div className="mt-4 space-y-4">
               <div className="flex items-center gap-4 p-3 bg-news-accent rounded-lg border border-news-border">
-                <div className="w-10 h-10 bg-news-text rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-news-text dark:bg-paper-100 rounded-lg flex items-center justify-center">
                   <span className="font-['Newsreader'] font-bold text-white">
                     {fund.name.charAt(0)}
                   </span>
@@ -205,7 +205,7 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
                         className={cn(
                           "flex-1 py-2 px-3 rounded-lg border text-sm font-['Source_Sans_3'] flex items-center justify-center gap-1 transition-colors",
                           transactionType === type
-                            ? "border-news-text bg-news-text text-white"
+                            ? "border-news-text bg-news-text dark:bg-paper-100 text-white"
                             : "border-news-border hover:bg-news-accent text-news-text"
                         )}
                       >
@@ -339,7 +339,7 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
                     parseFloat(transactionShares) <= 0 ||
                     parseFloat(transactionPrice) <= 0
                   }
-                  className="flex-1 bg-news-text hover:bg-paper-900 disabled:opacity-50"
+                  className="flex-1 bg-news-text dark:bg-paper-100 hover:bg-paper-900 dark:hover:bg-paper-200 disabled:opacity-50"
                 >
                   {editingTransaction ? "保存" : "添加"}
                 </Button>
@@ -431,7 +431,7 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeleteTransaction(transaction.id)}
-                            className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-news-muted hover:text-finance-rise hover:bg-red-50"
+                            className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-news-muted hover:text-finance-rise hover:bg-red-50 dark:hover:bg-red-950"
                           >
                             <Trash2 className="w-3 h-3" />
                           </Button>

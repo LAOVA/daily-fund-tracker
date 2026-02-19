@@ -18,7 +18,7 @@ export function ErrorMessage({
 }: ErrorMessageProps) {
   return (
     <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-      <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
+      <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
         <AlertCircle className="w-6 h-6 text-finance-rise" />
       </div>
       <h3 className="font-['Libre_Baskerville'] text-lg font-bold text-news-text mb-2">
@@ -32,7 +32,7 @@ export function ErrorMessage({
           onClick={onRetry}
           variant="outline"
           size="sm"
-          className="border-news-text hover:bg-news-text hover:text-white font-['Source_Sans_3']"
+          className="border-news-text hover:bg-news-text dark:hover:bg-paper-100 hover:text-white font-['Source_Sans_3']"
         >
           <RefreshCw className="w-4 h-4 mr-2" />
           {retryText}

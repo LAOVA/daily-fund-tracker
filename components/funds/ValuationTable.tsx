@@ -184,16 +184,13 @@ const FundMobileCard = memo(function FundMobileCard({
     return null;
   };
 
-return (
+  return (
     <div
       className={`border border-news-border bg-card mb-3 ${
         isExpanded ? "ring-2 ring-news-text" : ""
       }`}
     >
-      <div
-        className="p-4 cursor-pointer"
-        onClick={() => onToggle(fund.code)}
-      >
+      <div className="p-4 cursor-pointer" onClick={() => onToggle(fund.code)}>
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1 min-w-0">
             <div className="font-['Libre_Baskerville'] font-bold text-news-text truncate">
@@ -316,22 +313,25 @@ export function ValuationTable() {
       setError(null);
 
       try {
-        const results = await fetchMultipleFundData(codesToFetch, (code: string, data: any) => {
-          const fund = watchlist.find((f: Fund) => f.code === code);
-          if (fund && data) {
-            updateFund(code, {
-              code: data.code,
-              name: data.name || fund.name,
-              previousNetAssetValue: data.previousNetAssetValue,
-              estimatedNetValue: data.estimatedNetValue,
-              estimatedGrowthRate: data.estimatedGrowthRate,
-              yesterdayChange: data.yesterdayChange,
-              lastWeekGrowthRate: data.lastWeekChange,
-              lastMonthGrowthRate: data.lastMonthChange,
-              updateTime: new Date().toISOString(),
-            });
+        const results = await fetchMultipleFundData(
+          codesToFetch,
+          (code: string, data: any) => {
+            const fund = watchlist.find((f: Fund) => f.code === code);
+            if (fund && data) {
+              updateFund(code, {
+                code: data.code,
+                name: data.name || fund.name,
+                previousNetAssetValue: data.previousNetAssetValue,
+                estimatedNetValue: data.estimatedNetValue,
+                estimatedGrowthRate: data.estimatedGrowthRate,
+                yesterdayChange: data.yesterdayChange,
+                lastWeekGrowthRate: data.lastWeekChange,
+                lastMonthGrowthRate: data.lastMonthChange,
+                updateTime: new Date().toISOString(),
+              });
+            }
           }
-        });
+        );
 
         if (results.size === 0 && codesToFetch.length > 0) {
           setError("获取基金数据失败，请检查网络连接后重试");
@@ -377,7 +377,7 @@ export function ValuationTable() {
   });
 
   return (
-    <div className="bg-card">
+    <div>
       <div className="border-b-2 border-news-text pb-4 mb-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
@@ -397,7 +397,7 @@ export function ValuationTable() {
                 className={cn(
                   "font-['Source_Sans_3'] text-xs cursor-pointer whitespace-nowrap",
                   selectedGroup === "all"
-                    ? "bg-news-text text-white "
+                    ? "bg-news-text dark:bg-paper-100 text-white "
                     : "border-news-border hover:bg-news-accent "
                 )}
               >
@@ -413,12 +413,14 @@ export function ValuationTable() {
                   className={cn(
                     "font-['Source_Sans_3'] text-xs cursor-pointer whitespace-nowrap",
                     selectedGroup === group.id
-                      ? "bg-news-text text-white"
+                      ? "bg-news-text dark:bg-paper-100 text-white"
                       : "border-news-border hover:bg-news-accent"
                   )}
                 >
                   <Folder className="w-3 h-3 mr-1" />
-                  {group.name.length > 4 ? group.name.slice(0, 4) + "..." : group.name}
+                  {group.name.length > 4
+                    ? group.name.slice(0, 4) + "..."
+                    : group.name}
                 </Button>
               ))}
             </div>
@@ -432,7 +434,7 @@ export function ValuationTable() {
               size="sm"
               onClick={() => fetchFundData(true)}
               disabled={loading}
-              className="border-news-text hover:bg-news-text hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em] cursor-pointer"
+              className="border-news-text hover:bg-news-text dark:hover:bg-paper-100 hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em] cursor-pointer"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -457,7 +459,9 @@ export function ValuationTable() {
 
       <div className="mb-4 text-sm text-news-muted font-['Source_Sans_3'] flex items-center gap-2">
         <span className="text-finance-rise">💡</span>
-        <span className="hidden sm:inline">点击任意基金行可查看历史净值走势和重仓股信息</span>
+        <span className="hidden sm:inline">
+          点击任意基金行可查看历史净值走势和重仓股信息
+        </span>
         <span className="sm:hidden">点击卡片查看详情</span>
       </div>
 
@@ -549,15 +553,15 @@ export function ValuationTable() {
       )}
 
       {watchlist.length > 0 && filteredFunds.length === 0 && (
-          <div className="py-12 text-center border-t border-news-border">
-            <p className="text-news-muted font-['Libre_Baskerville'] text-lg mb-2">
-              该分组暂无基金
-            </p>
-            <p className="text-sm text-news-muted font-['Source_Sans_3']">
-              请切换到其他分组或添加基金到该分组
-            </p>
-          </div>
-)}
+        <div className="py-12 text-center border-t border-news-border">
+          <p className="text-news-muted font-['Libre_Baskerville'] text-lg mb-2">
+            该分组暂无基金
+          </p>
+          <p className="text-sm text-news-muted font-['Source_Sans_3']">
+            请切换到其他分组或添加基金到该分组
+          </p>
+        </div>
+      )}
 
       {watchlist.length > 0 && filteredFunds.length === 0 && (
         <div className="py-12 text-center border-t border-news-border">

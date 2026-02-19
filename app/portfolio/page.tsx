@@ -153,7 +153,7 @@ export default function PortfolioPage() {
               <DialogTrigger asChild>
                 <Button
                   variant="outline"
-                  className="border-news-text hover:bg-news-text hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em] whitespace-nowrap"
+                  className="cursor-pointer border-news-text hover:bg-news-text dark:hover:bg-paper-100 hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em] whitespace-nowrap"
                 >
                   <FolderPlus className="w-4 h-4 mr-1" />
                   <span className="hidden sm:inline">新建分组</span>
@@ -176,7 +176,7 @@ export default function PortfolioPage() {
                   />
                   <Button
                     onClick={handleAddGroup}
-                    className="bg-news-text hover:bg-paper-900"
+                    className="bg-news-text dark:bg-paper-100 hover:bg-paper-900 dark:hover:bg-paper-200"
                   >
                     添加
                   </Button>
@@ -196,7 +196,7 @@ export default function PortfolioPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="bg-card border border-paper-300 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-full bg-news-text flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-news-text dark:bg-paper-100 flex items-center justify-center">
                   <span className="text-white text-xs font-bold">¥</span>
                 </div>
                 <span className="text-xs text-news-muted font-['Source_Sans_3']">
@@ -316,7 +316,7 @@ export default function PortfolioPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => removeGroup(group.id)}
-                    className="text-news-muted hover:text-finance-rise hover:bg-red-50 h-8 w-8 p-0"
+                    className="text-news-muted hover:text-finance-rise hover:bg-red-50 dark:hover:bg-red-950 h-8 w-8 p-0"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -345,7 +345,7 @@ export default function PortfolioPage() {
                       onClick={() => toggleFundExpand(fundCode)}
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-news-text flex-shrink-0 flex items-center justify-center">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-news-text dark:bg-paper-100 flex-shrink-0 flex items-center justify-center">
                           <span className="font-['Newsreader'] font-bold text-white text-sm">
                             {fund.name.charAt(0)}
                           </span>
@@ -393,7 +393,7 @@ export default function PortfolioPage() {
                               e.stopPropagation();
                               handleMoveFund(fundCode, group.id);
                             }}
-                            className="text-news-muted hover:text-news-text hover:bg-gray-100 h-7 w-7 sm:h-8 sm:w-8 p-0"
+                            className="text-news-muted hover:text-news-text hover:bg-gray-100 dark:hover:bg-paper-700 h-7 w-7 sm:h-8 sm:w-8 p-0"
                             title="移动到分组"
                           >
                             <Move className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -405,7 +405,7 @@ export default function PortfolioPage() {
                               e.stopPropagation();
                               removeFund(fundCode);
                             }}
-                            className="text-news-muted hover:text-finance-rise hover:bg-red-50 h-7 w-7 sm:h-8 sm:w-8 p-0"
+                            className="text-news-muted hover:text-finance-rise hover:bg-red-50 dark:hover:bg-red-950 h-7 w-7 sm:h-8 sm:w-8 p-0"
                           >
                             <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           </Button>

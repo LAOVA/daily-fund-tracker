@@ -55,7 +55,7 @@ export default function Home() {
               <div className="space-y-3 text-sm">
                 <button
                   onClick={handleSearchClick}
-                  className="flex items-start gap-2 w-full text-left hover:opacity-70 transition-opacity cursor-pointer"
+                  className="flex items-start gap-2 w-fit text-left hover:opacity-70 transition-opacity cursor-pointer"
                 >
                   <span className="text-finance-rise font-bold">▸</span>
                   <p className="font-['Libre_Baskerville'] text-news-text">
@@ -64,7 +64,7 @@ export default function Home() {
                 </button>
                 <Link
                   href="/holdings"
-                  className="flex items-start gap-2 hover:opacity-70 transition-opacity"
+                  className="flex items-start gap-2 hover:opacity-70 transition-opacity w-fit"
                 >
                   <span className="text-finance-rise font-bold">▸</span>
                   <p className="font-['Libre_Baskerville'] text-news-text">
@@ -73,7 +73,7 @@ export default function Home() {
                 </Link>
                 <Link
                   href="/portfolio"
-                  className="flex items-start gap-2 hover:opacity-70 transition-opacity"
+                  className="flex items-start gap-2 hover:opacity-70 transition-opacity w-fit"
                 >
                   <span className="text-finance-rise font-bold">▸</span>
                   <p className="font-['Libre_Baskerville'] text-news-text">

@@ -79,7 +79,7 @@ export default function HoldingsPage() {
     <div className="space-y-8">
       {/* 页面标题区 */}
       <div className="border-b-2 border-news-text pb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-row items-center justify-between gap-4">
           <div>
             <span className="inline-block bg-finance-rise text-white text-xs font-bold px-2 py-1 uppercase tracking-[0.2em] font-['Source_Sans_3'] mb-2 w-fit">
               深度分析
@@ -92,7 +92,7 @@ export default function HoldingsPage() {
             variant="outline"
             onClick={fetchHoldings}
             disabled={loading}
-            className="border-news-text hover:bg-news-text hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em] w-fit"
+            className="border-news-text hover:bg-news-text dark:hover:bg-paper-100 hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em] w-fit"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -123,8 +123,8 @@ export default function HoldingsPage() {
               onClick={() => toggleExpand(fund.fundCode)}
             >
               <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-news-text flex-shrink-0 flex items-center justify-center">
-                  <span className="font-['Newsreader'] text-lg sm:text-xl font-bold text-white">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-news-text dark:bg-paper-100 flex-shrink-0 flex items-center justify-center">
+                  <span className="font-['Newsreader'] text-lg sm:text-xl font-bold text-white dark:text-news-text">
                     {fund.fundName.charAt(0)}
                   </span>
                 </div>
@@ -182,8 +182,8 @@ export default function HoldingsPage() {
                       >
                         <td className="py-2 px-2 sm:py-3 sm:px-3">
                           <div className="flex items-center gap-1.5 sm:gap-2 overflow-hidden">
-                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-news-text flex-shrink-0 flex items-center justify-center">
-                              <span className="font-['Newsreader'] font-bold text-white text-[10px] sm:text-xs">
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-news-text dark:bg-paper-100 flex-shrink-0 flex items-center justify-center">
+                              <span className="font-['Newsreader'] font-bold text-white dark:text-news-text text-[10px] sm:text-xs">
                                 {holding.name.charAt(0)}
                               </span>
                             </div>

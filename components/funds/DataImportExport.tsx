@@ -9,7 +9,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useFundsStore, Fund, Transaction, FundGroup } from "@/stores/fundsStore";
+import {
+  useFundsStore,
+  Fund,
+  Transaction,
+  FundGroup,
+} from "@/stores/fundsStore";
 import {
   downloadFile,
   exportToCSV,
@@ -93,7 +98,16 @@ export function DataImportExport() {
           fee: t.fee,
           remark: t.remark || "",
         }));
-        headers = ["fundCode", "type", "date", "shares", "price", "amount", "fee", "remark"];
+        headers = [
+          "fundCode",
+          "type",
+          "date",
+          "shares",
+          "price",
+          "amount",
+          "fee",
+          "remark",
+        ];
         filename = `交易记录_${timestamp}`;
         break;
 
@@ -102,7 +116,9 @@ export function DataImportExport() {
           .filter((f) => f.shares && f.costPrice)
           .map((f) => {
             const marketValue = (f.shares || 0) * (f.estimatedNetValue || 0);
-            const profit = (f.shares || 0) * ((f.estimatedNetValue || 0) - (f.costPrice || 0));
+            const profit =
+              (f.shares || 0) *
+              ((f.estimatedNetValue || 0) - (f.costPrice || 0));
             const profitPercent = f.costPrice
               ? (((f.estimatedNetValue || 0) - f.costPrice) / f.costPrice) * 100
               : 0;
@@ -172,13 +188,27 @@ export function DataImportExport() {
       let imported = 0;
 
       if (importType === "funds") {
-        let fundList: Array<{ code: string; name: string; shares?: number; costPrice?: number; group?: string }> = [];
+        let fundList: Array<{
+          code: string;
+          name: string;
+          shares?: number;
+          costPrice?: number;
+          group?: string;
+        }> = [];
 
         if (file.name.endsWith(".json")) {
           const parsed = parseJSON(content);
           if (Array.isArray(parsed)) {
-            fundList = parsed as Array<{ code: string; name: string; group?: string }>;
-          } else if (parsed && typeof parsed === "object" && "watchlist" in parsed) {
+            fundList = parsed as Array<{
+              code: string;
+              name: string;
+              group?: string;
+            }>;
+          } else if (
+            parsed &&
+            typeof parsed === "object" &&
+            "watchlist" in parsed
+          ) {
             fundList = (parsed as { watchlist: Fund[] }).watchlist;
           }
         } else {
@@ -200,7 +230,7 @@ export function DataImportExport() {
             const exists = watchlist.some((wf) => wf.code === f.code);
             if (!exists) {
               let targetGroupId = "default";
-              
+
               if (f.group && f.group !== "未分组" && f.group !== "默认分组") {
                 let groupId = groupNameToId.get(f.group);
                 if (!groupId) {
@@ -216,7 +246,7 @@ export function DataImportExport() {
                   targetGroupId = groupId;
                 }
               }
-              
+
               addFund(
                 {
                   code: f.code,
@@ -235,7 +265,12 @@ export function DataImportExport() {
           setImporting(true);
           const codes = fundList
             .filter((f) => f.code && f.name)
-            .filter((f) => !watchlist.some((wf) => wf.code === f.code && wf.estimatedNetValue))
+            .filter(
+              (f) =>
+                !watchlist.some(
+                  (wf) => wf.code === f.code && wf.estimatedNetValue
+                )
+            )
             .map((f) => f.code);
 
           fetchMultipleFundData(codes, (code: string, data: any) => {
@@ -259,7 +294,11 @@ export function DataImportExport() {
 
         setImportResult({
           success: true,
-          message: `成功导入 ${imported} 只基金${fundList.length - imported > 0 ? `，跳过 ${fundList.length - imported} 只已存在的基金` : ""}，正在获取数据...`,
+          message: `成功导入 ${imported} 只基金${
+            fundList.length - imported > 0
+              ? `，跳过 ${fundList.length - imported} 只已存在的基金`
+              : ""
+          }，正在获取数据...`,
         });
       } else if (importType === "transactions") {
         let txList: Array<{
@@ -277,14 +316,21 @@ export function DataImportExport() {
           const parsed = parseJSON(content);
           if (Array.isArray(parsed)) {
             txList = parsed as typeof txList;
-          } else if (parsed && typeof parsed === "object" && "transactions" in parsed) {
+          } else if (
+            parsed &&
+            typeof parsed === "object" &&
+            "transactions" in parsed
+          ) {
             txList = (parsed as { transactions: Transaction[] }).transactions;
           }
         } else {
           const rows = parseCSV(content);
           txList = rows.map((row) => ({
             fundCode: row.fundCode || row["基金代码"] || "",
-            type: (row.type || row["类型"] || "buy") as "buy" | "sell" | "dividend",
+            type: (row.type || row["类型"] || "buy") as
+              | "buy"
+              | "sell"
+              | "dividend",
             date: row.date || row["日期"] || "",
             shares: parseFloat(row.shares || row["份额"] || "0"),
             price: parseFloat(row.price || row["价格"] || "0"),
@@ -326,7 +372,7 @@ export function DataImportExport() {
 
         if (parsed) {
           const oldIdToNewId = new Map<string, string>();
-          
+
           if (parsed.groups && parsed.groups.length > 0) {
             parsed.groups.forEach((g) => {
               if (g.id === "default") {
@@ -338,7 +384,9 @@ export function DataImportExport() {
                 } else {
                   addGroup(g.name);
                   const newGroups = useFundsStore.getState().groups;
-                  const newGroup = newGroups.find((ng) => ng.name === g.name && ng.id !== g.id);
+                  const newGroup = newGroups.find(
+                    (ng) => ng.name === g.name && ng.id !== g.id
+                  );
                   if (newGroup) {
                     oldIdToNewId.set(g.id, newGroup.id);
                   }
@@ -352,7 +400,7 @@ export function DataImportExport() {
               const exists = watchlist.some((wf) => wf.code === f.code);
               if (!exists) {
                 let targetGroupId = "default";
-                
+
                 if (parsed.groups) {
                   for (const g of parsed.groups) {
                     if (g.funds.includes(f.code)) {
@@ -364,7 +412,7 @@ export function DataImportExport() {
                     }
                   }
                 }
-                
+
                 addFund(f, targetGroupId);
                 importedCodes.push(f.code);
                 imported++;
@@ -412,7 +460,9 @@ export function DataImportExport() {
 
         setImportResult({
           success: true,
-          message: `成功恢复数据：${imported} 条记录${importedCodes.length > 0 ? "，正在获取基金数据..." : ""}`,
+          message: `成功恢复数据：${imported} 条记录${
+            importedCodes.length > 0 ? "，正在获取基金数据..." : ""
+          }`,
         });
       }
     } catch {
@@ -450,7 +500,7 @@ export function DataImportExport() {
         <DialogTrigger asChild>
           <Button
             variant="outline"
-            className="border-news-text hover:bg-news-text hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em]"
+            className="cursor-pointer border-news-text hover:bg-news-text dark:hover:bg-paper-100 hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em]"
           >
             <Download className="w-4 h-4 mr-2" />
             导出数据
@@ -467,21 +517,31 @@ export function DataImportExport() {
             <div className="bg-news-accent border border-news-border p-4 mb-4">
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <div className="text-xs text-news-muted font-['Source_Sans_3']">总成本</div>
+                  <div className="text-xs text-news-muted font-['Source_Sans_3']">
+                    总成本
+                  </div>
                   <div className="font-['JetBrains_Mono'] font-bold text-news-text">
                     {formatCurrency(totalCost)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-news-muted font-['Source_Sans_3']">总市值</div>
+                  <div className="text-xs text-news-muted font-['Source_Sans_3']">
+                    总市值
+                  </div>
                   <div className="font-['JetBrains_Mono'] font-bold text-news-text">
                     {formatCurrency(totalMarketValue)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-news-muted font-['Source_Sans_3']">总收益</div>
+                  <div className="text-xs text-news-muted font-['Source_Sans_3']">
+                    总收益
+                  </div>
                   <div
-                    className={`font-['JetBrains_Mono'] font-bold ${totalProfit >= 0 ? "text-finance-rise" : "text-finance-fall"}`}
+                    className={`font-['JetBrains_Mono'] font-bold ${
+                      totalProfit >= 0
+                        ? "text-finance-rise"
+                        : "text-finance-fall"
+                    }`}
                   >
                     {formatCurrency(totalProfit)}
                   </div>
@@ -591,7 +651,7 @@ export function DataImportExport() {
                 <Button
                   size="sm"
                   onClick={() => handleExport("all", "json")}
-                  className="bg-news-text hover:bg-paper-900"
+                  className="bg-news-text dark:bg-paper-100 hover:bg-paper-900 dark:hover:bg-paper-200"
                 >
                   <FileJson className="w-4 h-4 mr-1" />
                   导出备份文件
@@ -606,7 +666,7 @@ export function DataImportExport() {
         <DialogTrigger asChild>
           <Button
             variant="outline"
-            className="border-news-text hover:bg-news-text hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em]"
+            className="cursor-pointer border-news-text hover:bg-news-text dark:hover:bg-paper-100 hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em]"
           >
             <Upload className="w-4 h-4 mr-2" />
             导入数据
@@ -625,7 +685,11 @@ export function DataImportExport() {
                 size="sm"
                 variant={importType === "funds" ? "default" : "outline"}
                 onClick={() => setImportType("funds")}
-                className={importType === "funds" ? "bg-news-text" : "border-news-border"}
+                className={
+                  importType === "funds"
+                    ? "bg-news-text dark:bg-paper-100"
+                    : "border-news-border"
+                }
               >
                 基金列表
               </Button>
@@ -633,7 +697,11 @@ export function DataImportExport() {
                 size="sm"
                 variant={importType === "transactions" ? "default" : "outline"}
                 onClick={() => setImportType("transactions")}
-                className={importType === "transactions" ? "bg-news-text" : "border-news-border"}
+                className={
+                  importType === "transactions"
+                    ? "bg-news-text dark:bg-paper-100"
+                    : "border-news-border"
+                }
               >
                 交易记录
               </Button>
@@ -641,7 +709,11 @@ export function DataImportExport() {
                 size="sm"
                 variant={importType === "backup" ? "default" : "outline"}
                 onClick={() => setImportType("backup")}
-                className={importType === "backup" ? "bg-news-text" : "border-news-border"}
+                className={
+                  importType === "backup"
+                    ? "bg-news-text dark:bg-paper-100"
+                    : "border-news-border"
+                }
               >
                 完整备份
               </Button>
@@ -670,8 +742,8 @@ export function DataImportExport() {
               <div
                 className={`flex items-center gap-2 p-3 ${
                   importResult.success
-                    ? "bg-green-50 text-green-700"
-                    : "bg-red-50 text-red-700"
+                    ? "bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-400"
+                    : "bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400"
                 }`}
               >
                 {importing ? (
@@ -696,7 +768,8 @@ export function DataImportExport() {
               )}
               {importType === "transactions" && (
                 <p className="text-xs text-news-muted">
-                  CSV 需包含列: fundCode, type, date, shares, price, amount, fee, remark(可选)
+                  CSV 需包含列: fundCode, type, date, shares, price, amount,
+                  fee, remark(可选)
                 </p>
               )}
               {importType === "backup" && (
@@ -711,3 +784,4 @@ export function DataImportExport() {
     </div>
   );
 }
+
