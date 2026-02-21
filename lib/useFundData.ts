@@ -130,9 +130,17 @@ export async function fetchFullFundData(code: string): Promise<{
         let lastWeekChange: number | undefined;
         let lastMonthChange: number | undefined;
         // let thisYearChange: number | undefined;
+        let estimatedNetValue: number | undefined;
 
         if (trend.length > 0) {
           const sliced = trend.slice(-90);
+
+          // 获取今日估算的净值
+          const today = sliced[sliced.length - 1];
+          if (today && typeof today.equityReturn === "number") {
+            estimatedNetValue =
+              safeParseFloat(today.y) || safeParseFloat(gzData.gsz);
+          }
 
           // 昨日涨幅
           const last = sliced[sliced.length - 2];
@@ -175,7 +183,7 @@ export async function fetchFullFundData(code: string): Promise<{
         }
 
         const previousNetAssetValue = safeParseFloat(gzData.dwjz);
-        const estimatedNetValue = safeParseFloat(gzData.gsz);
+        // const estimatedNetValue = safeParseFloat(gzData.gsz);
         const estimatedGrowthRate = safeParseFloat(gzData.gszzl);
 
         // 验证核心数据是否有效
@@ -251,15 +259,25 @@ const getTencentPrefix = (code: string) => {
 export async function fetchFundHoldingsByJsonp(code: string): Promise<{
   fundName: string;
   holdings: Holding[];
-  yesterdayChange: number | null;
-  lastWeekChange: number | null;
-  lastMonthChange: number | null;
+  hasData: boolean;
 } | null> {
   try {
     const holdingsUrl = `https://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=jjcc&code=${code}&topline=10&rt=${Date.now()}`;
     await loadScript(holdingsUrl);
 
     const html = (window as any).apidata?.content || "";
+
+    // 检查是否有数据
+    if (!html || html.trim() === "") {
+      // 尝试从 apidata 获取基金名称
+      const fundName = code;
+      return {
+        fundName,
+        holdings: [],
+        hasData: false,
+      };
+    }
+
     const holdings: Holding[] = [];
     const rows = html.match(/<tr[\s\S]*?<\/tr>/gi) || [];
 
@@ -296,78 +314,42 @@ export async function fetchFundHoldingsByJsonp(code: string): Promise<{
         .trim();
     }
 
-    // 获取历史净值
-    let yesterdayChange = null;
-    let lastWeekChange = null;
-    let lastMonthChange = null;
-
-    try {
-      const pingUrl = `https://fund.eastmoney.com/pingzhongdata/${code}.js?v=${Date.now()}`;
-      await loadScript(pingUrl);
-
-      const trend = Array.isArray((window as any).Data_netWorthTrend)
-        ? (window as any).Data_netWorthTrend
-        : [];
-
-      if (trend.length > 0) {
-        const sliced = trend.slice(-90);
-
-        const last = sliced[sliced.length - 2];
-        if (last && typeof last.equityReturn === "number") {
-          yesterdayChange = last.equityReturn;
-        }
-
-        if (sliced.length >= 8) {
-          const weekAgo = sliced[sliced.length - 8];
-          const current = sliced[sliced.length - 2];
-          if (weekAgo && current && weekAgo.y > 0) {
-            lastWeekChange = ((current.y - weekAgo.y) / weekAgo.y) * 100;
-          }
-        }
-
-        if (sliced.length >= 32) {
-          const monthAgo = sliced[sliced.length - 32];
-          const current = sliced[sliced.length - 2];
-          if (monthAgo && current && monthAgo.y > 0) {
-            lastMonthChange = ((current.y - monthAgo.y) / monthAgo.y) * 100;
-          }
-        }
-      }
-    } catch (e) {
-      console.error("获取历史净值失败:", e);
+    // 如果没有解析到持仓数据
+    if (holdings.length === 0) {
+      return {
+        fundName,
+        holdings: [],
+        hasData: false,
+      };
     }
 
     // 补充重仓股涨跌幅
-    if (holdings.length > 0) {
-      try {
-        const tencentCodes = holdings
-          .map((h) => `s_${getTencentPrefix(h.code)}${h.code}`)
-          .join(",");
-        const quoteUrl = `https://qt.gtimg.cn/q=${tencentCodes}`;
-        await loadScript(quoteUrl);
+    try {
+      const tencentCodes = holdings
+        .map((h) => `s_${getTencentPrefix(h.code)}${h.code}`)
+        .join(",");
+      const quoteUrl = `https://qt.gtimg.cn/q=${tencentCodes}`;
+      await loadScript(quoteUrl);
 
-        holdings.forEach((h) => {
-          const varName = `v_s_${getTencentPrefix(h.code)}${h.code}`;
-          const dataStr = (window as any)[varName];
-          if (dataStr) {
-            const parts = dataStr.split("~");
-            if (parts.length > 5 && parts[5]) {
-              const changeValue = safeParseFloat(parts[5]);
-              h.change = changeValue ?? 0;
-            }
+      holdings.forEach((h) => {
+        const varName = `v_s_${getTencentPrefix(h.code)}${h.code}`;
+        const dataStr = (window as any)[varName];
+        if (dataStr) {
+          const parts = dataStr.split("~");
+          if (parts.length > 5 && parts[5]) {
+            const changeValue = safeParseFloat(parts[5]);
+            h.change = changeValue ?? 0;
           }
-        });
-      } catch (e) {
-        console.error("获取股票行情失败:", e);
-      }
+        }
+      });
+    } catch (e) {
+      console.error("获取股票行情失败:", e);
     }
 
     return {
       fundName,
       holdings: holdings.slice(0, 10),
-      yesterdayChange,
-      lastWeekChange,
-      lastMonthChange,
+      hasData: true,
     };
   } catch (e) {
     console.error("解析持仓数据失败:", e);

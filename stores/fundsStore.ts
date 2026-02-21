@@ -2,21 +2,37 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export interface Fund {
+  /** 基金代码 */
   code: string;
+  /** 基金名称 */
   name: string;
+  /** 最新净值 */
   netAssetValue?: number;
+  /** 昨日净值 */
   previousNetAssetValue?: number;
+  /** 估算净值（实时） */
   estimatedNetValue?: number;
+  /** 估算涨跌幅（实时，百分比） */
   estimatedGrowthRate?: number;
+  /** 昨日涨跌幅（百分比） */
   yesterdayChange?: number;
+  /** 累计净值 */
   totalNetValue?: number;
+  /** 日涨跌幅 */
   dailyGrowthRate?: number;
+  /** 近一周涨跌幅 */
   lastWeekGrowthRate?: number;
+  /** 近一月涨跌幅 */
   lastMonthGrowthRate?: number;
+  /** 今年以来涨跌幅 */
   thisYearGrowthRate?: number;
+  /** 数据更新时间 */
   updateTime?: string;
+  /** 持有份额 */
   shares?: number;
+  /** 成本价（单位净值） */
   costPrice?: number;
+  /** 总投入成本 */
   costAmount?: number;
 }
 

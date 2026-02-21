@@ -54,12 +54,19 @@ const transactionTypeConfig: Record<
 };
 
 export function TransactionManager({ fund }: TransactionManagerProps) {
-  const { transactions, addTransaction, updateTransaction, removeTransaction, recalculatePosition } =
-    useFundsStore();
+  const {
+    transactions,
+    addTransaction,
+    updateTransaction,
+    removeTransaction,
+    recalculatePosition,
+  } = useFundsStore();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const [transactionType, setTransactionType] = useState<TransactionType>("buy");
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transaction | null>(null);
+  const [transactionType, setTransactionType] =
+    useState<TransactionType>("buy");
   const [transactionDate, setTransactionDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -153,7 +160,9 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
           <span className="text-sm font-bold text-news-text font-['Source_Sans_3'] uppercase tracking-wider">
             交易记录
           </span>
-          <span className="text-xs text-news-muted">({fundTransactions.length}笔)</span>
+          <span className="text-xs text-news-muted">
+            ({fundTransactions.length}笔)
+          </span>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -196,7 +205,9 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
                   交易类型
                 </label>
                 <div className="flex gap-2">
-                  {(Object.keys(transactionTypeConfig) as TransactionType[]).map((type) => {
+                  {(
+                    Object.keys(transactionTypeConfig) as TransactionType[]
+                  ).map((type) => {
                     const config = transactionTypeConfig[type];
                     return (
                       <button
@@ -326,7 +337,7 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
                       resetForm();
                       setIsAddDialogOpen(false);
                     }}
-                    className="flex-1 border-news-border"
+                    className="flex-1 border-news-border cursor-pointer"
                   >
                     取消
                   </Button>
@@ -339,7 +350,7 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
                     parseFloat(transactionShares) <= 0 ||
                     parseFloat(transactionPrice) <= 0
                   }
-                  className="flex-1 bg-news-text dark:bg-paper-100 hover:bg-paper-900 dark:hover:bg-paper-200 disabled:opacity-50"
+                  className="flex-1 bg-news-text dark:bg-paper-100 hover:bg-paper-900 dark:hover:bg-paper-200 disabled:opacity-50 cursor-pointer"
                 >
                   {editingTransaction ? "保存" : "添加"}
                 </Button>
@@ -397,8 +408,12 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
                           )}
                         >
                           {config.icon}
-                          <span className="hidden sm:inline">{config.label}</span>
-                          <span className="sm:hidden">{config.label.charAt(0)}</span>
+                          <span className="hidden sm:inline">
+                            {config.label}
+                          </span>
+                          <span className="sm:hidden">
+                            {config.label.charAt(0)}
+                          </span>
                         </span>
                       </td>
                       <td className="py-2 px-2 sm:px-3 text-right font-['JetBrains_Mono'] text-news-text text-xs sm:text-sm whitespace-nowrap">
@@ -430,7 +445,9 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDeleteTransaction(transaction.id)}
+                            onClick={() =>
+                              handleDeleteTransaction(transaction.id)
+                            }
                             className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-news-muted hover:text-finance-rise hover:bg-red-50 dark:hover:bg-red-950"
                           >
                             <Trash2 className="w-3 h-3" />
@@ -459,11 +476,15 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
           <div className="font-['JetBrains_Mono'] text-news-text flex flex-wrap gap-x-3 gap-y-1">
             <span>
               <span className="text-news-muted">当前份额：</span>
-              <span className="font-bold">{fund.shares?.toFixed(2) || "0.00"}</span>
+              <span className="font-bold">
+                {fund.shares?.toFixed(2) || "0.00"}
+              </span>
             </span>
             <span>
               <span className="text-news-muted">成本价：</span>
-              <span className="font-bold">{fund.costPrice?.toFixed(4) || "0.0000"}</span>
+              <span className="font-bold">
+                {fund.costPrice?.toFixed(4) || "0.0000"}
+              </span>
             </span>
           </div>
         </div>
@@ -471,3 +492,4 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
     </div>
   );
 }
+

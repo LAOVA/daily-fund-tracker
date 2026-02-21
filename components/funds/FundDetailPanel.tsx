@@ -108,6 +108,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
 }: FundDetailPanelProps) {
   const [allHistoryData, setAllHistoryData] = useState<HistoryDataPoint[]>([]);
   const [holdings, setHoldings] = useState<Holding[]>([]);
+  const [hasHoldingsData, setHasHoldingsData] = useState(true);
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("1m");
 
@@ -121,6 +122,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
         ]);
         setAllHistoryData(history);
         setHoldings(holdingsData?.holdings || []);
+        setHasHoldingsData(holdingsData?.hasData ?? true);
       } catch (error) {
         console.error("加载数据失败:", error);
       } finally {
@@ -343,13 +345,13 @@ export const FundDetailPanel = memo(function FundDetailPanel({
         <div className="flex flex-col">
           <div className="border-b-2 border-news-text pb-2 mb-4">
             <h4 className="font-['Source_Sans_3'] text-sm font-bold uppercase tracking-[0.15em] text-news-text">
-              重仓股 ({holdings.length}只)
+              重仓股 {hasHoldingsData ? `(${holdings.length}只)` : ""}
             </h4>
           </div>
           <div className="border border-news-border bg-card h-64 sm:h-72 overflow-hidden">
             {loading ? (
               <Loading />
-            ) : holdings.length > 0 ? (
+            ) : hasHoldingsData && holdings.length > 0 ? (
               <div className="h-full overflow-y-auto">
                 <table className="w-full">
                   <thead className="sticky top-0 z-10">
@@ -409,8 +411,11 @@ export const FundDetailPanel = memo(function FundDetailPanel({
                 </table>
               </div>
             ) : (
-              <div className="h-full flex items-center justify-center text-news-muted font-['Source_Sans_3']">
-                暂无持仓数据
+              <div className="h-full flex flex-col items-center justify-center text-news-muted font-['Source_Sans_3']">
+                <p>暂无重仓股数据</p>
+                <p className="text-xs mt-1 text-news-muted/70">
+                  可能是新发基金或货币/债券型基金
+                </p>
               </div>
             )}
           </div>
@@ -421,9 +426,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
 
   if (variant === "card") {
     return (
-      <div className="border border-news-text bg-paper-100 mb-3">
-        {content}
-      </div>
+      <div className="border border-news-text bg-paper-100 mb-3">{content}</div>
     );
   }
 

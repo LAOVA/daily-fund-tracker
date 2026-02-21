@@ -358,12 +358,25 @@ export default function PortfolioPage() {
                             <span className="text-xs text-news-muted font-['JetBrains_Mono']">
                               {fundCode}
                             </span>
+                            <span
+                              className={
+                                "font-['JetBrains_Mono'] font-bold text-xs text-finance-neutral"
+                              }
+                            >
+                              {fund.estimatedNetValue
+                                ? formatCurrency(
+                                    fund.estimatedNetValue,
+                                    false,
+                                    4
+                                  )
+                                : "—"}
+                            </span>
                             {transactionCount > 0 && (
                               <Badge
                                 variant="secondary"
-                                className="bg-news-accent text-news-muted font-['Source_Sans_3'] text-[10px] px-1 py-0"
+                                className="bg-news-accent border-news-border text-news-muted font-['Source_Sans_3'] text-[10px] px-1 py-0"
                               >
-                                {transactionCount}笔
+                                {transactionCount} 笔
                               </Badge>
                             )}
                           </div>

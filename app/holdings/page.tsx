@@ -21,6 +21,7 @@ interface FundHoldings {
   fundCode: string;
   fundName: string;
   holdings: Holding[];
+  hasData: boolean;
 }
 
 export default function HoldingsPage() {
@@ -37,11 +38,13 @@ export default function HoldingsPage() {
       const results = [];
       for (const fund of watchlist) {
         const result = await fetchFundHoldingsByJsonp(fund.code);
-        if (result) {
+
+        if (result && result.holdings.length) {
           results.push({
             fundCode: fund.code,
             fundName: result.fundName || fund.name,
             holdings: result.holdings,
+            hasData: result.hasData,
           });
         }
       }
@@ -138,12 +141,21 @@ export default function HoldingsPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-                <Badge
-                  variant="secondary"
-                  className="bg-news-accent text-finance-highlight font-['Source_Sans_3'] text-xs whitespace-nowrap"
-                >
-                  {fund.holdings.length}只重仓股
-                </Badge>
+                {fund.hasData ? (
+                  <Badge
+                    variant="secondary"
+                    className="bg-news-accent border border-news-border text-finance-highlight font-['Source_Sans_3'] text-xs whitespace-nowrap"
+                  >
+                    {fund.holdings.length}只重仓股
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="secondary"
+                    className="bg-paper-200 dark:bg-paper-700 text-news-muted font-['Source_Sans_3'] text-xs whitespace-nowrap"
+                  >
+                    暂无重仓数据
+                  </Badge>
+                )}
                 {expandedFunds.has(fund.fundCode) ? (
                   <ChevronUp className="w-5 h-5 text-news-muted" />
                 ) : (
@@ -155,73 +167,84 @@ export default function HoldingsPage() {
             {/* 持仓明细表格 */}
             {expandedFunds.has(fund.fundCode) && (
               <div>
-                <table className="w-full table-fixed">
-                  <thead>
-                    <tr className="border-b border-news-border bg-news-accent">
-                      <th className="text-left py-2 px-2 sm:py-3 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-news-text w-[30%]">
-                        股票名称
-                      </th>
-                      <th className="text-right py-2 px-1 sm:py-3 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-news-text ">
-                        股票代码
-                      </th>
-                      <th className="text-right py-2 px-1 sm:py-3 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-news-text ">
-                        持仓比例
-                      </th>
-                      <th className="text-right py-2 px-2 sm:py-3 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-news-text ">
-                        今日涨跌
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {fund.holdings.map((holding, index) => (
-                      <tr
-                        key={holding.code}
-                        className={`border-b border-paper-300 hover:bg-paper-100 transition-colors ${
-                          index % 2 === 0 ? "bg-card" : "bg-paper-100"
-                        }`}
-                      >
-                        <td className="py-2 px-2 sm:py-3 sm:px-3">
-                          <div className="flex items-center gap-1.5 sm:gap-2 overflow-hidden">
-                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-news-text dark:bg-paper-100 flex-shrink-0 flex items-center justify-center">
-                              <span className="font-['Newsreader'] font-bold text-white dark:text-news-text text-[10px] sm:text-xs">
-                                {holding.name.charAt(0)}
+                {fund.hasData && fund.holdings.length > 0 ? (
+                  <table className="w-full table-fixed">
+                    <thead>
+                      <tr className="border-b border-news-border bg-news-accent">
+                        <th className="text-left py-2 px-2 sm:py-3 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-news-text w-[30%]">
+                          股票名称
+                        </th>
+                        <th className="text-right py-2 px-1 sm:py-3 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-news-text ">
+                          股票代码
+                        </th>
+                        <th className="text-right py-2 px-1 sm:py-3 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-news-text ">
+                          持仓比例
+                        </th>
+                        <th className="text-right py-2 px-2 sm:py-3 sm:px-3 font-['Source_Sans_3'] text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-news-text ">
+                          今日涨跌
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {fund.holdings.map((holding, index) => (
+                        <tr
+                          key={holding.code}
+                          className={`border-b border-paper-300 hover:bg-paper-100 transition-colors ${
+                            index % 2 === 0 ? "bg-card" : "bg-paper-100"
+                          }`}
+                        >
+                          <td className="py-2 px-2 sm:py-3 sm:px-3">
+                            <div className="flex items-center gap-1.5 sm:gap-2 overflow-hidden">
+                              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-news-text dark:bg-paper-100 flex-shrink-0 flex items-center justify-center">
+                                <span className="font-['Newsreader'] font-bold text-white dark:text-news-text text-[10px] sm:text-xs">
+                                  {holding.name.charAt(0)}
+                                </span>
+                              </div>
+                              <span className="font-['Libre_Baskerville'] font-semibold text-news-text text-xs sm:text-sm truncate">
+                                {holding.name}
                               </span>
                             </div>
-                            <span className="font-['Libre_Baskerville'] font-semibold text-news-text text-xs sm:text-sm truncate">
-                              {holding.name}
+                          </td>
+                          <td className="text-right py-2 px-1 sm:py-3 sm:px-3 font-['JetBrains_Mono'] text-news-muted text-[10px] sm:text-xs">
+                            {holding.code}
+                          </td>
+                          <td className="text-right py-2 px-1 sm:py-3 sm:px-3">
+                            <span className="font-['JetBrains_Mono'] text-finance-highlight text-[10px] sm:text-xs">
+                              {holding.ratio}%
                             </span>
-                          </div>
-                        </td>
-                        <td className="text-right py-2 px-1 sm:py-3 sm:px-3 font-['JetBrains_Mono'] text-news-muted text-[10px] sm:text-xs">
-                          {holding.code}
-                        </td>
-                        <td className="text-right py-2 px-1 sm:py-3 sm:px-3">
-                          <span className="font-['JetBrains_Mono'] text-finance-highlight text-[10px] sm:text-xs">
-                            {holding.ratio}%
-                          </span>
-                        </td>
-                        <td className="text-right py-2 px-2 sm:py-3 sm:px-3">
-                          <span
-                            className={cn(
-                              "font-['JetBrains_Mono'] font-bold flex items-center justify-end gap-0.5 text-[10px] sm:text-xs",
-                              getChangeColor(holding.change || 0)
-                            )}
-                          >
-                            {getChangeIcon(holding.change || 0)}
-                            {holding.change !== undefined ? (
-                              <>
-                                {holding.change > 0 ? "+" : ""}
-                                {holding.change.toFixed(2)}%
-                              </>
-                            ) : (
-                              "—"
-                            )}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          </td>
+                          <td className="text-right py-2 px-2 sm:py-3 sm:px-3">
+                            <span
+                              className={cn(
+                                "font-['JetBrains_Mono'] font-bold flex items-center justify-end gap-0.5 text-[10px] sm:text-xs",
+                                getChangeColor(holding.change || 0)
+                              )}
+                            >
+                              {getChangeIcon(holding.change || 0)}
+                              {holding.change !== undefined ? (
+                                <>
+                                  {holding.change > 0 ? "+" : ""}
+                                  {holding.change.toFixed(2)}%
+                                </>
+                              ) : (
+                                "—"
+                              )}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="py-8 px-4 text-center">
+                    <p className="text-news-muted font-['Source_Sans_3'] text-sm">
+                      该基金暂无重仓股数据
+                    </p>
+                    <p className="text-news-muted font-['Source_Sans_3'] text-xs mt-1">
+                      可能是新发基金或货币/债券型基金
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>

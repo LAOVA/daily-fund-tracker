@@ -65,12 +65,12 @@ const FundTableRow = memo(function FundTableRow({
       </td>
       <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-news-text">
         {fund.previousNetAssetValue
-          ? formatCurrency(fund.previousNetAssetValue, false)
+          ? formatCurrency(fund.previousNetAssetValue, false, 4)
           : "—"}
       </td>
       <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-news-text font-bold">
         {fund.estimatedNetValue
-          ? formatCurrency(fund.estimatedNetValue, false)
+          ? formatCurrency(fund.estimatedNetValue, false, 4)
           : "—"}
       </td>
       <td className="text-right py-4 px-4">

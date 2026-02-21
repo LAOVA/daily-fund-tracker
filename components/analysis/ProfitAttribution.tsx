@@ -22,7 +22,8 @@ export function ProfitAttribution({ className }: ProfitAttributionProps) {
     }
 
     const totalProfit = fundsWithPosition.reduce((sum, f) => {
-      const profit = (f.shares || 0) * ((f.estimatedNetValue || 0) - (f.costPrice || 0));
+      const profit =
+        (f.shares || 0) * ((f.estimatedNetValue || 0) - (f.costPrice || 0));
       return sum + profit;
     }, 0);
 
@@ -35,10 +36,12 @@ export function ProfitAttribution({ className }: ProfitAttributionProps) {
       const cost = (f.shares || 0) * (f.costPrice || 0);
       const marketValue = (f.shares || 0) * (f.estimatedNetValue || 0);
       const profit = marketValue - cost;
-      const profitPercent = f.costPrice && f.costPrice > 0
-        ? ((f.estimatedNetValue || 0) - f.costPrice) / f.costPrice * 100
-        : 0;
-      const contributionRatio = totalProfit !== 0 ? (profit / totalProfit) * 100 : 0;
+      const profitPercent =
+        f.costPrice && f.costPrice > 0
+          ? (((f.estimatedNetValue || 0) - f.costPrice) / f.costPrice) * 100
+          : 0;
+      const contributionRatio =
+        totalProfit !== 0 ? (profit / totalProfit) * 100 : 0;
       const weightRatio = totalCost > 0 ? (cost / totalCost) * 100 : 0;
 
       return {
@@ -60,7 +63,10 @@ export function ProfitAttribution({ className }: ProfitAttributionProps) {
     fundAttributions.sort((a, b) => b.profit - a.profit);
 
     const topGainers = fundAttributions.filter((f) => f.profit > 0).slice(0, 3);
-    const topLosers = fundAttributions.filter((f) => f.profit < 0).sort((a, b) => a.profit - b.profit).slice(0, 3);
+    const topLosers = fundAttributions
+      .filter((f) => f.profit < 0)
+      .sort((a, b) => a.profit - b.profit)
+      .slice(0, 3);
 
     return {
       fundAttributions,
@@ -199,34 +205,24 @@ export function ProfitAttribution({ className }: ProfitAttributionProps) {
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-right">
-                  <div className={cn(
-                    "font-['JetBrains_Mono'] font-bold text-sm",
-                    getChangeColor(f.profit)
-                  )}>
-                    {f.profit >= 0 ? "+" : ""}{formatCurrency(f.profit, false)}
+                  <div
+                    className={cn(
+                      "font-['JetBrains_Mono'] font-bold text-sm",
+                      getChangeColor(f.profit)
+                    )}
+                  >
+                    {f.profit >= 0 ? "+" : ""}
+                    {formatCurrency(f.profit, false)}
                   </div>
-                  <div className={cn(
-                    "text-xs font-['JetBrains_Mono']",
-                    getChangeColor(f.profitPercent)
-                  )}>
+                  <div
+                    className={cn(
+                      "text-xs font-['JetBrains_Mono']",
+                      getChangeColor(f.profitPercent)
+                    )}
+                  >
                     {formatPercent(f.profitPercent)}
                   </div>
                 </div>
-                {f.estimatedGrowthRate !== undefined && (
-                  <div className={cn(
-                    "text-xs font-['JetBrains_Mono'] font-bold flex items-center gap-1",
-                    getChangeColor(f.estimatedGrowthRate)
-                  )}>
-                    {f.estimatedGrowthRate > 0 ? (
-                      <TrendingUp className="w-3 h-3" />
-                    ) : f.estimatedGrowthRate < 0 ? (
-                      <TrendingDown className="w-3 h-3" />
-                    ) : (
-                      <Minus className="w-3 h-3" />
-                    )}
-                    {formatPercent(f.estimatedGrowthRate)}
-                  </div>
-                )}
               </div>
             </div>
           ))}
@@ -235,3 +231,4 @@ export function ProfitAttribution({ className }: ProfitAttributionProps) {
     </div>
   );
 }
+

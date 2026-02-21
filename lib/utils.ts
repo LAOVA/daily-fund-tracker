@@ -18,15 +18,16 @@ export function formatPercent(value: number, showSign: boolean = true): string {
 
 export function formatCurrency(
   value: number,
-  showSign: boolean = true
+  showSign: boolean = true,
+  fixed: number = 2
 ): string {
   if (value > 0 && showSign) {
-    return `¥${value.toFixed(2)}`;
+    return `¥${value.toFixed(fixed)}`;
   }
   if (value < 0) {
-    return `-¥${Math.abs(value).toFixed(2)}`;
+    return `-¥${Math.abs(value).toFixed(fixed)}`;
   }
-  return `¥${value.toFixed(2)}`;
+  return `¥${value.toFixed(fixed)}`;
 }
 
 export function getChangeColor(value: number): string {
@@ -53,18 +54,23 @@ export function downloadFile(content: string, filename: string, type: string) {
   URL.revokeObjectURL(url);
 }
 
-export function exportToCSV(data: Record<string, unknown>[], headers: string[]): string {
+export function exportToCSV(
+  data: Record<string, unknown>[],
+  headers: string[]
+): string {
   const headerRow = headers.join(",");
   const rows = data.map((row) =>
-    headers.map((h) => {
-      const value = row[h];
-      if (value === null || value === undefined) return "";
-      const str = String(value);
-      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-        return `"${str.replace(/"/g, '""')}"`;
-      }
-      return str;
-    }).join(",")
+    headers
+      .map((h) => {
+        const value = row[h];
+        if (value === null || value === undefined) return "";
+        const str = String(value);
+        if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      })
+      .join(",")
   );
   return "\uFEFF" + [headerRow, ...rows].join("\n");
 }
@@ -129,3 +135,4 @@ export function readFileAsText(file: File): Promise<string> {
     reader.readAsText(file);
   });
 }
+
