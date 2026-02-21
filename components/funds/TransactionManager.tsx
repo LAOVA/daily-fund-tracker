@@ -350,7 +350,7 @@ export function TransactionManager({ fund }: TransactionManagerProps) {
                     parseFloat(transactionShares) <= 0 ||
                     parseFloat(transactionPrice) <= 0
                   }
-                  className="flex-1 bg-news-text dark:bg-paper-100 hover:bg-paper-900 dark:hover:bg-paper-200 disabled:opacity-50 cursor-pointer"
+                  className="flex-1 bg-news-text dark:bg-paper-500 hover:bg-paper-900 dark:hover:bg-paper-700 disabled:opacity-50 cursor-pointer"
                 >
                   {editingTransaction ? "保存" : "添加"}
                 </Button>

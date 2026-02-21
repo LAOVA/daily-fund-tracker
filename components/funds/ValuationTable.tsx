@@ -397,7 +397,7 @@ export function ValuationTable() {
                 className={cn(
                   "font-['Source_Sans_3'] text-xs cursor-pointer whitespace-nowrap",
                   selectedGroup === "all"
-                    ? "bg-news-text dark:bg-paper-100 text-white "
+                    ? "bg-news-text dark:bg-paper-400 text-white "
                     : "border-news-border hover:bg-news-accent "
                 )}
               >
@@ -413,7 +413,7 @@ export function ValuationTable() {
                   className={cn(
                     "font-['Source_Sans_3'] text-xs cursor-pointer whitespace-nowrap",
                     selectedGroup === group.id
-                      ? "bg-news-text dark:bg-paper-100 text-white"
+                      ? "bg-news-text dark:bg-paper-400 text-white"
                       : "border-news-border hover:bg-news-accent"
                   )}
                 >

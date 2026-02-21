@@ -122,11 +122,11 @@ export default function HoldingsPage() {
           >
             {/* 基金标题栏 */}
             <div
-              className="border-b-2 border-news-text px-3 sm:px-5 py-3 sm:py-4 cursor-pointer hover:bg-paper-100 dark:hover:bg-paper-800 transition-colors flex items-center justify-between gap-2"
+              className="border-b-2 border-news-text px-3 sm:px-5 py-3 sm:py-4 cursor-pointer hover:bg-paper-100 dark:hover:bg-paper-600 transition-colors flex items-center justify-between gap-2"
               onClick={() => toggleExpand(fund.fundCode)}
             >
               <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-news-text dark:bg-paper-100 flex-shrink-0 flex items-center justify-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-news-text dark:bg-paper-500 flex-shrink-0 flex items-center justify-center">
                   <span className="font-['Newsreader'] text-lg sm:text-xl font-bold text-white dark:text-news-text">
                     {fund.fundName.charAt(0)}
                   </span>
@@ -195,7 +195,7 @@ export default function HoldingsPage() {
                         >
                           <td className="py-2 px-2 sm:py-3 sm:px-3">
                             <div className="flex items-center gap-1.5 sm:gap-2 overflow-hidden">
-                              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-news-text dark:bg-paper-100 flex-shrink-0 flex items-center justify-center">
+                              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-news-text dark:bg-paper-500 flex-shrink-0 flex items-center justify-center">
                                 <span className="font-['Newsreader'] font-bold text-white dark:text-news-text text-[10px] sm:text-xs">
                                   {holding.name.charAt(0)}
                                 </span>

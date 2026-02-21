@@ -100,7 +100,9 @@ export function Header() {
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="font-['Source_Sans_3'] hidden sm:inline">农历甲辰年</span>
+            <span className="font-['Source_Sans_3'] hidden sm:inline">
+              农历甲辰年
+            </span>
             <span className="font-['JetBrains_Mono']">{currentTime}</span>
             <ThemeToggle />
           </div>
@@ -118,7 +120,7 @@ export function Header() {
           </div>
 
           {/* 主标题 - 使用 Newsreader 字体 */}
-          <h1 className="font-['Newsreader'] text-6xl md:text-7xl font-bold text-news-text tracking-wide ">
+          <h1 className="font-['Newsreader'] text-6xl md:text-7xl font-bold text-news-text tracking-wide mt-6">
             追基日报
           </h1>
 

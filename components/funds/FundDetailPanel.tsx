@@ -285,8 +285,8 @@ export const FundDetailPanel = memo(function FundDetailPanel({
     <div className="p-4 sm:p-6">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="w-10 h-10 sm:w-14 sm:h-14 bg-news-text dark:bg-paper-100 flex items-center justify-center">
-            <span className="font-['Newsreader'] text-lg sm:text-2xl font-bold text-white">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 bg-news-text dark:bg-paper-500 flex items-center justify-center">
+            <span className="font-['Newsreader'] text-lg sm:text-2xl font-bold text-white mt-1.5">
               {fund.name.charAt(0)}
             </span>
           </div>
@@ -320,7 +320,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
                   onClick={() => setSelectedPeriod(period)}
                   className={`px-2 py-1 text-xs font-['Source_Sans_3'] rounded transition-colors ${
                     selectedPeriod === period
-                      ? "bg-news-text dark:bg-paper-100 text-white"
+                      ? "bg-news-text dark:bg-paper-500 text-white"
                       : "text-news-muted hover:text-news-text hover:bg-paper-200"
                   }`}
                 >
@@ -377,7 +377,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
                       >
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-news-text dark:bg-paper-100 flex items-center justify-center text-white text-xs font-['Newsreader'] font-bold">
+                            <div className="w-6 h-6 bg-news-text dark:bg-paper-500 flex items-center justify-center text-white text-xs font-['Newsreader'] font-bold">
                               {holding.name.charAt(0)}
                             </div>
                             <span className="font-['Libre_Baskerville'] font-bold text-news-text text-sm">

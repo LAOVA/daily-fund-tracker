@@ -345,7 +345,7 @@ export default function PortfolioPage() {
                       onClick={() => toggleFundExpand(fundCode)}
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-news-text dark:bg-paper-100 flex-shrink-0 flex items-center justify-center">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-news-text dark:bg-paper-500 flex-shrink-0 flex items-center justify-center">
                           <span className="font-['Newsreader'] font-bold text-white text-sm">
                             {fund.name.charAt(0)}
                           </span>
