@@ -10,16 +10,14 @@ export interface Fund {
   netAssetValue?: number;
   /** 昨日净值 */
   previousNetAssetValue?: number;
+  /** 昨日涨跌幅（百分比） */
+  yesterdayChange?: number;
   /** 估算净值（实时） */
   estimatedNetValue?: number;
   /** 估算涨跌幅（实时，百分比） */
   estimatedGrowthRate?: number;
-  /** 昨日涨跌幅（百分比） */
-  yesterdayChange?: number;
   /** 累计净值 */
   totalNetValue?: number;
-  /** 日涨跌幅 */
-  dailyGrowthRate?: number;
   /** 近一周涨跌幅 */
   lastWeekGrowthRate?: number;
   /** 近一月涨跌幅 */
@@ -88,7 +86,8 @@ interface FundsState {
   recalculatePosition: (fundCode: string) => void;
 }
 
-const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+const generateId = () =>
+  `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 export const useFundsStore = create<FundsState>()(
   persist(
@@ -201,7 +200,12 @@ export const useFundsStore = create<FundsState>()(
         set((state) => ({
           watchlist: state.watchlist.map((f) =>
             f.code === code
-              ? { ...f, shares: undefined, costPrice: undefined, costAmount: undefined }
+              ? {
+                  ...f,
+                  shares: undefined,
+                  costPrice: undefined,
+                  costAmount: undefined,
+                }
               : f
           ),
         })),
@@ -225,7 +229,9 @@ export const useFundsStore = create<FundsState>()(
         set((state) => ({
           transactions: state.transactions
             .map((t) => (t.id === id ? { ...t, ...data } : t))
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+            .sort(
+              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+            ),
         })),
 
       removeTransaction: (id: string) =>
@@ -343,3 +349,4 @@ export function calculatePositionFromTransactions(
     costAmount: totalCost,
   };
 }
+

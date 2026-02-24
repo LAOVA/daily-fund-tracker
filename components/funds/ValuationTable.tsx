@@ -1,6 +1,6 @@
 "use client";
 
-import React, {
+import {
   useEffect,
   useCallback,
   useState,
@@ -37,6 +37,15 @@ const FundTableRow = memo(function FundTableRow({
   isExpanded,
   onToggle,
 }: FundTableRowProps) {
+  const todayEarnings =
+    fund.shares &&
+    fund.previousNetAssetValue &&
+    fund.estimatedGrowthRate !== undefined
+      ? fund.shares *
+        fund.previousNetAssetValue *
+        (fund.estimatedGrowthRate / 100)
+      : null;
+
   return (
     <tr
       className={`border-b border-paper-300 hover:bg-paper-100 transition-colors cursor-pointer ${
@@ -63,10 +72,19 @@ const FundTableRow = memo(function FundTableRow({
           </div>
         </div>
       </td>
-      <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-news-text">
-        {fund.previousNetAssetValue
-          ? formatCurrency(fund.previousNetAssetValue, false, 4)
-          : "—"}
+      <td className="text-right py-4 px-4">
+        {todayEarnings !== null ? (
+          <span
+            className={cn(
+              "font-['JetBrains_Mono'] font-bold",
+              getChangeColor(todayEarnings)
+            )}
+          >
+            {formatCurrency(todayEarnings)}
+          </span>
+        ) : (
+          <span className="text-news-muted font-['JetBrains_Mono']">—</span>
+        )}
       </td>
       <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-news-text font-bold">
         {fund.estimatedNetValue
@@ -84,6 +102,12 @@ const FundTableRow = memo(function FundTableRow({
             : "—"}
         </span>
       </td>
+      <td className="text-right py-4 px-4 font-['JetBrains_Mono'] text-news-text">
+        {fund.previousNetAssetValue
+          ? formatCurrency(fund.previousNetAssetValue, false, 4)
+          : "—"}
+      </td>
+
       <td className="text-right py-4 px-4">
         <span
           className={`font-['JetBrains_Mono'] ${getChangeColor(
@@ -106,30 +130,6 @@ const FundTableRow = memo(function FundTableRow({
           : "—"}
       </td>
       <td className="text-right py-4 px-4 hidden sm:table-cell">
-        {fund.shares &&
-        fund.previousNetAssetValue &&
-        fund.yesterdayChange !== undefined ? (
-          <span
-            className={cn(
-              "font-['JetBrains_Mono'] font-bold",
-              getChangeColor(
-                fund.shares *
-                  fund.previousNetAssetValue *
-                  (fund.yesterdayChange / 100)
-              )
-            )}
-          >
-            {formatCurrency(
-              fund.shares *
-                fund.previousNetAssetValue *
-                (fund.yesterdayChange / 100)
-            )}
-          </span>
-        ) : (
-          <span className="text-news-muted font-['JetBrains_Mono']">—</span>
-        )}
-      </td>
-      <td className="text-right py-4 px-4 hidden md:table-cell">
         {fund.shares && fund.costPrice && fund.estimatedNetValue ? (
           <div>
             <span
@@ -494,7 +494,7 @@ export function ValuationTable() {
                 基金名称
               </th>
               <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
-                昨日净值
+                今日收益
               </th>
               <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
                 估值净值
@@ -503,6 +503,10 @@ export function ValuationTable() {
                 估值涨跌
               </th>
               <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
+                昨日净值
+              </th>
+
+              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
                 昨日涨幅
               </th>
               <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
@@ -510,9 +514,6 @@ export function ValuationTable() {
               </th>
               <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
                 近一月
-              </th>
-              <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
-                昨日收益
               </th>
               <th className="text-right py-3 px-4 font-['Source_Sans_3'] text-xs font-bold uppercase tracking-[0.15em] text-news-text">
                 持仓收益
@@ -574,14 +575,14 @@ export function ValuationTable() {
         </div>
       )}
 
-      {watchlist.length > 0 && (
+      {/* {watchlist.length > 0 && (
         <div className="border-t-2 border-news-border mt-4 pt-4">
           <div className="flex items-center justify-between text-xs text-news-muted font-['Source_Sans_3']">
             <span>共 {filteredFunds.length} 只基金</span>
             <span className="hidden sm:inline">数据来源：天天基金网</span>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

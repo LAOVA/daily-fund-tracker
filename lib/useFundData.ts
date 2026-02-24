@@ -5,7 +5,6 @@ export interface FundData {
   name: string;
   netAssetValue?: number;
   totalNetValue?: number;
-  dailyGrowthRate?: number;
   lastWeekGrowthRate?: number;
   lastMonthGrowthRate?: number;
   thisYearGrowthRate?: number;
@@ -130,20 +129,20 @@ export async function fetchFullFundData(code: string): Promise<{
         let lastWeekChange: number | undefined;
         let lastMonthChange: number | undefined;
         // let thisYearChange: number | undefined;
-        let estimatedNetValue: number | undefined;
+        // let estimatedNetValue: number | undefined;
 
         if (trend.length > 0) {
           const sliced = trend.slice(-90);
 
-          // 获取今日估算的净值
-          const today = sliced[sliced.length - 1];
-          if (today && typeof today.equityReturn === "number") {
-            estimatedNetValue =
-              safeParseFloat(today.y) || safeParseFloat(gzData.gsz);
-          }
+          // // 获取今日估算的净值
+          // const today = sliced[sliced.length - 1];
+          // if (today && typeof today.equityReturn === "number") {
+          //   estimatedNetValue =
+          //     safeParseFloat(today.y) || safeParseFloat(gzData.gsz);
+          // }
 
           // 昨日涨幅
-          const last = sliced[sliced.length - 2];
+          const last = sliced[sliced.length - 1];
           if (last && typeof last.equityReturn === "number") {
             yesterdayChange = last.equityReturn;
           }
@@ -183,7 +182,7 @@ export async function fetchFullFundData(code: string): Promise<{
         }
 
         const previousNetAssetValue = safeParseFloat(gzData.dwjz);
-        // const estimatedNetValue = safeParseFloat(gzData.gsz);
+        const estimatedNetValue = safeParseFloat(gzData.gsz);
         const estimatedGrowthRate = safeParseFloat(gzData.gszzl);
 
         // 验证核心数据是否有效

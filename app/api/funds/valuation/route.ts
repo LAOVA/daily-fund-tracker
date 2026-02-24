@@ -60,7 +60,6 @@ export async function GET(request: NextRequest) {
           previousNetAssetValue: parseFloat(data.dwjz) || 0, // 昨日净值
           estimatedNetValue: parseFloat(data.gsz) || 0, // 估值净值
           estimatedGrowthRate: parseFloat(data.gszzl) || 0, // 估值涨跌幅
-          dailyGrowthRate: parseFloat(data.gszzl) || 0, // 日涨跌幅（同估值涨跌幅）
           totalNetValue: parseFloat(data.dwjz) || 0, // 累计净值（使用昨日净值）
           gztime: data.gztime, // 估值时间
           updateTime: new Date().toISOString(),
