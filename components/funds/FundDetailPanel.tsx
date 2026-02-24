@@ -16,7 +16,7 @@ import { Line } from "react-chartjs-2";
 import { ChevronUp, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Loading } from "@/components/ui/loading";
 import { Fund } from "@/stores/fundsStore";
-import { getChangeColor } from "@/lib/utils";
+import { getChangeColor, formatCurrency, formatPercent, cn } from "@/lib/utils";
 import { fetchFundHoldingsByJsonp, Holding } from "@/lib/useFundData";
 
 ChartJS.register(
@@ -307,7 +307,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
         <div>
           <div className="flex items-center justify-between border-b-2 border-news-text pb-2 mb-4">
             <h4 className="font-['Source_Sans_3'] text-sm font-bold uppercase tracking-[0.15em] text-news-text">
@@ -329,7 +329,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
               ))}
             </div>
           </div>
-          <div className="border border-news-border bg-card p-4 h-64 sm:h-72 relative">
+          <div className="border border-news-border bg-card p-4 h-59 relative">
             {loading ? (
               <Loading />
             ) : historyData.length > 0 ? (
@@ -348,7 +348,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
               重仓股 {hasHoldingsData ? `(${holdings.length}只)` : ""}
             </h4>
           </div>
-          <div className="border border-news-border bg-card h-64 sm:h-72 overflow-hidden">
+          <div className="border border-news-border bg-card h-60  overflow-hidden">
             {loading ? (
               <Loading />
             ) : hasHoldingsData && holdings.length > 0 ? (
@@ -415,6 +415,127 @@ export const FundDetailPanel = memo(function FundDetailPanel({
                 <p>暂无重仓股数据</p>
                 <p className="text-xs mt-1 text-news-muted/70">
                   可能是新发基金或货币/债券型基金
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col">
+          <div className="border-b-2 border-news-text pb-2 mb-4">
+            <h4 className="font-['Source_Sans_3'] text-sm font-bold uppercase tracking-[0.15em] text-news-text">
+              我的持仓
+            </h4>
+          </div>
+          <div className="border border-news-border bg-card p-4 h-60 overflow-y-auto">
+            {fund.shares && fund.costPrice ? (
+              <div className="space-y-3">
+                <div className="bg-paper-100 rounded-lg p-3">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                    <div>
+                      <div className="text-[10px] text-news-muted font-['Source_Sans_3'] uppercase tracking-[0.15em]">
+                        持有份额
+                      </div>
+                      <div className="text-sm font-['JetBrains_Mono'] font-semibold text-news-text">
+                        {fund.shares.toLocaleString("zh-CN", {
+                          maximumFractionDigits: 2,
+                        })}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-news-muted font-['Source_Sans_3'] uppercase tracking-[0.15em]">
+                        成本单价
+                      </div>
+                      <div className="text-sm font-['JetBrains_Mono'] font-semibold text-news-text">
+                        {formatCurrency(fund.costPrice, false, 4)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-paper-100 rounded-lg p-3">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                    <div>
+                      <div className="text-[10px] text-news-muted font-['Source_Sans_3'] uppercase tracking-[0.15em]">
+                        总成本
+                      </div>
+                      <div className="text-sm font-['JetBrains_Mono'] font-semibold text-news-text">
+                        {formatCurrency(fund.shares * fund.costPrice)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-news-muted font-['Source_Sans_3'] uppercase tracking-[0.15em]">
+                        当前市值
+                      </div>
+                      <div className="text-sm font-['JetBrains_Mono'] font-semibold text-news-text">
+                        {fund.estimatedNetValue
+                          ? formatCurrency(fund.shares * fund.estimatedNetValue)
+                          : "—"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-paper-100 rounded-lg p-3">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                    <div>
+                      <div className="text-[10px] text-news-muted font-['Source_Sans_3'] uppercase tracking-[0.15em]">
+                        持仓盈亏
+                      </div>
+                      {fund.estimatedNetValue ? (
+                        <div
+                          className={cn(
+                            "text-base font-['JetBrains_Mono'] font-bold",
+                            getChangeColor(
+                              fund.shares *
+                                (fund.estimatedNetValue - fund.costPrice)
+                            )
+                          )}
+                        >
+                          {formatCurrency(
+                            fund.shares *
+                              (fund.estimatedNetValue - fund.costPrice)
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-base font-['JetBrains_Mono'] text-news-muted">
+                          —
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-news-muted font-['Source_Sans_3'] uppercase tracking-[0.15em]">
+                        盈亏比例
+                      </div>
+                      {fund.estimatedNetValue ? (
+                        <div
+                          className={cn(
+                            "text-base font-['JetBrains_Mono'] font-bold",
+                            getChangeColor(
+                              ((fund.estimatedNetValue - fund.costPrice) /
+                                fund.costPrice) *
+                                100
+                            )
+                          )}
+                        >
+                          {formatPercent(
+                            ((fund.estimatedNetValue - fund.costPrice) /
+                              fund.costPrice) *
+                              100
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-base font-['JetBrains_Mono'] text-news-muted">
+                          —
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-news-muted font-['Source_Sans_3']">
+                <p>暂无持仓信息</p>
+                <p className="text-xs mt-1 text-news-muted/70">
+                  请在设置中添加您的持仓
                 </p>
               </div>
             )}
