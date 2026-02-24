@@ -22,7 +22,6 @@ import { useFundsStore, Fund, FundGroup } from "@/stores/fundsStore";
 import { formatCurrency, formatPercent, getChangeColor, cn } from "@/lib/utils";
 import { fetchMultipleFundData } from "@/lib/useFundData";
 import { FundDetailPanel } from "./FundDetailPanel";
-import { ErrorMessage } from "@/components/ui/error-boundary";
 
 interface FundTableRowProps {
   fund: Fund;
@@ -48,9 +47,9 @@ const FundTableRow = memo(function FundTableRow({
 
   return (
     <tr
-      className={`border-b border-paper-300 hover:bg-paper-100 transition-colors cursor-pointer ${
-        index % 2 === 0 ? "bg-card" : "bg-paper-100"
-      } ${isExpanded ? "bg-news-accent" : ""}`}
+      className={`border-b border-paper-300 hover:bg-paper-200 transition-colors cursor-pointer bg-card ${
+        isExpanded ? "bg-paper-200" : ""
+      }`}
       onClick={() => onToggle(fund.code)}
     >
       <td className="py-4 px-4">
@@ -284,87 +283,83 @@ const FundMobileCard = memo(function FundMobileCard({
 export function ValuationTable() {
   const { watchlist, groups, updateFund } = useFundsStore();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<string>("all");
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [expandedFund, setExpandedFund] = useState<string | null>(null);
   const fetchingCodesRef = useRef<Set<string>>(new Set());
-  const hasInitializedRef = useRef(false);
+  const hasCleanedRef = useRef(false);
 
-  const fetchFundData = useCallback(
-    async (force = false) => {
-      if (watchlist.length === 0) return;
+  const fetchFundData = useCallback(async () => {
+    setLoading(true);
 
-      const codesToFetch = force
-        ? watchlist.map((f: Fund) => f.code)
-        : watchlist
-            .filter(
-              (f: Fund) =>
-                !f.estimatedNetValue && !fetchingCodesRef.current.has(f.code)
-            )
-            .map((f: Fund) => f.code);
-
-      if (codesToFetch.length === 0) return;
-
-      codesToFetch.forEach((code: string) =>
-        fetchingCodesRef.current.add(code)
-      );
-      setLoading(true);
-      setError(null);
-
-      try {
-        const results = await fetchMultipleFundData(
-          codesToFetch,
-          (code: string, data: any) => {
-            const fund = watchlist.find((f: Fund) => f.code === code);
-            if (fund && data) {
-              updateFund(code, {
-                code: data.code,
-                name: data.name || fund.name,
-                previousNetAssetValue: data.previousNetAssetValue,
-                estimatedNetValue: data.estimatedNetValue,
-                estimatedGrowthRate: data.estimatedGrowthRate,
-                yesterdayChange: data.yesterdayChange,
-                lastWeekGrowthRate: data.lastWeekChange,
-                lastMonthGrowthRate: data.lastMonthChange,
-                updateTime: new Date().toISOString(),
-              });
-            }
-          }
-        );
-
-        if (results.size === 0 && codesToFetch.length > 0) {
-          setError("获取基金数据失败，请检查网络连接后重试");
-        }
-
-        setLastUpdate(new Date());
-      } catch (err) {
-        console.error("Fetch error:", err);
-        setError("网络请求失败，请检查网络连接后重试");
-      } finally {
-        codesToFetch.forEach((code: string) =>
-          fetchingCodesRef.current.delete(code)
-        );
+    if (watchlist.length === 0) {
+      setTimeout(() => {
         setLoading(false);
-      }
-    },
-    [watchlist, updateFund]
-  );
-
-  useEffect(() => {
-    if (!hasInitializedRef.current) {
-      fetchFundData();
-      hasInitializedRef.current = true;
+      }, 1000);
       return;
     }
 
-    const hasNewFundWithoutData = watchlist.some(
-      (f: Fund) => !f.estimatedNetValue && !fetchingCodesRef.current.has(f.code)
-    );
-    if (hasNewFundWithoutData && !loading) {
+    const now = Date.now();
+    const codesToFetch = watchlist
+      .filter((f: Fund) => {
+        if (!f.updateTime) return true;
+        const updateTime = new Date(f.updateTime).getTime();
+        const fiveMinutes = 5 * 60 * 1000;
+        return now - updateTime > fiveMinutes;
+      })
+      .map((f: Fund) => f.code);
+
+    if (codesToFetch.length === 0) {
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+      return;
+    }
+
+    codesToFetch.forEach((code: string) => fetchingCodesRef.current.add(code));
+
+    try {
+      await fetchMultipleFundData(codesToFetch, (code: string, data: any) => {
+        const fund = watchlist.find((f: Fund) => f.code === code);
+        if (fund && data) {
+          updateFund(code, {
+            code: data.code,
+            name: data.name || fund.name,
+            previousNetAssetValue: data.previousNetAssetValue,
+            estimatedNetValue: data.estimatedNetValue,
+            estimatedGrowthRate: data.estimatedGrowthRate,
+            yesterdayChange: data.yesterdayChange,
+            lastWeekGrowthRate: data.lastWeekChange,
+            lastMonthGrowthRate: data.lastMonthChange,
+            updateTime: new Date().toISOString(),
+          });
+        }
+      });
+
+      setLastUpdate(new Date());
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
+      codesToFetch.forEach((code: string) =>
+        fetchingCodesRef.current.delete(code)
+      );
+      setLoading(false);
+    }
+  }, [watchlist, updateFund]);
+
+  useEffect(() => {
+    if (!hasCleanedRef.current) {
+      const { cleanOrphanFunds } = useFundsStore.getState();
+      cleanOrphanFunds();
+      hasCleanedRef.current = true;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (watchlist.length > 0 && !loading) {
       fetchFundData();
     }
-  }, [fetchFundData, loading, watchlist]);
+  }, [watchlist.length]);
 
   const handleToggleExpand = useCallback((code: string) => {
     setExpandedFund((prev) => (prev === code ? null : code));
@@ -432,7 +427,7 @@ export function ValuationTable() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => fetchFundData(true)}
+              onClick={() => fetchFundData()}
               disabled={loading}
               className="border-news-text hover:bg-news-text dark:hover:bg-paper-100 hover:text-white font-['Source_Sans_3'] text-xs uppercase tracking-[0.15em] cursor-pointer"
             >
@@ -446,16 +441,6 @@ export function ValuationTable() {
           </div>
         </div>
       </div>
-
-      {error && (
-        <div className="mb-4">
-          <ErrorMessage
-            title="数据加载失败"
-            message={error}
-            onRetry={() => fetchFundData(true)}
-          />
-        </div>
-      )}
 
       <div className="mb-4 text-sm text-news-muted font-['Source_Sans_3'] flex items-center gap-2">
         <span className="text-finance-rise">💡</span>

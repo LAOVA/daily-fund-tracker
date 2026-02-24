@@ -337,11 +337,11 @@ export default function PortfolioPage() {
                 return (
                   <div key={fundCode}>
                     <div
-                      className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 hover:bg-paper-100 transition-colors cursor-pointer ${
-                        index !== group.funds.length - 1 || isExpanded
-                          ? "border-b border-paper-300"
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 hover:bg-paper-200 transition-colors cursor-pointer ${
+                        index !== group.funds.length - 1
+                          ? "border-b border-paper-300 "
                           : ""
-                      }`}
+                      } ${isExpanded ? "bg-paper-200" : ""}`}
                       onClick={() => toggleFundExpand(fundCode)}
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -432,7 +432,7 @@ export default function PortfolioPage() {
                     </div>
 
                     {isExpanded && (
-                      <div className="px-3 sm:px-4 pb-4 pt-2 bg-paper-100 border-b border-paper-300">
+                      <div className="px-3 sm:px-4 pb-4 pt-2 bg-paper-200 border-b border-paper-300">
                         <TransactionManager fund={fund} />
                       </div>
                     )}
@@ -450,14 +450,14 @@ export default function PortfolioPage() {
         ))}
       </div>
 
-      <div className="border-t-2 border-news-border pt-4">
+      {/* <div className="border-t-2 border-news-border pt-4">
         <div className="flex items-center justify-between text-xs text-news-muted font-['Source_Sans_3']">
           <span>
             共 {groups.length} 个分组，{watchlist.length} 只基金
           </span>
           <span>数据来源：追基日报</span>
         </div>
-      </div>
+      </div> */}
 
       <Dialog open={isMoveDialogOpen} onOpenChange={setIsMoveDialogOpen}>
         <DialogContent className="sm:max-w-md border-2 border-news-text">

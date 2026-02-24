@@ -430,7 +430,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
           <div className="border border-news-border bg-card p-4 h-60 overflow-y-auto">
             {fund.shares && fund.costPrice ? (
               <div className="space-y-3">
-                <div className="bg-paper-100 rounded-lg p-3">
+                <div className="bg-paper-200 rounded-lg p-3">
                   <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                     <div>
                       <div className="text-[10px] text-news-muted font-['Source_Sans_3'] uppercase tracking-[0.15em]">
@@ -452,7 +452,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
                     </div>
                   </div>
                 </div>
-                <div className="bg-paper-100 rounded-lg p-3">
+                <div className="bg-paper-200 rounded-lg p-3">
                   <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                     <div>
                       <div className="text-[10px] text-news-muted font-['Source_Sans_3'] uppercase tracking-[0.15em]">
@@ -474,7 +474,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
                     </div>
                   </div>
                 </div>
-                <div className="bg-paper-100 rounded-lg p-3">
+                <div className="bg-paper-200 rounded-lg p-3">
                   <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                     <div>
                       <div className="text-[10px] text-news-muted font-['Source_Sans_3'] uppercase tracking-[0.15em]">
@@ -553,7 +553,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
 
   return (
     <tr>
-      <td colSpan={9} className="bg-paper-100 border-b-2 border-news-text">
+      <td colSpan={9} className="bg-paper-200 border-b-2 border-news-text">
         {content}
       </td>
     </tr>

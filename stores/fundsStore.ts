@@ -84,6 +84,7 @@ interface FundsState {
   addDividend: (dividend: Omit<DividendRecord, "id">) => void;
   removeDividend: (id: string) => void;
   recalculatePosition: (fundCode: string) => void;
+  cleanOrphanFunds: () => void;
 }
 
 const generateId = () =>
@@ -160,9 +161,26 @@ export const useFundsStore = create<FundsState>()(
         })),
 
       removeGroup: (id: string) =>
-        set((state) => ({
-          groups: state.groups.filter((g) => g.id !== id),
-        })),
+        set((state) => {
+          const group = state.groups.find((g) => g.id === id);
+          const groupFundCodes = group ? group.funds : [];
+          return {
+            groups: state.groups.filter((g) => g.id !== id),
+            watchlist: state.watchlist.filter((f) => !groupFundCodes.includes(f.code)),
+          };
+        }),
+
+      cleanOrphanFunds: () =>
+        set((state) => {
+          const validGroupFundCodes = new Set(
+            state.groups.flatMap((g) => g.funds)
+          );
+          return {
+            watchlist: state.watchlist.filter(
+              (f) => validGroupFundCodes.has(f.code) || !validGroupFundCodes.size
+            ),
+          };
+        }),
 
       addFundToGroup: (fundCode: string, groupId: string) =>
         set((state) => ({
