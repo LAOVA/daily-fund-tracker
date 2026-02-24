@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
+import { HeroSection } from "@/components/layout/HeroSection";
+import { Footer } from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
   title: "追基日报 | 基金投资早报",
@@ -22,9 +24,13 @@ export default function RootLayout({
           rel="stylesheet" 
         />
       </head>
-      <body className="min-h-screen bg-news-bg text-news-text antialiased">
+      <body className="min-h-screen bg-news-bg text-news-text antialiased flex flex-col">
         <Header />
-        <main className="max-w-7xl mx-auto px-4 py-6">{children}</main>
+        <div className="max-w-7xl mx-auto px-4 w-full">
+          <HeroSection />
+        </div>
+        <main className="flex-1 max-w-7xl mx-auto px-4 py-6 w-full">{children}</main>
+        <Footer />
       </body>
     </html>
   );
