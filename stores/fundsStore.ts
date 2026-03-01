@@ -1,6 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+export interface NavRecord {
+  date: string;
+  nav: number;
+  accNav: number;
+}
+
 export interface Fund {
   /** 基金代码 */
   code: string;
@@ -32,6 +38,8 @@ export interface Fund {
   costPrice?: number;
   /** 总投入成本 */
   costAmount?: number;
+  /** 历史净值记录 */
+  navHistory?: NavRecord[];
 }
 
 export interface FundGroup {

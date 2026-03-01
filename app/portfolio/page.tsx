@@ -29,6 +29,7 @@ import { TransactionManager } from "@/components/funds/TransactionManager";
 import { PortfolioAnalysis } from "@/components/analysis/PortfolioAnalysis";
 import { ProfitAttribution } from "@/components/analysis/ProfitAttribution";
 import { DataImportExport } from "@/components/funds/DataImportExport";
+import { DailyProfitCalendar } from "@/components/funds/DailyProfitCalendar";
 
 export default function PortfolioPage() {
   const {
@@ -191,7 +192,7 @@ export default function PortfolioPage() {
         <div className="bg-news-accent border border-news-border p-6">
           <h2 className="font-['Newsreader'] text-xl font-bold text-news-text mb-4 flex items-center gap-2">
             <Wallet className="w-5 h-5" />
-            投资组合总览
+            投资总览
           </h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="bg-card border border-paper-300 rounded-lg p-4">
@@ -432,8 +433,9 @@ export default function PortfolioPage() {
                     </div>
 
                     {isExpanded && (
-                      <div className="px-3 sm:px-4 pb-4 pt-2 bg-paper-200 border-b border-paper-300">
+                      <div className="px-3 sm:px-4 pb-4 pt-2 bg-paper-200 border-b border-paper-300 space-y-4">
                         <TransactionManager fund={fund} />
+                        <DailyProfitCalendar fund={fund} />
                       </div>
                     )}
                   </div>

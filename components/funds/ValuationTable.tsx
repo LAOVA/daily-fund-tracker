@@ -18,7 +18,7 @@ import {
   TrendingDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useFundsStore, Fund, FundGroup } from "@/stores/fundsStore";
+import { useFundsStore, Fund, FundGroup, NavRecord } from "@/stores/fundsStore";
 import { formatCurrency, formatPercent, getChangeColor, cn } from "@/lib/utils";
 import { fetchMultipleFundData } from "@/lib/useFundData";
 import { FundDetailPanel } from "./FundDetailPanel";
@@ -332,6 +332,7 @@ export function ValuationTable() {
             lastWeekGrowthRate: data.lastWeekChange,
             lastMonthGrowthRate: data.lastMonthChange,
             updateTime: new Date().toISOString(),
+            navHistory: data.navHistory as NavRecord[],
           });
         }
       });
