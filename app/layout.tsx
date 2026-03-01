@@ -6,7 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
   title: "追基日报 | 基金投资早报",
-  description: "每日基金估值、重仓追踪、组合管理 - 您的基金投资早报",
+  description: "每日基金估值、组合管理 - 您的基金投资早报",
 };
 
 export default function RootLayout({

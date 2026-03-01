@@ -57,15 +57,6 @@ export function HeroSection() {
                 </p>
               </button>
               <Link
-                href="/holdings"
-                className="flex items-start gap-2 hover:opacity-70 transition-opacity w-fit"
-              >
-                <span className="text-finance-rise font-bold">▸</span>
-                <p className="font-['Libre_Baskerville'] text-news-text">
-                  点击"重仓追踪"查看基金持仓明细
-                </p>
-              </Link>
-              <Link
                 href="/portfolio"
                 className="flex items-start gap-2 hover:opacity-70 transition-opacity w-fit"
               >

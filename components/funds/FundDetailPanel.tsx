@@ -383,6 +383,9 @@ export const FundDetailPanel = memo(function FundDetailPanel({
                             <span className="font-['Libre_Baskerville'] font-bold text-news-text text-sm">
                               {holding.name}
                             </span>
+                            <span className="text-[10px] font-['JetBrains_Mono'] text-news-muted bg-paper-200 px-1.5 py-0.5 rounded">
+                              {holding.code}
+                            </span>
                           </div>
                         </td>
                         <td className="text-right py-3 px-4 font-['JetBrains_Mono'] text-finance-highlight text-sm">

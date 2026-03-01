@@ -7,7 +7,6 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const navItems = [
   { href: "/", label: "首页" },
-  { href: "/holdings", label: "重仓追踪" },
   { href: "/portfolio", label: "基金管理" },
 ];
 
