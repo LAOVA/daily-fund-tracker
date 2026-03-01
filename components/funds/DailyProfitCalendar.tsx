@@ -46,10 +46,15 @@ const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
 
 export function DailyProfitCalendar({
   fund,
+  funds,
   currentDay = new Date().getDate(),
   currentMonth = new Date().getMonth() + 1,
   currentYear = new Date().getFullYear(),
 }: DailyProfitCalendarProps) {
+  const isMultiFund = !!funds;
+  const activeFund = fund;
+  const activeFunds = funds || (fund ? [fund] : []);
+  
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [viewMode, setViewMode] = useState<"calendar" | "chart">("calendar");
@@ -61,15 +66,27 @@ export function DailyProfitCalendar({
   const transactions = useFundsStore((state) => state.transactions);
 
   const fundTransactions = useMemo(() => {
+    if (isMultiFund) {
+      return transactions
+        .filter((t) => activeFunds.some((f) => f.code === t.fundCode))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }
     return transactions
-      .filter((t) => t.fundCode === fund.code)
+      .filter((t) => t.fundCode === activeFund?.code)
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [transactions, fund.code]);
+  }, [transactions, activeFund?.code, activeFunds, isMultiFund]);
 
   const firstBuyDate = useMemo(() => {
     const buyTransactions = fundTransactions.filter((t) => t.type === "buy");
     return buyTransactions.length > 0 ? buyTransactions[0].date : null;
   }, [fundTransactions]);
+
+  const totalCost = useMemo(() => {
+    if (isMultiFund) {
+      return activeFunds.reduce((sum, f) => sum + (f.costAmount || 0), 0);
+    }
+    return activeFund?.costAmount || 0;
+  }, [activeFund, activeFunds, isMultiFund]);
 
   const daysInMonth = useMemo(() => {
     return new Date(selectedYear, selectedMonth, 0).getDate();
@@ -80,7 +97,120 @@ export function DailyProfitCalendar({
   }, [selectedYear, selectedMonth]);
 
   const dailyProfitData = useMemo(() => {
-    const navHistory = fund.navHistory || [];
+    if (isMultiFund) {
+      const allDates = new Set<string>();
+      const fundNavMaps: Map<string, Map<string, number>> = new Map();
+      const fundSharesMaps: Map<string, Map<string, number>> = new Map();
+      
+      activeFunds.forEach((f) => {
+        const navHistory = f.navHistory || [];
+        if (navHistory.length > 0) {
+          const sortedNav = [...navHistory].sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          );
+          const navMap = new Map<string, number>();
+          sortedNav.forEach((nav) => navMap.set(nav.date, nav.nav));
+          fundNavMaps.set(f.code, navMap);
+          
+          sortedNav.forEach((nav) => allDates.add(nav.date));
+        }
+      });
+      
+      if (allDates.size === 0 || fundTransactions.length === 0) {
+        return [];
+      }
+      
+      const sortedDates = Array.from(allDates).sort(
+        (a, b) => new Date(a).getTime() - new Date(b).getTime()
+      );
+      
+      let filteredDates = sortedDates;
+      if (firstBuyDate) {
+        const purchaseTime = new Date(firstBuyDate).getTime();
+        filteredDates = sortedDates.filter((d) => new Date(d).getTime() >= purchaseTime);
+      }
+      
+      const dateSet = new Set(filteredDates);
+      
+      const sharesMap = new Map<string, number>();
+      for (const navDate of filteredDates) {
+        const dayTxns = fundTransactions.filter((t) => {
+          const txnDate = new Date(t.date);
+          const navDt = new Date(navDate);
+          return txnDate.getTime() <= navDt.getTime();
+        });
+        
+        let currentShares = 0;
+        dayTxns.forEach((t) => {
+          if (t.type === "buy") {
+            currentShares += t.shares;
+          } else if (t.type === "sell") {
+            currentShares -= t.shares;
+          }
+        });
+        
+        sharesMap.set(navDate, currentShares);
+      }
+      
+      const data: { date: number; profit: number }[] = [];
+      
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayStr = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        
+        if (!dateSet.has(dayStr)) {
+          data.push({ date: day, profit: 0 });
+          continue;
+        }
+        
+        const sortedAllDates = Array.from(allDates).sort(
+          (a, b) => new Date(a).getTime() - new Date(b).getTime()
+        );
+        const currentIndex = sortedAllDates.indexOf(dayStr);
+        
+        if (currentIndex > 0) {
+          const prevDate = sortedAllDates[currentIndex - 1];
+          
+          let totalProfit = 0;
+          
+          activeFunds.forEach((f) => {
+            const navMap = fundNavMaps.get(f.code);
+            if (!navMap) return;
+            
+            const currentNav = navMap.get(dayStr);
+            const prevNav = navMap.get(prevDate);
+            
+            if (currentNav && prevNav && currentNav > 0 && prevNav > 0) {
+              const dayTxns = fundTransactions.filter((t) => {
+                const txnDate = new Date(t.date);
+                const navDt = new Date(dayStr);
+                return t.fundCode === f.code && txnDate.getTime() <= navDt.getTime();
+              });
+              
+              let currentShares = 0;
+              dayTxns.forEach((t) => {
+                if (t.type === "buy") {
+                  currentShares += t.shares;
+                } else if (t.type === "sell") {
+                  currentShares -= t.shares;
+                }
+              });
+              
+              if (currentShares > 0) {
+                totalProfit += (currentNav - prevNav) * currentShares;
+              }
+            }
+          });
+          
+          data.push({ date: day, profit: totalProfit });
+        } else {
+          data.push({ date: day, profit: 0 });
+        }
+      }
+      
+      return data;
+    }
+    
+    const navHistory = activeFund?.navHistory || [];
 
     if (navHistory.length === 0 || fundTransactions.length === 0) {
       return [];
@@ -162,7 +292,9 @@ export function DailyProfitCalendar({
 
     return data;
   }, [
-    fund.navHistory,
+    activeFund,
+    activeFunds,
+    isMultiFund,
     selectedYear,
     selectedMonth,
     daysInMonth,
@@ -210,10 +342,10 @@ export function DailyProfitCalendar({
   };
 
   const formatProfitPercent = (profit: number) => {
-    if (!fund.costPrice || fund.costPrice === 0 || profit === 0) {
+    if (!activeFund?.costPrice || activeFund?.costPrice === 0 || profit === 0) {
       return "0.00%";
     }
-    const percent = (profit / (fund.costPrice * (fund.shares || 1))) * 100;
+    const percent = (profit / (activeFund?.costPrice * (activeFund?.shares || 1))) * 100;
     const prefix = percent > 0 ? "+" : "";
     return `${prefix}${percent.toFixed(2)}%`;
   };
@@ -241,7 +373,110 @@ export function DailyProfitCalendar({
   }, [dailyProfitData]);
 
   const aggregatedData = useMemo(() => {
-    const navHistory = fund.navHistory || [];
+    if (isMultiFund) {
+      const allDates = new Set<string>();
+      const fundNavMaps: Map<string, Map<string, number>> = new Map();
+      
+      activeFunds.forEach((f) => {
+        const navHistory = f.navHistory || [];
+        if (navHistory.length > 0) {
+          const sortedNav = [...navHistory].sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          );
+          const navMap = new Map<string, number>();
+          sortedNav.forEach((nav) => navMap.set(nav.date, nav.nav));
+          fundNavMaps.set(f.code, navMap);
+          
+          sortedNav.forEach((nav) => allDates.add(nav.date));
+        }
+      });
+      
+      if (allDates.size === 0 || fundTransactions.length === 0) {
+        return [];
+      }
+      
+      const sortedAllDates = Array.from(allDates).sort(
+        (a, b) => new Date(a).getTime() - new Date(b).getTime()
+      );
+      
+      let filteredDates = sortedAllDates;
+      if (firstBuyDate) {
+        const purchaseTime = new Date(firstBuyDate).getTime();
+        filteredDates = sortedAllDates.filter((d) => new Date(d).getTime() >= purchaseTime);
+      }
+      
+      const dailyProfits: { date: string; profit: number }[] = [];
+      
+      for (let i = 1; i < filteredDates.length; i++) {
+        const currentDate = filteredDates[i];
+        const prevDate = filteredDates[i - 1];
+        
+        let totalProfit = 0;
+        
+        activeFunds.forEach((f) => {
+          const navMap = fundNavMaps.get(f.code);
+          if (!navMap) return;
+          
+          const currentNav = navMap.get(currentDate);
+          const prevNav = navMap.get(prevDate);
+          
+          if (currentNav && prevNav && currentNav > 0 && prevNav > 0) {
+            const dayTxns = fundTransactions.filter((t) => {
+              const txnDate = new Date(t.date);
+              const navDt = new Date(currentDate);
+              return t.fundCode === f.code && txnDate.getTime() <= navDt.getTime();
+            });
+            
+            let currentShares = 0;
+            dayTxns.forEach((t) => {
+              if (t.type === "buy") {
+                currentShares += t.shares;
+              } else if (t.type === "sell") {
+                currentShares -= t.shares;
+              }
+            });
+            
+            if (currentShares > 0) {
+              totalProfit += (currentNav - prevNav) * currentShares;
+            }
+          }
+        });
+        
+        if (totalProfit !== 0) {
+          dailyProfits.push({ date: currentDate, profit: totalProfit });
+        }
+      }
+      
+      if (timeGranularity === "day") {
+        return dailyProfits.slice(-30);
+      }
+      
+      const grouped: Record<string, number> = {};
+      
+      dailyProfits.forEach((item) => {
+        const date = new Date(item.date);
+        let key: string;
+        
+        if (timeGranularity === "week") {
+          const weekStart = new Date(date);
+          weekStart.setDate(date.getDate() - date.getDay());
+          key = weekStart.toISOString().split("T")[0];
+        } else if (timeGranularity === "month") {
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        } else {
+          key = String(date.getFullYear());
+        }
+        
+        grouped[key] = (grouped[key] || 0) + item.profit;
+      });
+      
+      return Object.entries(grouped)
+        .map(([date, profit]) => ({ date, profit }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        .slice(-12);
+    }
+    
+    const navHistory = activeFund?.navHistory || [];
 
     if (navHistory.length === 0 || fundTransactions.length === 0) {
       return [];
@@ -335,7 +570,7 @@ export function DailyProfitCalendar({
       .map(([date, profit]) => ({ date, profit }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .slice(-12);
-  }, [fund.navHistory, fundTransactions, firstBuyDate, timeGranularity]);
+  }, [activeFund, activeFunds, isMultiFund, fundTransactions, firstBuyDate, timeGranularity]);
 
   const chartData = useMemo(() => {
     const labels = aggregatedData.map((d) => {
@@ -350,7 +585,7 @@ export function DailyProfitCalendar({
       }
     });
 
-    const costBasis = (fund.costPrice || 0) * (fund.shares || 1);
+    const costBasis = (activeFund?.costPrice || 0) * (activeFund?.shares || 1);
     const data = aggregatedData.map((d) => {
       if (unit === "percent" && costBasis > 0) {
         return (d.profit / costBasis) * 100;
@@ -379,7 +614,7 @@ export function DailyProfitCalendar({
         },
       ],
     };
-  }, [aggregatedData, timeGranularity, unit, fund.costPrice, fund.shares]);
+  }, [aggregatedData, timeGranularity, unit, activeFund?.costPrice, activeFund?.shares]);
 
   const chartOptions = useMemo(
     () => ({
@@ -427,13 +662,22 @@ export function DailyProfitCalendar({
         },
       },
     }),
-    [unit, fund.costPrice, fund.shares]
+    [unit, activeFund?.costPrice, activeFund?.shares]
   );
 
-  const hasNavHistory =
-    (fund.navHistory && fund.navHistory.length > 0) || false;
-  const hasPosition =
-    (fund.shares && fund.shares > 0 && fund.costPrice) || false;
+  const hasNavHistory = useMemo(() => {
+    if (isMultiFund) {
+      return activeFunds.some((f) => f.navHistory && f.navHistory.length > 0);
+    }
+    return (activeFund?.navHistory && activeFund?.navHistory.length > 0) || false;
+  }, [activeFund, activeFunds, isMultiFund]);
+
+  const hasPosition = useMemo(() => {
+    if (isMultiFund) {
+      return activeFunds.some((f) => f.shares && f.shares > 0 && f.costPrice);
+    }
+    return (activeFund?.shares && activeFund?.shares > 0 && activeFund?.costPrice) || false;
+  }, [activeFund, activeFunds, isMultiFund]);
 
   if (!hasPosition) {
     return (

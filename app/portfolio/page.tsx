@@ -288,6 +288,10 @@ export default function PortfolioPage() {
               </div>
             </div>
           </div>
+
+          <div className="mt-4">
+            <DailyProfitCalendar funds={watchlist} />
+          </div>
         </div>
       )}
 
