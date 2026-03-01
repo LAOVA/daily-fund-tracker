@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import Link from "next/link";
 import { FundSearch, FundSearchRef } from "@/components/funds/FundSearch";
 
 export function HeroSection() {
@@ -56,15 +55,6 @@ export function HeroSection() {
                   添加基金代码即可查看实时估值
                 </p>
               </button>
-              <Link
-                href="/portfolio"
-                className="flex items-start gap-2 hover:opacity-70 transition-opacity w-fit"
-              >
-                <span className="text-finance-rise font-bold">▸</span>
-                <p className="font-['Libre_Baskerville'] text-news-text">
-                  使用"基金管理"功能分组管理基金
-                </p>
-              </Link>
             </div>
           </div>
         </div>
