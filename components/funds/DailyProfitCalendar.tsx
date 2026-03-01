@@ -35,7 +35,8 @@ ChartJS.register(
 );
 
 interface DailyProfitCalendarProps {
-  fund: Fund;
+  fund?: Fund;
+  funds?: Fund[];
   currentDay?: number;
   currentMonth?: number;
   currentYear?: number;
@@ -52,7 +53,9 @@ export function DailyProfitCalendar({
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [viewMode, setViewMode] = useState<"calendar" | "chart">("calendar");
-  const [timeGranularity, setTimeGranularity] = useState<"day" | "week" | "month" | "year">("day");
+  const [timeGranularity, setTimeGranularity] = useState<
+    "day" | "week" | "month" | "year"
+  >("day");
   const [unit, setUnit] = useState<"currency" | "percent">("currency");
 
   const transactions = useFundsStore((state) => state.transactions);
@@ -78,7 +81,7 @@ export function DailyProfitCalendar({
 
   const dailyProfitData = useMemo(() => {
     const navHistory = fund.navHistory || [];
-    
+
     if (navHistory.length === 0 || fundTransactions.length === 0) {
       return [];
     }
@@ -86,7 +89,7 @@ export function DailyProfitCalendar({
     const sortedNav = [...navHistory].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
-    
+
     const navMap = new Map<string, number>();
     sortedNav.forEach((nav) => navMap.set(nav.date, nav.nav));
 
@@ -103,14 +106,14 @@ export function DailyProfitCalendar({
 
     const sharesMap = new Map<string, number>();
     let currentShares = 0;
-    
+
     for (const navDate of dates) {
       const dayTxns = fundTransactions.filter((t) => {
         const txnDate = new Date(t.date);
         const navDt = new Date(navDate);
         return txnDate.getTime() <= navDt.getTime();
       });
-      
+
       currentShares = 0;
       dayTxns.forEach((t) => {
         if (t.type === "buy") {
@@ -119,27 +122,30 @@ export function DailyProfitCalendar({
           currentShares -= t.shares;
         }
       });
-      
+
       sharesMap.set(navDate, currentShares);
     }
 
     const data: { date: number; profit: number }[] = [];
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const dayStr = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      const dayStr = `${selectedYear}-${String(selectedMonth).padStart(
+        2,
+        "0"
+      )}-${String(day).padStart(2, "0")}`;
       const currentNav = navMap.get(dayStr);
-      
+
       if (currentNav && currentNav > 0 && dateSet.has(dayStr)) {
         const sortedDates = Array.from(navMap.keys()).sort(
           (a, b) => new Date(a).getTime() - new Date(b).getTime()
         );
         const currentIndex = sortedDates.indexOf(dayStr);
-        
+
         if (currentIndex > 0) {
           const prevDate = sortedDates[currentIndex - 1];
           const prevNav = navMap.get(prevDate);
           const currentShares = sharesMap.get(dayStr) || 0;
-          
+
           if (prevNav && prevNav > 0 && currentShares > 0) {
             const profit = (currentNav - prevNav) * currentShares;
             data.push({ date: day, profit });
@@ -155,28 +161,39 @@ export function DailyProfitCalendar({
     }
 
     return data;
-  }, [fund.navHistory, selectedYear, selectedMonth, daysInMonth, fundTransactions, firstBuyDate]);
+  }, [
+    fund.navHistory,
+    selectedYear,
+    selectedMonth,
+    daysInMonth,
+    fundTransactions,
+    firstBuyDate,
+  ]);
 
   const calendarDays = useMemo(() => {
     const days: { date: number; profit: number }[] = [];
-    
+
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push({ date: 0, profit: 0 });
     }
-    
+
     for (let day = 1; day <= daysInMonth; day++) {
       const dayData = dailyProfitData.find((d) => d.date === day);
       days.push(dayData || { date: day, profit: 0 });
     }
-    
+
     while (days.length % 7 !== 0) {
       days.push({ date: 0, profit: 0 });
     }
-    
+
     return days;
   }, [daysInMonth, firstDayOfMonth, dailyProfitData]);
 
-  const getProfitColor = (profit: number, isToday: boolean, hasData: boolean) => {
+  const getProfitColor = (
+    profit: number,
+    isToday: boolean,
+    hasData: boolean
+  ) => {
     if (!hasData || profit === 0) {
       return "bg-paper-200 text-news-muted";
     }
@@ -225,7 +242,7 @@ export function DailyProfitCalendar({
 
   const aggregatedData = useMemo(() => {
     const navHistory = fund.navHistory || [];
-    
+
     if (navHistory.length === 0 || fundTransactions.length === 0) {
       return [];
     }
@@ -233,7 +250,7 @@ export function DailyProfitCalendar({
     const sortedNav = [...navHistory].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
-    
+
     const navMap = new Map<string, number>();
     sortedNav.forEach((nav) => navMap.set(nav.date, nav.nav));
 
@@ -248,14 +265,14 @@ export function DailyProfitCalendar({
 
     const sharesMap = new Map<string, number>();
     let currentShares = 0;
-    
+
     for (const navDate of dates) {
       const dayTxns = fundTransactions.filter((t) => {
         const txnDate = new Date(t.date);
         const navDt = new Date(navDate);
         return txnDate.getTime() <= navDt.getTime();
       });
-      
+
       currentShares = 0;
       dayTxns.forEach((t) => {
         if (t.type === "buy") {
@@ -264,7 +281,7 @@ export function DailyProfitCalendar({
           currentShares -= t.shares;
         }
       });
-      
+
       sharesMap.set(navDate, currentShares);
     }
 
@@ -274,7 +291,13 @@ export function DailyProfitCalendar({
       const currentNav = navMap.get(dates[i]);
       const prevNav = navMap.get(dates[i - 1]);
       const currentShares = sharesMap.get(dates[i]) || 0;
-      if (currentNav && prevNav && currentNav > 0 && prevNav > 0 && currentShares > 0) {
+      if (
+        currentNav &&
+        prevNav &&
+        currentNav > 0 &&
+        prevNav > 0 &&
+        currentShares > 0
+      ) {
         dailyProfits.push({
           date: dates[i],
           profit: (currentNav - prevNav) * currentShares,
@@ -287,21 +310,24 @@ export function DailyProfitCalendar({
     }
 
     const grouped: Record<string, number> = {};
-    
+
     dailyProfits.forEach((item) => {
       const date = new Date(item.date);
       let key: string;
-      
+
       if (timeGranularity === "week") {
         const weekStart = new Date(date);
         weekStart.setDate(date.getDate() - date.getDay());
         key = weekStart.toISOString().split("T")[0];
       } else if (timeGranularity === "month") {
-        key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}`;
       } else {
         key = String(date.getFullYear());
       }
-      
+
       grouped[key] = (grouped[key] || 0) + item.profit;
     });
 
@@ -331,10 +357,14 @@ export function DailyProfitCalendar({
       }
       return d.profit;
     });
-    
+
     const isPositive = data.every((v) => v >= 0);
     const isNegative = data.every((v) => v <= 0);
-    const baseColor = isPositive ? "#22c55e" : isNegative ? "#ef4444" : "#3b82f6";
+    const baseColor = isPositive
+      ? "#22c55e"
+      : isNegative
+      ? "#ef4444"
+      : "#3b82f6";
 
     return {
       labels,
@@ -351,54 +381,59 @@ export function DailyProfitCalendar({
     };
   }, [aggregatedData, timeGranularity, unit, fund.costPrice, fund.shares]);
 
-  const chartOptions = useMemo(() => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        callbacks: {
-          label: (context: any) => {
-            const value = context.raw;
-            const prefix = value >= 0 ? "+" : "";
-            if (unit === "currency") {
-              return `${prefix}${value.toFixed(2)} 元`;
-            }
-            return `${prefix}${value.toFixed(2)}%`;
-          },
-        },
-      },
-    },
-    scales: {
-      x: {
-        grid: {
+  const chartOptions = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
           display: false,
         },
-        ticks: {
-          color: "#6b7280",
-        },
-      },
-      y: {
-        grid: {
-          color: "#e5e7eb",
-        },
-        ticks: {
-          color: "#6b7280",
-          callback: (value: any) => {
-            if (unit === "currency") {
-              return `¥${value}`;
-            }
-            return `${Number(value).toFixed(2)}%`;
+        tooltip: {
+          callbacks: {
+            label: (context: any) => {
+              const value = context.raw;
+              const prefix = value >= 0 ? "+" : "";
+              if (unit === "currency") {
+                return `${prefix}${value.toFixed(2)} 元`;
+              }
+              return `${prefix}${value.toFixed(2)}%`;
+            },
           },
         },
       },
-    },
-  }), [unit, fund.costPrice, fund.shares]);
+      scales: {
+        x: {
+          grid: {
+            display: false,
+          },
+          ticks: {
+            color: "#6b7280",
+          },
+        },
+        y: {
+          grid: {
+            color: "#e5e7eb",
+          },
+          ticks: {
+            color: "#6b7280",
+            callback: (value: any) => {
+              if (unit === "currency") {
+                return `¥${value}`;
+              }
+              return `${Number(value).toFixed(2)}%`;
+            },
+          },
+        },
+      },
+    }),
+    [unit, fund.costPrice, fund.shares]
+  );
 
-  const hasNavHistory = (fund.navHistory && fund.navHistory.length > 0) || false;
-  const hasPosition = (fund.shares && fund.shares > 0 && fund.costPrice) || false;
+  const hasNavHistory =
+    (fund.navHistory && fund.navHistory.length > 0) || false;
+  const hasPosition =
+    (fund.shares && fund.shares > 0 && fund.costPrice) || false;
 
   if (!hasPosition) {
     return (
@@ -462,7 +497,13 @@ export function DailyProfitCalendar({
                       : "text-news-muted hover:text-news-text"
                   )}
                 >
-                  {g === "day" ? "日" : g === "week" ? "周" : g === "month" ? "月" : "年"}
+                  {g === "day"
+                    ? "日"
+                    : g === "week"
+                    ? "周"
+                    : g === "month"
+                    ? "月"
+                    : "年"}
                 </button>
               ))}
             </div>
@@ -499,9 +540,13 @@ export function DailyProfitCalendar({
         <div className="flex items-center justify-between">
           {viewMode === "chart" ? (
             <div className="font-['Newsreader'] text-lg font-bold text-news-text">
-              {timeGranularity === "day" ? "近30日盈亏" : 
-               timeGranularity === "week" ? "近12周盈亏" : 
-               timeGranularity === "month" ? "近12月盈亏" : "近年盈亏"}
+              {timeGranularity === "day"
+                ? "近30日盈亏"
+                : timeGranularity === "week"
+                ? "近12周盈亏"
+                : timeGranularity === "month"
+                ? "近12月盈亏"
+                : "近年盈亏"}
             </div>
           ) : (
             <>
@@ -525,7 +570,7 @@ export function DailyProfitCalendar({
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="p-2 sm:p-4">
         {viewMode === "chart" ? (
           <div className="h-[300px]">
             {aggregatedData.length > 0 ? (
@@ -537,31 +582,34 @@ export function DailyProfitCalendar({
             )}
           </div>
         ) : (
-          <>
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-sm font-['Source_Sans_3'] text-news-muted">
+          <div className="sm:px-[25%]">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
+              <div className="text-xs sm:text-sm font-['Source_Sans_3'] text-news-muted">
                 本月累计收益
               </div>
               <div
                 className={cn(
-                  "font-['JetBrains_Mono'] text-lg font-bold",
+                  "text-sm sm:text-lg font-['JetBrains_Mono'] font-bold",
                   totalProfit >= 0 ? "text-finance-rise" : "text-finance-fall"
                 )}
               >
                 {unit === "currency"
-                  ? `${totalProfit >= 0 ? "+" : ""}${totalProfit.toLocaleString("zh-CN", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}`
+                  ? `${totalProfit >= 0 ? "+" : ""}${totalProfit.toLocaleString(
+                      "zh-CN",
+                      {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }
+                    )}`
                   : formatProfitPercent(totalProfit)}
               </div>
             </div>
 
-            <div className="grid grid-cols-7 gap-1 mb-2">
+            <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
               {WEEKDAYS.map((day) => (
                 <div
                   key={day}
-                  className="text-center text-xs font-['Source_Sans_3'] text-news-muted py-2"
+                  className="text-[10px] sm:text-xs font-['Source_Sans_3'] text-news-muted py-1 sm:py-2 text-center"
                 >
                   {day}
                 </div>
@@ -571,7 +619,9 @@ export function DailyProfitCalendar({
             <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((dayData, index) => {
                 if (dayData.date === 0) {
-                  return <div key={`empty-${index}`} className="aspect-square" />;
+                  return (
+                    <div key={`empty-${index}`} className="aspect-square" />
+                  );
                 }
 
                 const isToday =
@@ -585,17 +635,17 @@ export function DailyProfitCalendar({
                   <div
                     key={dayData.date}
                     className={cn(
-                      "aspect-square rounded-md p-1 flex flex-col items-center justify-center relative transition-all hover:scale-105 cursor-pointer",
+                      "aspect-square rounded p-0.5 sm:p-1 flex flex-col items-center justify-center relative",
                       getProfitColor(dayData.profit, isToday, hasData),
                       isToday ? "ring-2 ring-finance-fall" : ""
                     )}
                   >
-                    <div className="text-xs font-['JetBrains_Mono'] text-news-text font-bold">
+                    <div className="text-[10px] sm:text-[14px] font-['JetBrains_Mono'] text-news-text font-bold">
                       {dayData.date}
                     </div>
                     <div
                       className={cn(
-                        "text-xs font-['JetBrains_Mono']",
+                        "text-[8px] sm:text-[12px] font-['JetBrains_Mono'] font-medium",
                         !hasData ? "text-news-muted" : ""
                       )}
                     >
@@ -627,9 +677,10 @@ export function DailyProfitCalendar({
                 <span className="text-news-muted">无交易</span>
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
   );
 }
+
