@@ -11,7 +11,7 @@ export function HeroSection() {
   };
 
   return (
-    <section className="border-b-2 border-news-border pb-6">
+    <section className="border-b-2 border-news-border py-6">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-8 lg:border-r lg:border-news-border lg:pr-6">
           <div className="mb-4">
@@ -29,7 +29,6 @@ export function HeroSection() {
           <div className="flex items-center gap-3 text-sm text-news-muted font-['Source_Sans_3']">
             <span>编辑：追基日报编辑部</span>
             <span className="text-news-border">|</span>
-            <span>来源：天天基金网</span>
           </div>
         </div>
 
@@ -62,3 +61,4 @@ export function HeroSection() {
     </section>
   );
 }
+

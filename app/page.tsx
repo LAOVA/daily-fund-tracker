@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useFundsStore, Fund, FundGroup } from "@/stores/fundsStore";
 import { formatCurrency, formatPercent, getChangeColor, cn } from "@/lib/utils";
 import {
@@ -50,6 +51,14 @@ export default function Home() {
   } | null>(null);
   const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
   const [expandedFund, setExpandedFund] = useState<string | null>(null);
+  const [fundToDelete, setFundToDelete] = useState<{ code: string } | null>(null);
+
+  const handleDeleteFund = () => {
+    if (fundToDelete) {
+      removeFund(fundToDelete.code);
+      setFundToDelete(null);
+    }
+  };
 
   const handleAddGroup = () => {
     if (newGroupName.trim()) {
@@ -170,8 +179,19 @@ export default function Home() {
                     </Button>
                   </div>
                 </DialogContent>
-              </Dialog>
-            </div>
+        </Dialog>
+
+        <ConfirmDialog
+          open={!!fundToDelete}
+          onOpenChange={(open) => !open && setFundToDelete(null)}
+          title="删除基金"
+          description={`确定要删除基金 ${fundToDelete?.code} 吗？此操作不可恢复。`}
+          confirmText="删除"
+          cancelText="取消"
+          onConfirm={handleDeleteFund}
+          variant="destructive"
+        />
+      </div>
           </div>
         </div>
 
@@ -408,7 +428,7 @@ export default function Home() {
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                removeFund(fundCode);
+                                setFundToDelete({ code: fundCode });
                               }}
                               className="text-news-muted hover:text-finance-rise hover:bg-red-50 dark:hover:bg-red-950 h-7 w-7 sm:h-8 sm:w-8 p-0"
                             >

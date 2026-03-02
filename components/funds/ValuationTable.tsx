@@ -304,8 +304,8 @@ export function ValuationTable() {
       .filter((f: Fund) => {
         if (!f.updateTime) return true;
         const updateTime = new Date(f.updateTime).getTime();
-        const fiveMinutes = 5 * 60 * 1000;
-        return now - updateTime > fiveMinutes;
+        const halfMinutes = 0.5 * 60 * 1000;
+        return now - updateTime > halfMinutes;
       })
       .map((f: Fund) => f.code);
 
@@ -322,6 +322,8 @@ export function ValuationTable() {
       await fetchMultipleFundData(codesToFetch, (code: string, data: any) => {
         const fund = watchlist.find((f: Fund) => f.code === code);
         if (fund && data) {
+          console.log(data);
+
           updateFund(code, {
             code: data.code,
             name: data.name || fund.name,
@@ -443,13 +445,13 @@ export function ValuationTable() {
         </div>
       </div>
 
-      <div className="mb-4 text-sm text-news-muted font-['Source_Sans_3'] flex items-center gap-2">
+      {/* <div className="mb-4 text-sm text-news-muted font-['Source_Sans_3'] flex items-center gap-2">
         <span className="text-finance-rise">💡</span>
         <span className="hidden sm:inline">
           点击任意基金行可查看历史净值走势和重仓股信息
         </span>
         <span className="sm:hidden">点击卡片查看详情</span>
-      </div>
+      </div> */}
 
       {/* 移动端卡片视图 */}
       <div className="lg:hidden">

@@ -143,7 +143,7 @@ export async function fetchFullFundData(code: string): Promise<{
           // }
 
           // 昨日涨幅
-          const last = sliced[sliced.length - 1];
+          const last = sliced[sliced.length - 2];
           if (last && typeof last.equityReturn === "number") {
             yesterdayChange = last.equityReturn;
           }
@@ -200,14 +200,17 @@ export async function fetchFullFundData(code: string): Promise<{
           return;
         }
 
-        const navHistory: Array<{ date: string; nav: number; accNav: number }> = [];
+        const navHistory: Array<{ date: string; nav: number; accNav: number }> =
+          [];
         if (trend.length > 0) {
           const sliced = trend.slice(-90);
           for (const item of sliced) {
             const nav = safeParseFloat(item.y);
             if (!nav || nav <= 0) continue;
             const date = new Date(item.x);
-            const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+            const dateStr = `${date.getFullYear()}-${String(
+              date.getMonth() + 1
+            ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
             navHistory.push({
               date: dateStr,
               nav,

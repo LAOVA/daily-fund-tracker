@@ -7,11 +7,11 @@ import { useState, useRef, useEffect } from "react";
 const themeOptions = [
   { value: "light", label: "浅色", icon: Sun },
   { value: "dark", label: "深色", icon: Moon },
-  { value: "system", label: "跟随系统", icon: Monitor },
+  { value: "system", label: "系统", icon: Monitor },
 ] as const;
 
 export function ThemeToggle() {
-  const { theme, setTheme, mounted, isDark } = useTheme();
+  const { theme, setTheme, mounted } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -95,3 +95,4 @@ export function ThemeToggle() {
     </div>
   );
 }
+

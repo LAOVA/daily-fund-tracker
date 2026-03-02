@@ -564,7 +564,7 @@ export function DataImportExport() {
                     size="sm"
                     variant="outline"
                     onClick={() => handleExport("funds", "csv")}
-                    className="border-news-border hover:bg-news-accent"
+                    className="cursor-pointer border-news-border hover:bg-news-accent"
                   >
                     <FileSpreadsheet className="w-4 h-4 mr-1" />
                     CSV
@@ -573,7 +573,7 @@ export function DataImportExport() {
                     size="sm"
                     variant="outline"
                     onClick={() => handleExport("funds", "json")}
-                    className="border-news-border hover:bg-news-accent"
+                    className="cursor-pointer border-news-border hover:bg-news-accent"
                   >
                     <FileJson className="w-4 h-4 mr-1" />
                     JSON
@@ -593,7 +593,7 @@ export function DataImportExport() {
                     size="sm"
                     variant="outline"
                     onClick={() => handleExport("transactions", "csv")}
-                    className="border-news-border hover:bg-news-accent"
+                    className="cursor-pointer border-news-border hover:bg-news-accent"
                   >
                     <FileSpreadsheet className="w-4 h-4 mr-1" />
                     CSV
@@ -602,7 +602,7 @@ export function DataImportExport() {
                     size="sm"
                     variant="outline"
                     onClick={() => handleExport("transactions", "json")}
-                    className="border-news-border hover:bg-news-accent"
+                    className="cursor-pointer border-news-border hover:bg-news-accent"
                   >
                     <FileJson className="w-4 h-4 mr-1" />
                     JSON
@@ -623,7 +623,7 @@ export function DataImportExport() {
                       size="sm"
                       variant="outline"
                       onClick={() => handleExport("portfolio", "csv")}
-                      className="border-news-border hover:bg-news-accent"
+                      className="cursor-pointer border-news-border hover:bg-news-accent"
                     >
                       <FileSpreadsheet className="w-4 h-4 mr-1" />
                       CSV
@@ -632,7 +632,7 @@ export function DataImportExport() {
                       size="sm"
                       variant="outline"
                       onClick={() => handleExport("portfolio", "json")}
-                      className="border-news-border hover:bg-news-accent"
+                      className="cursor-pointer border-news-border hover:bg-news-accent"
                     >
                       <FileJson className="w-4 h-4 mr-1" />
                       JSON
@@ -651,7 +651,7 @@ export function DataImportExport() {
                 <Button
                   size="sm"
                   onClick={() => handleExport("all", "json")}
-                  className="bg-news-text dark:bg-paper-100 hover:bg-paper-900 dark:hover:bg-paper-200"
+                  className="cursor-pointer bg-news-text dark:bg-paper-100 hover:bg-paper-900 dark:hover:bg-paper-200 dark:text-white"
                 >
                   <FileJson className="w-4 h-4 mr-1" />
                   导出备份文件

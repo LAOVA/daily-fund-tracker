@@ -36,9 +36,10 @@ interface FundDetailPanelProps {
   variant?: "table" | "card";
 }
 
-type TimePeriod = "1m" | "3m" | "6m" | "1y" | "all";
+type TimePeriod = "1w" | "1m" | "3m" | "6m" | "1y" | "all";
 
 const timePeriodConfig: Record<TimePeriod, { label: string; days: number }> = {
+  "1w": { label: "近1周", days: 7 },
   "1m": { label: "近1月", days: 30 },
   "3m": { label: "近3月", days: 90 },
   "6m": { label: "近6月", days: 180 },
@@ -110,7 +111,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [hasHoldingsData, setHasHoldingsData] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("1m");
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("1w");
 
   useEffect(() => {
     const loadData = async () => {
@@ -279,7 +280,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
     };
   }, [historyData]);
 
-  const periodButtons: TimePeriod[] = ["1m", "3m", "6m", "1y", "all"];
+  const periodButtons: TimePeriod[] = ["1w", "1m", "3m", "6m", "1y", "all"];
 
   const content = (
     <div className="p-4 sm:p-6">
@@ -307,7 +308,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
         <div>
           <div className="flex items-center justify-between border-b-2 border-news-text pb-2 mb-4">
             <h4 className="font-['Source_Sans_3'] text-sm font-bold uppercase tracking-[0.15em] text-news-text">
@@ -424,7 +425,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
           </div>
         </div>
 
-        <div className="flex flex-col">
+        {/* <div className="flex flex-col">
           <div className="border-b-2 border-news-text pb-2 mb-4">
             <h4 className="font-['Source_Sans_3'] text-sm font-bold uppercase tracking-[0.15em] text-news-text">
               我的持仓
@@ -543,7 +544,7 @@ export const FundDetailPanel = memo(function FundDetailPanel({
               </div>
             )}
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
@@ -562,4 +563,3 @@ export const FundDetailPanel = memo(function FundDetailPanel({
     </tr>
   );
 });
-

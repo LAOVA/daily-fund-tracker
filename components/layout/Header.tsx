@@ -5,9 +5,7 @@ import { usePathname } from "next/navigation";
 import { useSyncExternalStore } from "react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
-const navItems = [
-  { href: "/", label: "首页" },
-];
+const navItems = [{ href: "/", label: "首页" }];
 
 // 创建时间 store
 function createTimeStore() {
@@ -136,7 +134,7 @@ export function Header() {
         </div>
 
         {/* 导航栏 */}
-        <nav className="flex items-center justify-center gap-8 border-b border-news-text pb-3 min-h-[3rem]">
+        {/* <nav className="flex items-center justify-center gap-8 border-b border-news-text pb-3 min-h-[3rem]">
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -154,9 +152,8 @@ export function Header() {
               {item.label}
             </Link>
           ))}
-        </nav>
+        </nav> */}
       </div>
     </header>
   );
 }
-

@@ -34,6 +34,36 @@ ChartJS.register(
   Legend
 );
 
+const crosshairPlugin = {
+  id: "crosshair",
+  afterDraw: (chart: any) => {
+    if (chart.tooltip?._active?.length) {
+      const activePoint = chart.tooltip._active[0];
+      const ctx = chart.ctx;
+      const x = activePoint.element.x;
+      const y = activePoint.element.y;
+      const top = chart.chartArea.top;
+      const bottom = chart.chartArea.bottom;
+      const left = chart.chartArea.left;
+      const right = chart.chartArea.right;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(x, top);
+      ctx.lineTo(x, bottom);
+      ctx.moveTo(left, y);
+      ctx.lineTo(right, y);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(100, 100, 100, 0.5)";
+      ctx.setLineDash([5, 5]);
+      ctx.stroke();
+      ctx.restore();
+    }
+  },
+};
+
+ChartJS.register(crosshairPlugin);
+
 interface DailyProfitCalendarProps {
   fund?: Fund;
   funds?: Fund[];
@@ -54,7 +84,7 @@ export function DailyProfitCalendar({
   const isMultiFund = !!funds;
   const activeFund = fund;
   const activeFunds = funds || (fund ? [fund] : []);
-  
+
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [viewMode, setViewMode] = useState<"calendar" | "chart">("calendar");
@@ -69,7 +99,9 @@ export function DailyProfitCalendar({
     if (isMultiFund) {
       return transactions
         .filter((t) => activeFunds.some((f) => f.code === t.fundCode))
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        .sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
     }
     return transactions
       .filter((t) => t.fundCode === activeFund?.code)
@@ -101,7 +133,7 @@ export function DailyProfitCalendar({
       const allDates = new Set<string>();
       const fundNavMaps: Map<string, Map<string, number>> = new Map();
       const fundSharesMaps: Map<string, Map<string, number>> = new Map();
-      
+
       activeFunds.forEach((f) => {
         const navHistory = f.navHistory || [];
         if (navHistory.length > 0) {
@@ -111,27 +143,29 @@ export function DailyProfitCalendar({
           const navMap = new Map<string, number>();
           sortedNav.forEach((nav) => navMap.set(nav.date, nav.nav));
           fundNavMaps.set(f.code, navMap);
-          
+
           sortedNav.forEach((nav) => allDates.add(nav.date));
         }
       });
-      
+
       if (allDates.size === 0 || fundTransactions.length === 0) {
         return [];
       }
-      
+
       const sortedDates = Array.from(allDates).sort(
         (a, b) => new Date(a).getTime() - new Date(b).getTime()
       );
-      
+
       let filteredDates = sortedDates;
       if (firstBuyDate) {
         const purchaseTime = new Date(firstBuyDate).getTime();
-        filteredDates = sortedDates.filter((d) => new Date(d).getTime() >= purchaseTime);
+        filteredDates = sortedDates.filter(
+          (d) => new Date(d).getTime() >= purchaseTime
+        );
       }
-      
+
       const dateSet = new Set(filteredDates);
-      
+
       const sharesMap = new Map<string, number>();
       for (const navDate of filteredDates) {
         const dayTxns = fundTransactions.filter((t) => {
@@ -139,7 +173,7 @@ export function DailyProfitCalendar({
           const navDt = new Date(navDate);
           return txnDate.getTime() <= navDt.getTime();
         });
-        
+
         let currentShares = 0;
         dayTxns.forEach((t) => {
           if (t.type === "buy") {
@@ -148,44 +182,49 @@ export function DailyProfitCalendar({
             currentShares -= t.shares;
           }
         });
-        
+
         sharesMap.set(navDate, currentShares);
       }
-      
+
       const data: { date: number; profit: number }[] = [];
-      
+
       for (let day = 1; day <= daysInMonth; day++) {
-        const dayStr = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        
+        const dayStr = `${selectedYear}-${String(selectedMonth).padStart(
+          2,
+          "0"
+        )}-${String(day).padStart(2, "0")}`;
+
         if (!dateSet.has(dayStr)) {
           data.push({ date: day, profit: 0 });
           continue;
         }
-        
+
         const sortedAllDates = Array.from(allDates).sort(
           (a, b) => new Date(a).getTime() - new Date(b).getTime()
         );
         const currentIndex = sortedAllDates.indexOf(dayStr);
-        
+
         if (currentIndex > 0) {
           const prevDate = sortedAllDates[currentIndex - 1];
-          
+
           let totalProfit = 0;
-          
+
           activeFunds.forEach((f) => {
             const navMap = fundNavMaps.get(f.code);
             if (!navMap) return;
-            
+
             const currentNav = navMap.get(dayStr);
             const prevNav = navMap.get(prevDate);
-            
+
             if (currentNav && prevNav && currentNav > 0 && prevNav > 0) {
               const dayTxns = fundTransactions.filter((t) => {
                 const txnDate = new Date(t.date);
                 const navDt = new Date(dayStr);
-                return t.fundCode === f.code && txnDate.getTime() <= navDt.getTime();
+                return (
+                  t.fundCode === f.code && txnDate.getTime() <= navDt.getTime()
+                );
               });
-              
+
               let currentShares = 0;
               dayTxns.forEach((t) => {
                 if (t.type === "buy") {
@@ -194,22 +233,22 @@ export function DailyProfitCalendar({
                   currentShares -= t.shares;
                 }
               });
-              
+
               if (currentShares > 0) {
                 totalProfit += (currentNav - prevNav) * currentShares;
               }
             }
           });
-          
+
           data.push({ date: day, profit: totalProfit });
         } else {
           data.push({ date: day, profit: 0 });
         }
       }
-      
+
       return data;
     }
-    
+
     const navHistory = activeFund?.navHistory || [];
 
     if (navHistory.length === 0 || fundTransactions.length === 0) {
@@ -345,7 +384,8 @@ export function DailyProfitCalendar({
     if (!activeFund?.costPrice || activeFund?.costPrice === 0 || profit === 0) {
       return "0.00%";
     }
-    const percent = (profit / (activeFund?.costPrice * (activeFund?.shares || 1))) * 100;
+    const percent =
+      (profit / (activeFund?.costPrice * (activeFund?.shares || 1))) * 100;
     const prefix = percent > 0 ? "+" : "";
     return `${prefix}${percent.toFixed(2)}%`;
   };
@@ -376,7 +416,7 @@ export function DailyProfitCalendar({
     if (isMultiFund) {
       const allDates = new Set<string>();
       const fundNavMaps: Map<string, Map<string, number>> = new Map();
-      
+
       activeFunds.forEach((f) => {
         const navHistory = f.navHistory || [];
         if (navHistory.length > 0) {
@@ -386,47 +426,51 @@ export function DailyProfitCalendar({
           const navMap = new Map<string, number>();
           sortedNav.forEach((nav) => navMap.set(nav.date, nav.nav));
           fundNavMaps.set(f.code, navMap);
-          
+
           sortedNav.forEach((nav) => allDates.add(nav.date));
         }
       });
-      
+
       if (allDates.size === 0 || fundTransactions.length === 0) {
         return [];
       }
-      
+
       const sortedAllDates = Array.from(allDates).sort(
         (a, b) => new Date(a).getTime() - new Date(b).getTime()
       );
-      
+
       let filteredDates = sortedAllDates;
       if (firstBuyDate) {
         const purchaseTime = new Date(firstBuyDate).getTime();
-        filteredDates = sortedAllDates.filter((d) => new Date(d).getTime() >= purchaseTime);
+        filteredDates = sortedAllDates.filter(
+          (d) => new Date(d).getTime() >= purchaseTime
+        );
       }
-      
+
       const dailyProfits: { date: string; profit: number }[] = [];
-      
+
       for (let i = 1; i < filteredDates.length; i++) {
         const currentDate = filteredDates[i];
         const prevDate = filteredDates[i - 1];
-        
+
         let totalProfit = 0;
-        
+
         activeFunds.forEach((f) => {
           const navMap = fundNavMaps.get(f.code);
           if (!navMap) return;
-          
+
           const currentNav = navMap.get(currentDate);
           const prevNav = navMap.get(prevDate);
-          
+
           if (currentNav && prevNav && currentNav > 0 && prevNav > 0) {
             const dayTxns = fundTransactions.filter((t) => {
               const txnDate = new Date(t.date);
               const navDt = new Date(currentDate);
-              return t.fundCode === f.code && txnDate.getTime() <= navDt.getTime();
+              return (
+                t.fundCode === f.code && txnDate.getTime() <= navDt.getTime()
+              );
             });
-            
+
             let currentShares = 0;
             dayTxns.forEach((t) => {
               if (t.type === "buy") {
@@ -435,47 +479,50 @@ export function DailyProfitCalendar({
                 currentShares -= t.shares;
               }
             });
-            
+
             if (currentShares > 0) {
               totalProfit += (currentNav - prevNav) * currentShares;
             }
           }
         });
-        
+
         if (totalProfit !== 0) {
           dailyProfits.push({ date: currentDate, profit: totalProfit });
         }
       }
-      
+
       if (timeGranularity === "day") {
         return dailyProfits.slice(-30);
       }
-      
+
       const grouped: Record<string, number> = {};
-      
+
       dailyProfits.forEach((item) => {
         const date = new Date(item.date);
         let key: string;
-        
+
         if (timeGranularity === "week") {
           const weekStart = new Date(date);
           weekStart.setDate(date.getDate() - date.getDay());
           key = weekStart.toISOString().split("T")[0];
         } else if (timeGranularity === "month") {
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+            2,
+            "0"
+          )}`;
         } else {
           key = String(date.getFullYear());
         }
-        
+
         grouped[key] = (grouped[key] || 0) + item.profit;
       });
-      
+
       return Object.entries(grouped)
         .map(([date, profit]) => ({ date, profit }))
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
         .slice(-12);
     }
-    
+
     const navHistory = activeFund?.navHistory || [];
 
     if (navHistory.length === 0 || fundTransactions.length === 0) {
@@ -570,7 +617,14 @@ export function DailyProfitCalendar({
       .map(([date, profit]) => ({ date, profit }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .slice(-12);
-  }, [activeFund, activeFunds, isMultiFund, fundTransactions, firstBuyDate, timeGranularity]);
+  }, [
+    activeFund,
+    activeFunds,
+    isMultiFund,
+    fundTransactions,
+    firstBuyDate,
+    timeGranularity,
+  ]);
 
   const chartData = useMemo(() => {
     const labels = aggregatedData.map((d) => {
@@ -593,13 +647,7 @@ export function DailyProfitCalendar({
       return d.profit;
     });
 
-    const isPositive = data.every((v) => v >= 0);
-    const isNegative = data.every((v) => v <= 0);
-    const baseColor = isPositive
-      ? "#22c55e"
-      : isNegative
-      ? "#ef4444"
-      : "#3b82f6";
+    const baseColor = "#C41E3A";
 
     return {
       labels,
@@ -614,25 +662,71 @@ export function DailyProfitCalendar({
         },
       ],
     };
-  }, [aggregatedData, timeGranularity, unit, activeFund?.costPrice, activeFund?.shares]);
+  }, [
+    aggregatedData,
+    timeGranularity,
+    unit,
+    activeFund?.costPrice,
+    activeFund?.shares,
+  ]);
 
   const chartOptions = useMemo(
     () => ({
       responsive: true,
       maintainAspectRatio: false,
+      interaction: {
+        mode: "index" as const,
+        intersect: false,
+      },
       plugins: {
         legend: {
           display: false,
         },
         tooltip: {
+          enabled: true,
+          mode: "index" as const,
+          intersect: false,
+          backgroundColor: "rgba(45, 42, 38, 0.95)",
+          titleColor: "#fff",
+          bodyColor: "#fff",
+          borderColor: "#C9C2B5",
+          borderWidth: 1,
+          padding: 12,
+          titleFont: {
+            family: "'Source Sans 3', sans-serif",
+            size: 12,
+            weight: 600,
+          },
+          bodyFont: {
+            family: "'JetBrains Mono', monospace",
+            size: 14,
+            weight: 700,
+          },
+          displayColors: false,
           callbacks: {
+            title: (items: { dataIndex: number }[]) => {
+              const idx = items[0]?.dataIndex;
+              if (idx !== undefined && aggregatedData[idx]) {
+                const dateStr = aggregatedData[idx].date;
+                if (timeGranularity === "month") {
+                  const [year, month] = dateStr.split("-");
+                  return `${year}年${parseInt(month)}月`;
+                } else if (timeGranularity === "year") {
+                  return `${dateStr}年`;
+                } else {
+                  const date = new Date(dateStr);
+                  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+                }
+              }
+              return "";
+            },
             label: (context: any) => {
               const value = context.raw;
               const prefix = value >= 0 ? "+" : "";
               if (unit === "currency") {
-                return `${prefix}${value.toFixed(2)} 元`;
+                return `盈亏: ${prefix}${value.toFixed(2)} 元`;
               }
-              return `${prefix}${value.toFixed(2)}%`;
+              return `盈亏: ${prefix}${value.toFixed(2)}%`;
             },
           },
         },
@@ -661,6 +755,11 @@ export function DailyProfitCalendar({
           },
         },
       },
+      onHover: (event: any, chartElement: any) => {
+        event.native.target.style.cursor = chartElement[0]
+          ? "pointer"
+          : "default";
+      },
     }),
     [unit, activeFund?.costPrice, activeFund?.shares]
   );
@@ -669,14 +768,19 @@ export function DailyProfitCalendar({
     if (isMultiFund) {
       return activeFunds.some((f) => f.navHistory && f.navHistory.length > 0);
     }
-    return (activeFund?.navHistory && activeFund?.navHistory.length > 0) || false;
+    return (
+      (activeFund?.navHistory && activeFund?.navHistory.length > 0) || false
+    );
   }, [activeFund, activeFunds, isMultiFund]);
 
   const hasPosition = useMemo(() => {
     if (isMultiFund) {
       return activeFunds.some((f) => f.shares && f.shares > 0 && f.costPrice);
     }
-    return (activeFund?.shares && activeFund?.shares > 0 && activeFund?.costPrice) || false;
+    return (
+      (activeFund?.shares && activeFund?.shares > 0 && activeFund?.costPrice) ||
+      false
+    );
   }, [activeFund, activeFunds, isMultiFund]);
 
   if (!hasPosition) {
@@ -709,8 +813,8 @@ export function DailyProfitCalendar({
               className={cn(
                 "p-2 rounded-md transition-colors",
                 viewMode === "calendar"
-                  ? "bg-news-text text-white"
-                  : "bg-paper-200 text-news-muted hover:bg-paper-300"
+                  ? "bg-news-text text-white dark:bg-paper-300"
+                  : "bg-paper-200 dark:bg-paper-800 text-news-muted dark:text-paper-400 hover:bg-paper-300 dark:hover:bg-paper-600"
               )}
             >
               <CalendarDays className="w-5 h-5" />
@@ -720,8 +824,8 @@ export function DailyProfitCalendar({
               className={cn(
                 "p-2 rounded-md transition-colors",
                 viewMode === "chart"
-                  ? "bg-news-text text-white"
-                  : "bg-paper-200 text-news-muted hover:bg-paper-300"
+                  ? "bg-news-text text-white dark:bg-paper-300"
+                  : "bg-paper-200 dark:bg-paper-800 text-news-muted dark:text-paper-400 hover:bg-paper-300 dark:hover:bg-paper-600"
               )}
             >
               <BarChart3 className="w-5 h-5" />
@@ -729,7 +833,7 @@ export function DailyProfitCalendar({
           </div>
 
           {viewMode === "chart" && (
-            <div className="flex items-center gap-1 bg-paper-200 rounded-md p-1">
+            <div className="flex items-center gap-1 bg-paper-200 dark:bg-paper-700 rounded-md p-1">
               {(["day", "week", "month", "year"] as const).map((g) => (
                 <button
                   key={g}
@@ -737,8 +841,8 @@ export function DailyProfitCalendar({
                   className={cn(
                     "px-3 py-1 text-xs font-['Source_Sans_3'] rounded-md transition-colors",
                     timeGranularity === g
-                      ? "bg-news-text text-white"
-                      : "text-news-muted hover:text-news-text"
+                      ? "bg-news-text text-white dark:bg-paper-300"
+                      : "text-news-muted dark:text-paper-400 hover:text-news-text dark:hover:text-paper-200"
                   )}
                 >
                   {g === "day"
@@ -755,14 +859,14 @@ export function DailyProfitCalendar({
 
           {viewMode === "calendar" && <div />}
 
-          <div className="flex items-center gap-1 bg-paper-200 rounded-md p-1">
+          <div className="flex items-center gap-1 bg-paper-200 dark:bg-paper-700 rounded-md p-1">
             <button
               onClick={() => setUnit("currency")}
               className={cn(
                 "px-3 py-1 text-xs font-['Source_Sans_3'] rounded-md transition-colors",
                 unit === "currency"
-                  ? "bg-news-text text-white"
-                  : "text-news-muted hover:text-news-text"
+                  ? "bg-news-text text-white dark:bg-paper-300"
+                  : "text-news-muted dark:text-paper-400 hover:text-news-text dark:hover:text-paper-200"
               )}
             >
               ¥
@@ -772,8 +876,8 @@ export function DailyProfitCalendar({
               className={cn(
                 "px-3 py-1 text-xs font-['Source_Sans_3'] rounded-md transition-colors",
                 unit === "percent"
-                  ? "bg-news-text text-white"
-                  : "text-news-muted hover:text-news-text"
+                  ? "bg-news-text text-white  dark:bg-paper-300"
+                  : "text-news-muted dark:text-paper-400 hover:text-news-text dark:hover:text-paper-200"
               )}
             >
               %
@@ -881,7 +985,7 @@ export function DailyProfitCalendar({
                     className={cn(
                       "aspect-square rounded p-0.5 sm:p-1 flex flex-col items-center justify-center relative",
                       getProfitColor(dayData.profit, isToday, hasData),
-                      isToday ? "ring-2 ring-finance-fall" : ""
+                      isToday ? "ring-2 ring-news-text" : ""
                     )}
                   >
                     <div className="text-[10px] sm:text-[14px] font-['JetBrains_Mono'] text-news-text font-bold">
@@ -898,7 +1002,7 @@ export function DailyProfitCalendar({
                         : formatProfitPercent(dayData.profit)}
                     </div>
                     {isToday && (
-                      <div className="absolute -top-1 -right-1 bg-finance-fall text-white text-[8px] font-bold px-1 rounded">
+                      <div className="absolute -top-1 -right-1 bg-news-text dark:text-paper-200 text-white text-[8px] sm:text-[12px] font-bold px-1 rounded">
                         今
                       </div>
                     )}
