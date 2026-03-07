@@ -2,12 +2,12 @@ import type { NextConfig } from "next";
 import { codeInspectorPlugin } from "code-inspector-plugin";
 
 const nextConfig: NextConfig = {
-  output: 'export',
+  output: "export",
   trailingSlash: true,
   images: {
     unoptimized: true,
   },
-  basePath: '/fund-tracker',
+  basePath: "/daily-fund-tracker",
   webpack: (config) => {
     config.plugins.push(
       codeInspectorPlugin({
@@ -19,3 +19,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
