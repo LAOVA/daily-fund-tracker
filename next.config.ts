@@ -6,7 +6,6 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: "/daily-fund-tracker",
 };
 
 export default nextConfig;
