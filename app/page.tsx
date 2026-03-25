@@ -52,11 +52,19 @@ export default function Home() {
   const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
   const [expandedFund, setExpandedFund] = useState<string | null>(null);
   const [fundToDelete, setFundToDelete] = useState<{ code: string } | null>(null);
+  const [groupToDelete, setGroupToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const handleDeleteFund = () => {
     if (fundToDelete) {
       removeFund(fundToDelete.code);
       setFundToDelete(null);
+    }
+  };
+
+  const handleDeleteGroup = () => {
+    if (groupToDelete) {
+      removeGroup(groupToDelete.id);
+      setGroupToDelete(null);
     }
   };
 
@@ -189,6 +197,17 @@ export default function Home() {
           confirmText="删除"
           cancelText="取消"
           onConfirm={handleDeleteFund}
+          variant="destructive"
+        />
+
+        <ConfirmDialog
+          open={!!groupToDelete}
+          onOpenChange={(open) => !open && setGroupToDelete(null)}
+          title="删除分组"
+          description={`确定要删除分组 "${groupToDelete?.name}" 吗？该分组内的基金将被移至默认分组。`}
+          confirmText="删除"
+          cancelText="取消"
+          onConfirm={handleDeleteGroup}
           variant="destructive"
         />
       </div>
@@ -327,7 +346,7 @@ export default function Home() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => removeGroup(group.id)}
+                      onClick={() => setGroupToDelete({ id: group.id, name: group.name })}
                       className="text-news-muted hover:text-finance-rise hover:bg-red-50 dark:hover:bg-red-950 h-8 w-8 p-0"
                     >
                       <Trash2 className="w-4 h-4" />

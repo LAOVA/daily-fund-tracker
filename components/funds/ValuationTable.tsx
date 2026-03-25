@@ -289,7 +289,7 @@ export function ValuationTable() {
   const fetchingCodesRef = useRef<Set<string>>(new Set());
   const hasCleanedRef = useRef(false);
 
-  const fetchFundData = useCallback(async () => {
+  const fetchFundData = useCallback(async (force = false) => {
     setLoading(true);
 
     if (watchlist.length === 0) {
@@ -302,6 +302,7 @@ export function ValuationTable() {
     const now = Date.now();
     const codesToFetch = watchlist
       .filter((f: Fund) => {
+        if (force) return true;
         if (!f.updateTime) return true;
         const updateTime = new Date(f.updateTime).getTime();
         const halfMinutes = 0.5 * 60 * 1000;
@@ -360,9 +361,9 @@ export function ValuationTable() {
 
   useEffect(() => {
     if (watchlist.length > 0 && !loading) {
-      fetchFundData();
+      fetchFundData(true);
     }
-  }, [watchlist.length]);
+  }, [watchlist]);
 
   const handleToggleExpand = useCallback((code: string) => {
     setExpandedFund((prev) => (prev === code ? null : code));

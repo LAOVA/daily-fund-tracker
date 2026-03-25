@@ -22,7 +22,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 ```
 
 - **on**: 触发条件
@@ -140,15 +140,9 @@ jobs:
 deploy:
   needs: build
   runs-on: ubuntu-latest
-  environment:
-    name: github-pages
-    url: ${{ steps.deployment.outputs.page_url }}
 ```
 
 - **needs: build**: 依赖 build job，必须等构建完成后才能部署
-- **environment**: 部署环境配置
-  - `name: github-pages`: 环境名称
-  - `url`: 部署完成后的访问地址（从 deployment step 的输出获取）
 
 #### Steps 步骤
 
@@ -213,7 +207,7 @@ git push --tags
 
 填写版本号（如 v1.0.0）→ Publish release
 
-> 标签命名建议遵循语义化版本规范：v主版本.次版本.修订号
+> 标签命名建议遵循语义化版本规范：v 主版本.次版本.修订号
 
 ---
 
@@ -221,12 +215,12 @@ git push --tags
 
 在 `next.config.ts` 中配置了以下选项：
 
-| 配置 | 作用 |
-|------|------|
-| `output: 'export'` | 启用静态导出模式 |
-| `trailingSlash: true` | URL 添加尾斜杠，避免 404 |
-| `images.unoptimized: true` | 禁用图片优化（静态导出不支持） |
-| `basePath` | 设置站点基础路径（production 环境为 /daily-fund-tracker） |
+| 配置                       | 作用                                                      |
+| -------------------------- | --------------------------------------------------------- |
+| `output: 'export'`         | 启用静态导出模式                                          |
+| `trailingSlash: true`      | URL 添加尾斜杠，避免 404                                  |
+| `images.unoptimized: true` | 禁用图片优化（静态导出不支持）                            |
+| `basePath`                 | 设置站点基础路径（production 环境为 /daily-fund-tracker） |
 
 ---
 
