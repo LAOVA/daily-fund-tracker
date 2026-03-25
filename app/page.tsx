@@ -51,8 +51,13 @@ export default function Home() {
   } | null>(null);
   const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
   const [expandedFund, setExpandedFund] = useState<string | null>(null);
-  const [fundToDelete, setFundToDelete] = useState<{ code: string } | null>(null);
-  const [groupToDelete, setGroupToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [fundToDelete, setFundToDelete] = useState<{ code: string } | null>(
+    null
+  );
+  const [groupToDelete, setGroupToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const handleDeleteFund = () => {
     if (fundToDelete) {
@@ -181,36 +186,36 @@ export default function Home() {
                     />
                     <Button
                       onClick={handleAddGroup}
-                      className="bg-news-text dark:bg-paper-100 hover:bg-paper-900 dark:hover:bg-paper-200"
+                      className="cursor-pointer bg-news-text dark:bg-paper-100 hover:bg-paper-900 dark:hover:bg-paper-200"
                     >
                       添加
                     </Button>
                   </div>
                 </DialogContent>
-        </Dialog>
+              </Dialog>
 
-        <ConfirmDialog
-          open={!!fundToDelete}
-          onOpenChange={(open) => !open && setFundToDelete(null)}
-          title="删除基金"
-          description={`确定要删除基金 ${fundToDelete?.code} 吗？此操作不可恢复。`}
-          confirmText="删除"
-          cancelText="取消"
-          onConfirm={handleDeleteFund}
-          variant="destructive"
-        />
+              <ConfirmDialog
+                open={!!fundToDelete}
+                onOpenChange={(open) => !open && setFundToDelete(null)}
+                title="删除基金"
+                description={`确定要删除基金 ${fundToDelete?.code} 吗？此操作不可恢复。`}
+                confirmText="删除"
+                cancelText="取消"
+                onConfirm={handleDeleteFund}
+                variant="destructive"
+              />
 
-        <ConfirmDialog
-          open={!!groupToDelete}
-          onOpenChange={(open) => !open && setGroupToDelete(null)}
-          title="删除分组"
-          description={`确定要删除分组 "${groupToDelete?.name}" 吗？该分组内的基金将被移至默认分组。`}
-          confirmText="删除"
-          cancelText="取消"
-          onConfirm={handleDeleteGroup}
-          variant="destructive"
-        />
-      </div>
+              <ConfirmDialog
+                open={!!groupToDelete}
+                onOpenChange={(open) => !open && setGroupToDelete(null)}
+                title="删除分组"
+                description={`确定要删除分组 "${groupToDelete?.name}" 吗？该分组内的基金将被移至默认分组。`}
+                confirmText="删除"
+                cancelText="取消"
+                onConfirm={handleDeleteGroup}
+                variant="destructive"
+              />
+            </div>
           </div>
         </div>
 
@@ -346,7 +351,9 @@ export default function Home() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setGroupToDelete({ id: group.id, name: group.name })}
+                      onClick={() =>
+                        setGroupToDelete({ id: group.id, name: group.name })
+                      }
                       className="text-news-muted hover:text-finance-rise hover:bg-red-50 dark:hover:bg-red-950 h-8 w-8 p-0"
                     >
                       <Trash2 className="w-4 h-4" />

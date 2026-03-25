@@ -1,12 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
-} from "chart.js";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Pie, Doughnut } from "react-chartjs-2";
 import { useFundsStore } from "@/stores/fundsStore";
 import { formatCurrency, cn } from "@/lib/utils";
@@ -60,10 +55,12 @@ export function PortfolioAnalysis({ className }: PortfolioAnalysisProps) {
       code: f.code,
       cost: (f.shares || 0) * (f.costPrice || 0),
       marketValue: (f.shares || 0) * (f.estimatedNetValue || 0),
-      profit: (f.shares || 0) * ((f.estimatedNetValue || 0) - (f.costPrice || 0)),
-      profitPercent: f.costPrice && f.costPrice > 0
-        ? ((f.estimatedNetValue || 0) - f.costPrice) / f.costPrice * 100
-        : 0,
+      profit:
+        (f.shares || 0) * ((f.estimatedNetValue || 0) - (f.costPrice || 0)),
+      profitPercent:
+        f.costPrice && f.costPrice > 0
+          ? (((f.estimatedNetValue || 0) - f.costPrice) / f.costPrice) * 100
+          : 0,
       color: chartColors[index % chartColors.length],
     }));
 
@@ -87,7 +84,9 @@ export function PortfolioAnalysis({ className }: PortfolioAnalysisProps) {
       datasets: [
         {
           data: portfolioData.holdingsDistribution.map((h) => h.cost),
-          backgroundColor: portfolioData.holdingsDistribution.map((h) => h.color),
+          backgroundColor: portfolioData.holdingsDistribution.map(
+            (h) => h.color
+          ),
           borderColor: "#fff",
           borderWidth: 2,
         },
@@ -102,7 +101,9 @@ export function PortfolioAnalysis({ className }: PortfolioAnalysisProps) {
       labels: portfolioData.holdingsDistribution.map((h) => h.name),
       datasets: [
         {
-          data: portfolioData.holdingsDistribution.map((h) => Math.abs(h.profit)),
+          data: portfolioData.holdingsDistribution.map((h) =>
+            Math.abs(h.profit)
+          ),
           backgroundColor: portfolioData.holdingsDistribution.map((h, i) =>
             h.profit >= 0 ? chartColors[i % chartColors.length] : "#228B22"
           ),
@@ -136,7 +137,11 @@ export function PortfolioAnalysis({ className }: PortfolioAnalysisProps) {
           size: 12,
         },
         callbacks: {
-          label: (context: { parsed: number; label: string; dataset: { data: number[] } }) => {
+          label: (context: {
+            parsed: number;
+            label: string;
+            dataset: { data: number[] };
+          }) => {
             const value = context.parsed;
             const total = context.dataset.data.reduce((a, b) => a + b, 0);
             const percent = ((value / total) * 100).toFixed(1);
@@ -152,7 +157,7 @@ export function PortfolioAnalysis({ className }: PortfolioAnalysisProps) {
       <div className={cn("bg-card border border-news-border p-6", className)}>
         <div className="flex items-center gap-2 mb-4">
           <PieChart className="w-5 h-5 text-news-muted" />
-          <h3 className="font-['Newsreader'] text-xl font-bold text-news-text">
+          <h3 className="font-['Newsreader'] text-xl font-bold text-news-text leading-none">
             组合分析
           </h3>
         </div>
@@ -181,11 +186,16 @@ export function PortfolioAnalysis({ className }: PortfolioAnalysisProps) {
             成本分布
           </h4>
           <div className="h-48">
-            {costChartData && <Pie data={costChartData} options={chartOptions} />}
+            {costChartData && (
+              <Pie data={costChartData} options={chartOptions} />
+            )}
           </div>
           <div className="mt-4 space-y-2">
             {portfolioData.holdingsDistribution.slice(0, 5).map((h) => (
-              <div key={h.code} className="flex items-center justify-between text-sm">
+              <div
+                key={h.code}
+                className="flex items-center justify-between text-sm"
+              >
                 <div className="flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-sm"
@@ -208,18 +218,25 @@ export function PortfolioAnalysis({ className }: PortfolioAnalysisProps) {
             收益贡献
           </h4>
           <div className="h-48">
-            {profitChartData && <Doughnut data={profitChartData} options={chartOptions} />}
+            {profitChartData && (
+              <Doughnut data={profitChartData} options={chartOptions} />
+            )}
           </div>
           <div className="mt-4 space-y-2">
             {portfolioData.holdingsDistribution
               .sort((a, b) => b.profit - a.profit)
               .slice(0, 5)
               .map((h, i) => (
-                <div key={h.code} className="flex items-center justify-between text-sm">
+                <div
+                  key={h.code}
+                  className="flex items-center justify-between text-sm"
+                >
                   <div className="flex items-center gap-2">
                     <div
                       className="w-3 h-3 rounded-sm"
-                      style={{ backgroundColor: chartColors[i % chartColors.length] }}
+                      style={{
+                        backgroundColor: chartColors[i % chartColors.length],
+                      }}
                     />
                     <span className="text-news-text font-['Libre_Baskerville'] truncate max-w-[120px]">
                       {h.name}
@@ -231,7 +248,8 @@ export function PortfolioAnalysis({ className }: PortfolioAnalysisProps) {
                       h.profit >= 0 ? "text-finance-rise" : "text-finance-fall"
                     )}
                   >
-                    {h.profit >= 0 ? "+" : ""}{formatCurrency(h.profit)}
+                    {h.profit >= 0 ? "+" : ""}
+                    {formatCurrency(h.profit)}
                   </span>
                 </div>
               ))}
@@ -264,7 +282,9 @@ export function PortfolioAnalysis({ className }: PortfolioAnalysisProps) {
             <div
               className={cn(
                 "font-['JetBrains_Mono'] font-bold flex items-center justify-center gap-1",
-                portfolioData.totalProfit >= 0 ? "text-finance-rise" : "text-finance-fall"
+                portfolioData.totalProfit >= 0
+                  ? "text-finance-rise"
+                  : "text-finance-fall"
               )}
             >
               {portfolioData.totalProfit >= 0 ? (
@@ -280,3 +300,4 @@ export function PortfolioAnalysis({ className }: PortfolioAnalysisProps) {
     </div>
   );
 }
+
